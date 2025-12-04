@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+
 import { LogMessage, LogType } from '../types';
 
 interface GameLogProps {

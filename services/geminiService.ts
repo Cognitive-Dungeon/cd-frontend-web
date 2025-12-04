@@ -22,7 +22,7 @@ export const generateNarrative = async (
   context: string, 
   recentLogs: string[]
 ): Promise<string | null> => {
-  if (!aiClient) return null;
+  if (!aiClient) {return null;}
 
   try {
     const model = 'gemini-2.5-flash';
@@ -59,7 +59,7 @@ export const parseUserIntent = async (
     input: string,
     visibleContext: string
 ): Promise<{ command?: string; narrative?: string } | null> => {
-    if (!aiClient) return null;
+    if (!aiClient) {return null;}
 
     try {
         const prompt = `
@@ -100,7 +100,7 @@ export const parseUserIntent = async (
         });
 
         const text = response.text;
-        if (!text) return null;
+        if (!text) {return null;}
         return JSON.parse(cleanJson(text));
 
     } catch (e) {
@@ -114,7 +114,7 @@ export const evaluateSocialInteraction = async (
     npc: any, 
     context: string
 ): Promise<{ success: boolean; newState?: string; reaction: string } | null> => {
-    if (!aiClient) return null;
+    if (!aiClient) {return null;}
 
     try {
         const prompt = `
@@ -151,7 +151,7 @@ export const evaluateSocialInteraction = async (
         const text = response.text;
         console.log("AI Response Raw:", text); // DEBUG LOG
 
-        if (!text) return null;
+        if (!text) {return null;}
         return JSON.parse(cleanJson(text));
 
     } catch (e) {

@@ -1,7 +1,7 @@
 
 
-import { Tile, GameWorld, Entity, EntityType, Position, ItemType, TileEnv } from '../types';
 import { MAP_WIDTH, MAP_HEIGHT, SYMBOLS, COLORS } from '../constants';
+import { Tile, GameWorld, Entity, EntityType, Position, ItemType, TileEnv } from '../types';
 
 // Helper to create a unique ID
 const uid = () => Math.random().toString(36).substr(2, 9);
@@ -270,7 +270,7 @@ export const generateDungeon = (level: number = 1): { world: GameWorld; entities
   const ey = Math.floor(lastRoom.y + lastRoom.h / 2);
   
   const exitIndex = entities.findIndex(e => e.pos.x === ex && e.pos.y === ey);
-  if (exitIndex > -1) entities.splice(exitIndex, 1);
+  if (exitIndex > -1) {entities.splice(exitIndex, 1);}
 
   entities.push({
       id: uid(), label: '>', type: EntityType.EXIT, name: 'Лестница вниз', symbol: SYMBOLS.EXIT, color: COLORS.EXIT, pos: { x: ex, y: ey },

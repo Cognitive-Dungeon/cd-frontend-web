@@ -1,0 +1,36 @@
+# Ignore directories
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+.temp/
+.tmp/
+
+# Environment and config artifacts
+.env
+.env.*
+*.local
+
+# Logs and caches
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache/
+.parcel-cache/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Generated assets
+*.min.js
+*.min.css
+
+# Ignore any compiled outputs or artifacts not meant for linting
+**/*.generated.*
+**/__snapshots__/

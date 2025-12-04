@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { GameWorld, Entity, Position, EntityType } from '../types';
+
 import { SYMBOLS, COLORS, TILE_SIZE } from '../constants';
+import { GameWorld, Entity, Position, EntityType } from '../types';
 
 interface GameGridProps {
   world: GameWorld;
@@ -84,10 +85,10 @@ const GameGrid: React.FC<GameGridProps> = ({ world, entities, playerPos }) => {
              }
           } else {
              // Explored but out of sight (Memory)
-             if (tile.env === 'grass') content = SYMBOLS.GRASS;
-             else if (tile.env === 'water') content = SYMBOLS.WATER;
-             else if (tile.env === 'tree') content = SYMBOLS.TREE;
-             else content = tile.isWall ? SYMBOLS.WALL : SYMBOLS.FLOOR;
+             if (tile.env === 'grass') {content = SYMBOLS.GRASS;}
+             else if (tile.env === 'water') {content = SYMBOLS.WATER;}
+             else if (tile.env === 'tree') {content = SYMBOLS.TREE;}
+             else {content = tile.isWall ? SYMBOLS.WALL : SYMBOLS.FLOOR;}
              colorClass = 'text-gray-800'; 
           }
 

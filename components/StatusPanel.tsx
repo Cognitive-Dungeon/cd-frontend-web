@@ -1,5 +1,6 @@
 
 import React from 'react';
+
 import { Entity, GameState } from '../types';
 
 interface StatusPanelProps {

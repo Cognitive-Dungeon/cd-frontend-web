@@ -18,3 +18,17 @@ View your app in AI Studio: https://ai.studio/apps/drive/1qqZ0mp7cPN_m28SbC5pqf5
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Linting and Code Style (ESLint)
+
+Use ESLint to ensure consistent code style and catch common issues.
+
+- Run lint:
+  `npm run lint`
+- Auto-fix:
+  `npm run lint:fix`
+
+Notes:
+- ESLint is configured for React + TypeScript.
+- Build artifacts and vendor directories are ignored (`dist`, `node_modules`).
+- Some console statements are allowed (warn, error). Regular `console.log` may be flagged.
