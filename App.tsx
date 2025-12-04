@@ -14,7 +14,8 @@ import StatusPanel from './components/StatusPanel';
 const App: React.FC = () => {
   // --- Game Engine Instance ---
   const engineRef = useRef<GameEngine>(new GameEngine());
-  
+  const socketRef = useRef<WebSocket | null>(null);
+
   // --- React Sync State (For Rendering) ---
   const [world, setWorld] = useState<GameWorld | null>(null);
   const [player, setPlayer] = useState<Entity | null>(null);
@@ -34,6 +35,81 @@ const App: React.FC = () => {
     syncState();
     processEvents(initialEvents);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // WebSocket: Connect to Server and stream updates/logs ---
+  useEffect(() => {
+    // TODO: вынести ws url в константы или конфиг?
+    const ws = new WebSocket("ws://localhost:8080/ws");
+    socketRef.current = ws;
+
+    ws.onopen = () => {
+      addLog("Connected", LogType.INFO);
+    };
+
+    ws.onmessage = (evt) => {
+      try {
+        // TODO: Handle structured server messages with schema (https://github.com/Cognitive-Dungeon/cd-frontend-web/issues/2)
+        console.log("WS raw:", evt.data);
+        const msg = JSON.parse(evt.data);
+
+        // Handle INIT/UPDATE payloads from Go ServerResponse
+        if (msg?.type === "INIT" || msg?.type === "UPDATE") {
+          if (msg.world) setWorld(msg.world);
+          if (msg.player) {
+            const normalizedPlayer = {
+              ...msg.player,
+              inventory: msg.player.inventory ?? [],
+            };
+            setPlayer(normalizedPlayer);
+          } 
+          if (Array.isArray(msg.entities)) setEntities(msg.entities);
+        }
+
+        // Process logs array from ServerResponse (LogEntry[])
+        if (Array.isArray(msg?.logs)) {
+          const typeMap: Record<string, LogType> = {
+            INFO: LogType.INFO,
+            ERROR: LogType.ERROR,
+            COMMAND: LogType.COMMAND,
+            NARRATIVE: LogType.NARRATIVE,
+            COMBAT: LogType.COMBAT,
+            SPEECH: LogType.SPEECH,
+          };
+
+          msg.logs.forEach((entry: any) => {
+            if (
+              entry &&
+              typeof entry === "object" &&
+              typeof entry.text === "string"
+            ) {
+              const t = typeMap[entry.type] ?? LogType.INFO;
+
+              addLog(entry.text, t);
+            } else if (typeof entry === "string") {
+              addLog(entry, LogType.INFO);
+            }
+          });
+        }
+      } catch (err) {
+        addLog("WS parse error", LogType.ERROR);
+      }
+    };
+
+    ws.onerror = () => {
+      addLog("WS error", LogType.ERROR);
+    };
+
+    ws.onclose = () => {
+      addLog("Disconnected", LogType.INFO);
+    };
+
+    return () => {
+      try {
+        ws.close();
+      } catch {}
+      socketRef.current = null;
+    };
   }, []);
 
   // --- Core Sync Logic ---
