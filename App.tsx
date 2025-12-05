@@ -482,18 +482,8 @@ const App: React.FC = () => {
       return;
     }
 
-    // Stop pathfinding if it's not player's turn
+    // Pause pathfinding if it's not player's turn (don't clear the path, just wait)
     if (activeEntityId && activeEntityId !== player.id) {
-      addLog(`Pathfinding stopped - not your turn`, LogType.INFO);
-      setIsPathfinding(false);
-      setCurrentPath([]);
-      setPathfindingTarget(null);
-      setWaitingForMoveResponse(false);
-      lastCommandedPosRef.current = null;
-      if (pathfindingTimeoutRef.current) {
-        clearTimeout(pathfindingTimeoutRef.current);
-        pathfindingTimeoutRef.current = null;
-      }
       return;
     }
 
