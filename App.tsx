@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { WindowSystem } from "./components/WindowSystem";
 
 import {
   GameCommand,
@@ -234,6 +235,9 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Window System */}
+      <WindowSystem />
     </div>
   );
 };
