@@ -429,7 +429,6 @@ const App: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="text-cyan-500 font-bold">{">"}</span>
               <input
-                autoFocus
                 type="text"
                 value={commandInput}
                 onChange={(e) => setCommandInput(e.target.value)}
