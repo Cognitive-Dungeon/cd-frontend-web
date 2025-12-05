@@ -94,6 +94,7 @@ export interface LogMessage {
   text: string;
   type: LogType;
   timestamp: number;
+  position?: Position;
   commandData?: {
     action: string;
     payload?: any;

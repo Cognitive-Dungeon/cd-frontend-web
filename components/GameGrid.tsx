@@ -1,6 +1,15 @@
 import { FC, useState, useCallback, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Focus } from "lucide-react";
+import {
+  Focus,
+  Sword,
+  MessageCircle,
+  Eye,
+  Package,
+  DollarSign,
+  Zap,
+  Sparkles,
+} from "lucide-react";
 
 import { SYMBOLS, COLORS } from "../constants";
 import { GameWorld, Entity, Position, EntityType } from "../types";
@@ -18,6 +27,7 @@ interface GameGridProps {
   onSelectEntity?: (entityId: string | null) => void;
   onSelectPosition?: (x: number, y: number) => void;
   onFollowEntity?: (entityId: string | null) => void;
+  onSendCommand?: (action: string, payload?: any) => void;
   selectedTargetEntityId?: string | null;
   selectedTargetPosition?: Position | null;
 }
@@ -40,6 +50,7 @@ const GameGrid: FC<GameGridProps> = ({
   onSelectEntity,
   onSelectPosition,
   onFollowEntity,
+  onSendCommand,
   selectedTargetEntityId,
   selectedTargetPosition,
 }) => {
@@ -480,6 +491,69 @@ const GameGrid: FC<GameGridProps> = ({
                       <Focus className="w-3 h-3" />
                       <span>Следить за {entity.name}</span>
                     </button>
+
+                    <div className="border-t border-neutral-700 mt-1 pt-1">
+                      <button
+                        className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-red-400 flex items-center gap-1.5"
+                        onClick={() => {
+                          if (onSendCommand) {
+                            onSendCommand("ATTACK", { targetId: entity.id });
+                          }
+                          setContextMenu(null);
+                        }}
+                      >
+                        <Sword className="w-3 h-3" />
+                        <span>Атаковать</span>
+                      </button>
+                      <button
+                        className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-blue-400 flex items-center gap-1.5"
+                        onClick={() => {
+                          if (onSendCommand) {
+                            onSendCommand("TALK", { targetId: entity.id });
+                          }
+                          setContextMenu(null);
+                        }}
+                      >
+                        <MessageCircle className="w-3 h-3" />
+                        <span>Поговорить</span>
+                      </button>
+                      <button
+                        className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-yellow-400 flex items-center gap-1.5"
+                        onClick={() => {
+                          if (onSendCommand) {
+                            onSendCommand("INSPECT", { targetId: entity.id });
+                          }
+                          setContextMenu(null);
+                        }}
+                      >
+                        <Eye className="w-3 h-3" />
+                        <span>Осмотреть</span>
+                      </button>
+                      <button
+                        className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-green-400 flex items-center gap-1.5"
+                        onClick={() => {
+                          if (onSendCommand) {
+                            onSendCommand("PICKUP", { targetId: entity.id });
+                          }
+                          setContextMenu(null);
+                        }}
+                      >
+                        <Package className="w-3 h-3" />
+                        <span>Подобрать</span>
+                      </button>
+                      <button
+                        className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-purple-400 flex items-center gap-1.5"
+                        onClick={() => {
+                          if (onSendCommand) {
+                            onSendCommand("TRADE", { targetId: entity.id });
+                          }
+                          setContextMenu(null);
+                        }}
+                      >
+                        <DollarSign className="w-3 h-3" />
+                        <span>Торговать</span>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -493,7 +567,7 @@ const GameGrid: FC<GameGridProps> = ({
 
             <div className="border-t border-neutral-700 py-1">
               <button
-                className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-gray-400"
+                className="w-full px-3 py-2 text-left text-xs hover:bg-neutral-700 text-gray-400"
                 onClick={() => {
                   if (onSelectPosition) {
                     onSelectPosition(contextMenu.cellX, contextMenu.cellY);
@@ -502,6 +576,36 @@ const GameGrid: FC<GameGridProps> = ({
                 }}
               >
                 Выбрать позицию
+              </button>
+              <button
+                className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-cyan-400 flex items-center gap-1.5"
+                onClick={() => {
+                  if (onSendCommand) {
+                    onSendCommand("TELEPORT", {
+                      x: contextMenu.cellX,
+                      y: contextMenu.cellY,
+                    });
+                  }
+                  setContextMenu(null);
+                }}
+              >
+                <Zap className="w-3 h-3" />
+                <span>Телепорт</span>
+              </button>
+              <button
+                className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-purple-400 flex items-center gap-1.5"
+                onClick={() => {
+                  if (onSendCommand) {
+                    onSendCommand("CAST_AREA", {
+                      x: contextMenu.cellX,
+                      y: contextMenu.cellY,
+                    });
+                  }
+                  setContextMenu(null);
+                }}
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>Заклинание на область</span>
               </button>
             </div>
           </div>,

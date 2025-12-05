@@ -3,6 +3,13 @@ import { Focus, Navigation } from "lucide-react";
 import { WindowSystem } from "./components/WindowSystem";
 
 import {
+  CommandAttack,
+  CommandCastArea,
+  CommandInspect,
+  CommandPickup,
+  CommandTalk,
+  CommandTeleport,
+  CommandTrade,
   GameCommand,
   KeyBindingManager,
   DEFAULT_KEY_BINDINGS,
@@ -55,11 +62,24 @@ const App: React.FC = () => {
   const [playerPosKey, setPlayerPosKey] = useState<string>("");
   const followInitializedRef = useRef(false);
 
+  // Единый регистр всех сущностей (включая игрока)
+  const entityRegistry = useMemo(() => {
+    const registry = new Map<string, Entity>();
+    if (player) {
+      registry.set(player.id, player);
+    }
+    entities.forEach((entity) => {
+      registry.set(entity.id, entity);
+    });
+    return registry;
+  }, [player, entities]);
+
   // --- Helper Functions ---
   const addLog = (
     text: string,
     type: LogType = LogType.INFO,
     commandData?: { action: string; payload?: any },
+    position?: Position,
   ) => {
     setLogs((prev) => [
       ...prev,
@@ -69,6 +89,7 @@ const App: React.FC = () => {
         type,
         timestamp: Date.now(),
         commandData,
+        position,
       },
     ]);
   };
@@ -177,31 +198,86 @@ const App: React.FC = () => {
 
       socketRef.current.send(JSON.stringify(message));
 
-      // Форматируем сообщение лога
+      // Если описание не передано, пытаемся найти команду и взять её описание
+      let commandDescription = description;
+      if (!commandDescription) {
+        const commandMap: Record<string, GameCommand> = {
+          ATTACK: CommandAttack,
+          TALK: CommandTalk,
+          INSPECT: CommandInspect,
+          PICKUP: CommandPickup,
+          TRADE: CommandTrade,
+          TELEPORT: CommandTeleport,
+          CAST_AREA: CommandCastArea,
+        };
+        const foundCommand = commandMap[action];
+        if (foundCommand) {
+          commandDescription = foundCommand.description;
+        }
+      }
+
+      // Форматируем сообщение лога с поддержкой шаблонов
       let logMessage: string;
 
-      if (description) {
-        // Если есть описание, используем его
-        logMessage = `Вы ${description}`;
+      if (commandDescription) {
+        // Поддержка шаблонов в описании
+        logMessage = commandDescription;
+
+        // Замена {targetName} или {target} с кликабельной ссылкой
+        if (payload?.targetId) {
+          const targetEntity = entityRegistry.get(payload.targetId);
+          const targetName = targetEntity
+            ? targetEntity.name
+            : `ID:${payload.targetId}`;
+          const clickableTarget = `<span class="cursor-pointer text-cyan-400 hover:underline" data-entity-id="${payload.targetId}">${targetName}</span>`;
+          logMessage = logMessage
+            .replace(/\{targetName\}/g, clickableTarget)
+            .replace(/\{target\}/g, clickableTarget);
+        }
+
+        // Замена {x} и {y}
+        if (payload?.x !== undefined) {
+          logMessage = logMessage.replace(/\{x\}/g, String(payload.x));
+        }
+        if (payload?.y !== undefined) {
+          logMessage = logMessage.replace(/\{y\}/g, String(payload.y));
+        }
+
+        // Замена {position} с кликабельной ссылкой
+        if (payload?.x !== undefined && payload?.y !== undefined) {
+          const clickablePosition = `<span class="cursor-pointer text-orange-400 hover:underline" data-position-x="${payload.x}" data-position-y="${payload.y}">(${payload.x}, ${payload.y})</span>`;
+          logMessage = logMessage.replace(/\{position\}/g, clickablePosition);
+        }
       } else if (payload?.targetId) {
-        // Если есть targetId, ищем сущность по ID
-        const targetEntity = entities.find((e) => e.id === payload.targetId);
+        // Fallback если нет описания
+        const targetEntity = entityRegistry.get(payload.targetId);
         const targetName = targetEntity
           ? targetEntity.name
           : `ID:${payload.targetId}`;
         logMessage = `Вы выполнили ${action} на ${targetName}`;
       } else if (payload?.x !== undefined && payload?.y !== undefined) {
-        // Если есть позиция x, y
         logMessage = `Вы выполнили ${action} на позицию (${payload.x}, ${payload.y})`;
       } else {
-        // Просто показываем действие
         logMessage = `Вы выполнили ${action}`;
       }
 
+      // Определяем позицию для лога
+      let logPosition: Position | undefined;
+      if (payload?.targetId) {
+        const targetEntity = entityRegistry.get(payload.targetId);
+        if (targetEntity) {
+          logPosition = { x: targetEntity.pos.x, y: targetEntity.pos.y };
+        }
+      } else if (payload?.x !== undefined && payload?.y !== undefined) {
+        logPosition = { x: payload.x, y: payload.y };
+      } else if (player) {
+        logPosition = { x: player.pos.x, y: player.pos.y };
+      }
+
       // Сохраняем полные данные команды для отображения JSON
-      addLog(logMessage, LogType.COMMAND, { action, payload });
+      addLog(logMessage, LogType.COMMAND, { action, payload }, logPosition);
     },
-    [entities],
+    [entityRegistry, player],
   );
 
   const sendTextCommand = (text: string) => {
@@ -239,6 +315,53 @@ const App: React.FC = () => {
     setSelectedTargetPosition({ x, y });
     console.log("Выбрана позиция:", x, y);
   }, []);
+
+  const handleGoToPosition = useCallback(
+    (position: Position) => {
+      // Выделяем позицию как цель
+      setSelectedTargetPosition(position);
+      // Отключаем следование и перемещаем камеру к позиции
+      setFollowedEntityId(null);
+
+      if (containerRef.current && world) {
+        const containerWidth = containerRef.current.clientWidth;
+        const containerHeight = containerRef.current.clientHeight;
+        const CELL_SIZE = 50 * zoom;
+        const positionPixelX = position.x * CELL_SIZE + CELL_SIZE / 2;
+        const positionPixelY = position.y * CELL_SIZE + CELL_SIZE / 2;
+        const offsetX = containerWidth / 2 - positionPixelX;
+        const offsetY = containerHeight / 2 - positionPixelY;
+        setPanOffset({ x: offsetX, y: offsetY });
+      }
+    },
+    [world, zoom],
+  );
+
+  const handleGoToEntity = useCallback(
+    (entityId: string) => {
+      const entity = entityRegistry.get(entityId);
+      if (!entity) return;
+
+      // Выделяем сущность как цель
+      setSelectedTargetEntityId(entityId);
+      // Выделяем её позицию
+      setSelectedTargetPosition({ x: entity.pos.x, y: entity.pos.y });
+      // Отключаем следование и перемещаем камеру к сущности
+      setFollowedEntityId(null);
+
+      if (containerRef.current && world) {
+        const containerWidth = containerRef.current.clientWidth;
+        const containerHeight = containerRef.current.clientHeight;
+        const CELL_SIZE = 50 * zoom;
+        const entityPixelX = entity.pos.x * CELL_SIZE + CELL_SIZE / 2;
+        const entityPixelY = entity.pos.y * CELL_SIZE + CELL_SIZE / 2;
+        const offsetX = containerWidth / 2 - entityPixelX;
+        const offsetY = containerHeight / 2 - entityPixelY;
+        setPanOffset({ x: offsetX, y: offsetY });
+      }
+    },
+    [entityRegistry, world, zoom],
+  );
 
   const handleFollowEntity = useCallback((entityId: string | null) => {
     setFollowedEntityId(entityId);
@@ -361,10 +484,8 @@ const App: React.FC = () => {
 
           // Если включено следование, вычисляем текущий offset камеры
           let currentOffset = panOffset;
-          if (followedEntityId && world && player) {
-            const followedEntity = [player, ...entities].find(
-              (entity) => entity.id === followedEntityId,
-            );
+          if (followedEntityId && world) {
+            const followedEntity = entityRegistry.get(followedEntityId);
             if (followedEntity && containerRef.current) {
               const containerWidth = containerRef.current.clientWidth;
               const containerHeight = containerRef.current.clientHeight;
@@ -425,18 +546,15 @@ const App: React.FC = () => {
     panStart,
     panOffset,
     followedEntityId,
-    player,
-    entities,
+    entityRegistry,
     world,
     zoom,
   ]);
 
   // Обновляем ключ позиции при изменении позиции отслеживаемой сущности
   useEffect(() => {
-    if (followedEntityId && player) {
-      const followedEntity = [player, ...entities].find(
-        (e) => e.id === followedEntityId,
-      );
+    if (followedEntityId) {
+      const followedEntity = entityRegistry.get(followedEntityId);
 
       if (followedEntity) {
         const newPosKey = `${followedEntity.pos.x},${followedEntity.pos.y}`;
@@ -445,16 +563,14 @@ const App: React.FC = () => {
         }
       }
     }
-  }, [player, entities, followedEntityId, playerPosKey]);
+  }, [entityRegistry, followedEntityId, playerPosKey]);
 
   // Вычисляем offset для центрирования на отслеживаемой сущности
   const cameraOffset =
     followedEntityId && containerRef.current && world && player
       ? (() => {
           // Определяем, за какой сущностью следим
-          const followedEntity = [player, ...entities].find(
-            (e) => e.id === followedEntityId,
-          );
+          const followedEntity = entityRegistry.get(followedEntityId);
 
           if (!followedEntity) return panOffset;
 
@@ -509,9 +625,8 @@ const App: React.FC = () => {
                   if (followedEntityId) {
                     // Вычисляем и сохраняем текущий offset камеры перед выходом из режима следования
                     if (containerRef.current && world) {
-                      const followedEntity = [player, ...entities].find(
-                        (e) => e.id === followedEntityId,
-                      );
+                      const followedEntity =
+                        entityRegistry.get(followedEntityId);
 
                       if (followedEntity) {
                         const containerWidth = containerRef.current.clientWidth;
@@ -550,9 +665,8 @@ const App: React.FC = () => {
                       <Focus className="w-3 h-3" />
                       <span>
                         Следую за{" "}
-                        {[player, ...entities].find(
-                          (e) => e.id === followedEntityId,
-                        )?.name || "сущностью"}
+                        {entityRegistry.get(followedEntityId)?.name ||
+                          "сущностью"}
                       </span>
                     </>
                   )
@@ -584,6 +698,7 @@ const App: React.FC = () => {
                 onSelectEntity={handleSelectEntity}
                 onSelectPosition={handleSelectPosition}
                 onFollowEntity={handleFollowEntity}
+                onSendCommand={sendCommand}
                 selectedTargetEntityId={selectedTargetEntityId}
                 selectedTargetPosition={selectedTargetPosition}
               />
@@ -592,7 +707,11 @@ const App: React.FC = () => {
         </div>
         <div className="w-[450px] flex flex-col bg-neutral-900">
           <div className="flex-1 overflow-hidden relative">
-            <GameLog logs={logs} />
+            <GameLog
+              logs={logs}
+              onGoToPosition={handleGoToPosition}
+              onGoToEntity={handleGoToEntity}
+            />
           </div>
           <div className="p-3 bg-neutral-950 border-t border-neutral-800">
             <div className="flex items-center gap-2">

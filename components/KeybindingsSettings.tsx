@@ -2,10 +2,17 @@ import { FC, useState, useEffect } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import {
+  CommandAttack,
+  CommandCastArea,
   CommandCustom,
   CommandDown,
+  CommandInspect,
   CommandLeft,
+  CommandPickup,
   CommandRight,
+  CommandTalk,
+  CommandTeleport,
+  CommandTrade,
   CommandUp,
   GameCommand,
   KeyBindingManager,
@@ -28,6 +35,13 @@ const AVAILABLE_COMMANDS: GameCommand[] = [
   CommandDown,
   CommandLeft,
   CommandRight,
+  CommandAttack,
+  CommandTalk,
+  CommandInspect,
+  CommandPickup,
+  CommandTrade,
+  CommandTeleport,
+  CommandCastArea,
   CommandCustom,
   // TODO: Добавить возможность перетащить из инвентаря сущность и назначить
 ];

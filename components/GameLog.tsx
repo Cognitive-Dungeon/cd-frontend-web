@@ -1,19 +1,54 @@
 import { useEffect, useRef, useState } from "react";
-import { Code } from "lucide-react";
+import { Code, MapPin } from "lucide-react";
 
-import { LogMessage, LogType } from "../types";
+import { LogMessage, LogType, Position } from "../types";
 
 interface GameLogProps {
   logs: LogMessage[];
+  onGoToPosition?: (position: Position) => void;
+  onGoToEntity?: (entityId: string) => void;
 }
 
-const GameLog: React.FC<GameLogProps> = ({ logs }) => {
+const GameLog: React.FC<GameLogProps> = ({
+  logs,
+  onGoToPosition,
+  onGoToEntity,
+}) => {
   const endRef = useRef<HTMLDivElement>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+  const logContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
+
+  // Обработчик кликов по кликабельным элементам в тексте
+  useEffect(() => {
+    const container = logContainerRef.current;
+    if (!container) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      // Клик по сущности
+      const entityId = target.getAttribute("data-entity-id");
+      if (entityId && onGoToEntity) {
+        onGoToEntity(entityId);
+        return;
+      }
+
+      // Клик по позиции
+      const posX = target.getAttribute("data-position-x");
+      const posY = target.getAttribute("data-position-y");
+      if (posX && posY && onGoToPosition) {
+        onGoToPosition({ x: parseInt(posX), y: parseInt(posY) });
+        return;
+      }
+    };
+
+    container.addEventListener("click", handleClick);
+    return () => container.removeEventListener("click", handleClick);
+  }, [onGoToPosition, onGoToEntity]);
 
   const toggleJsonView = (logId: string) => {
     setExpandedLogId(expandedLogId === logId ? null : logId);
@@ -42,7 +77,10 @@ const GameLog: React.FC<GameLogProps> = ({ logs }) => {
       <div className="mb-2 text-xs text-gray-500 uppercase tracking-widest border-b border-gray-800 pb-1">
         Журнал Приключений
       </div>
-      <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+      <div
+        ref={logContainerRef}
+        className="flex-1 overflow-y-auto space-y-2 pr-2"
+      >
         {logs.map((log) => (
           <div key={log.id} className="space-y-1">
             <div
@@ -69,17 +107,28 @@ const GameLog: React.FC<GameLogProps> = ({ logs }) => {
                 {log.type === LogType.SPEECH && (
                   <span className="mr-2">💬</span>
                 )}
-                {log.text}
+                <span dangerouslySetInnerHTML={{ __html: log.text }} />
               </div>
-              {log.commandData && (
-                <button
-                  onClick={() => toggleJsonView(log.id)}
-                  className="ml-2 p-1 rounded hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                  title="Показать JSON"
-                >
-                  <Code size={14} className="text-gray-500" />
-                </button>
-              )}
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                {log.position && onGoToPosition && (
+                  <button
+                    onClick={() => onGoToPosition(log.position!)}
+                    className="p-1 rounded hover:bg-neutral-800"
+                    title={`Перейти к (${log.position.x}, ${log.position.y})`}
+                  >
+                    <MapPin size={14} className="text-blue-400" />
+                  </button>
+                )}
+                {log.commandData && (
+                  <button
+                    onClick={() => toggleJsonView(log.id)}
+                    className="p-1 rounded hover:bg-neutral-800"
+                    title="Показать JSON"
+                  >
+                    <Code size={14} className="text-gray-500" />
+                  </button>
+                )}
+              </div>
             </div>
             {log.commandData && expandedLogId === log.id && (
               <div className="ml-6 p-2 bg-neutral-900 rounded border border-neutral-700 text-xs font-mono text-gray-400">

@@ -32,37 +32,90 @@ export const CommandUp: GameCommand = {
   action: "MOVE",
   payload: { dx: 0, dy: -1 },
   label: "Move Up",
-  description: "пошли наверх",
+  description: "Вы пошли наверх",
 };
 
 export const CommandDown: GameCommand = {
   action: "MOVE",
   payload: { dx: 0, dy: 1 },
   label: "Move Down",
-  description: "пошли вниз",
+  description: "Вы пошли вниз",
 };
 
 export const CommandLeft: GameCommand = {
   action: "MOVE",
   payload: { dx: -1, dy: 0 },
   label: "Move Left",
-  description: "пошли влево",
+  description: "Вы пошли влево",
 };
 
 export const CommandRight: GameCommand = {
   action: "MOVE",
   payload: { dx: 1, dy: 0 },
   label: "Move Right",
-  description: "пошли направо",
+  description: "Вы пошли направо",
 };
 
 export const CommandCustom: GameCommand = {
   action: "CUSTOM",
   payload: {},
   label: "Custom Command",
-  description: "кастомная команда",
+  description: "Вы выполнили кастомную команду",
   requiresEntityTarget: false,
   requiresPositionTarget: false,
+};
+
+// --- Entity Target Commands ---
+
+export const CommandAttack: GameCommand = {
+  action: "ATTACK",
+  label: "Attack",
+  description: "Вы атаковали {targetName}",
+  requiresEntityTarget: true,
+};
+
+export const CommandTalk: GameCommand = {
+  action: "TALK",
+  label: "Talk",
+  description: "Вы поговорили с {targetName}",
+  requiresEntityTarget: true,
+};
+
+export const CommandInspect: GameCommand = {
+  action: "INSPECT",
+  label: "Inspect",
+  description: "Вы осмотрели {targetName}",
+  requiresEntityTarget: true,
+};
+
+export const CommandPickup: GameCommand = {
+  action: "PICKUP",
+  label: "Pick Up",
+  description: "Вы подобрали {targetName}",
+  requiresEntityTarget: true,
+};
+
+export const CommandTrade: GameCommand = {
+  action: "TRADE",
+  label: "Trade",
+  description: "Вы начали торговлю с {targetName}",
+  requiresEntityTarget: true,
+};
+
+// --- Position Target Commands ---
+
+export const CommandTeleport: GameCommand = {
+  action: "TELEPORT",
+  label: "Teleport",
+  description: "Вы телепортировались на позицию {position}",
+  requiresPositionTarget: true,
+};
+
+export const CommandCastArea: GameCommand = {
+  action: "CAST_AREA",
+  label: "Cast Area Spell",
+  description: "Вы применили заклинание на область {position}",
+  requiresPositionTarget: true,
 };
 
 // --- Key Bindings Map ---
@@ -99,6 +152,17 @@ export const DEFAULT_KEY_BINDINGS: KeyBinding[] = [
   { code: "ArrowLeft", command: CommandLeft },
   { code: "ArrowDown", command: CommandDown },
   { code: "ArrowRight", command: CommandRight },
+
+  // Entity Target Commands
+  { code: "KeyF", command: CommandAttack },
+  { code: "KeyT", command: CommandTalk },
+  { code: "KeyE", command: CommandInspect },
+  { code: "KeyG", command: CommandPickup },
+  { code: "KeyR", command: CommandTrade },
+
+  // Position Target Commands
+  { code: "KeyV", command: CommandTeleport },
+  { code: "KeyC", command: CommandCastArea },
 ];
 
 /**
