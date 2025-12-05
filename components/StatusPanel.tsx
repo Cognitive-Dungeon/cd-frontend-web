@@ -95,7 +95,7 @@ const StatusPanel: FC<StatusPanelProps> = ({
 
       {/* Target Stats (if any) */}
       <div className="w-1/3 flex flex-col items-end">
-        {target && !target.isDead ? (
+        {target && !target.isDead && target.stats ? (
           <div className="w-full text-right">
             <h2 className={`font-bold text-sm mb-2 ${target.color}`}>
               {target.name} {target.symbol}
