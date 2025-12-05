@@ -8,6 +8,24 @@ export interface WindowSize {
   height: number;
 }
 
+export type DockedPosition = "none" | "left" | "right";
+
+export interface MagneticSnap {
+  left?: boolean;
+  right?: boolean;
+  top?: boolean;
+  bottom?: boolean;
+  windowId?: string; // ID of window this is snapped to
+  windowEdge?: "left" | "right" | "top" | "bottom"; // Which edge of target window we're snapped to
+}
+
+export interface WindowBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface WindowState {
   id: string;
   title: string;
@@ -26,6 +44,10 @@ export interface WindowState {
   pinned?: boolean;
   lockSize?: boolean;
   lockHeight?: boolean;
+  dockable?: boolean;
+  docked?: DockedPosition;
+  beforeDockedState?: { position: WindowPosition; size: WindowSize };
+  magneticSnap?: MagneticSnap;
   icon?: React.ReactNode;
   content: React.ReactNode;
 }
@@ -43,6 +65,7 @@ export interface WindowConfig {
   pinned?: boolean;
   lockSize?: boolean;
   lockHeight?: boolean;
+  dockable?: boolean;
   icon?: React.ReactNode;
   defaultPosition?: WindowPosition;
   defaultSize?: WindowSize;
@@ -53,6 +76,8 @@ export interface StoredWindowState {
   position: WindowPosition;
   size: WindowSize;
   isMinimized: boolean;
+  docked?: DockedPosition;
+  magneticSnap?: MagneticSnap;
 }
 
 export type WindowsStorage = Record<string, StoredWindowState>;

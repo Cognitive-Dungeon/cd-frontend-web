@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "windows": {
+    "settings": {
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": 650, "height": 500 },
+      "isMinimized": true,
+      "docked": "none",
+      "magneticSnap": {}
+    },
+    "turn-order": {
+      "position": { "x": 1073, "y": 0 },
+      "size": { "width": 450, "height": 600 },
+      "isMinimized": true
+    },
+    "system-dock": {
+      "position": { "x": 0, "y": 520 },
+      "size": { "width": 400, "height": 54 },
+      "isMinimized": false,
+      "docked": "none",
+      "magneticSnap": { "left": true, "bottom": true }
+    },
+    "turn-order-bar": {
+      "position": { "x": 0, "y": 461 },
+      "size": { "width": 402, "height": 60 },
+      "isMinimized": false,
+      "docked": "none",
+      "magneticSnap": {
+        "left": true,
+        "windowEdge": "top",
+        "windowId": "system-dock"
+      }
+    }
+  }
+}

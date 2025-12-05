@@ -31,8 +31,13 @@ const WindowSystem: FC<WindowSystemProps> = ({
   playerId = null,
   onEntityClick,
 }) => {
-  const { windows, openWindow, minimizeWindow, updateWindowContent } =
-    useWindowManager();
+  const {
+    windows,
+    openWindow,
+    minimizeWindow,
+    updateWindowContent,
+    resetWindowLayout,
+  } = useWindowManager();
   const turnOrderBarInitializedRef = useRef(false);
 
   // Автоматически открываем Dock и Settings при монтировании
@@ -65,8 +70,13 @@ const WindowSystem: FC<WindowSystemProps> = ({
         pinned: true,
         icon: <Settings size={20} />,
         defaultPosition: { x: 400, y: 100 },
-        defaultSize: { width: 450, height: 350 },
-        content: <KeybindingsSettings keyBindingManager={keyBindingManager} />,
+        defaultSize: { width: 600, height: 500 },
+        content: (
+          <KeybindingsSettings
+            keyBindingManager={keyBindingManager}
+            resetWindowLayout={resetWindowLayout}
+          />
+        ),
       });
 
       const stored = getStoredWindowState(SETTINGS_WINDOW_ID);
