@@ -1,5 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
+import {
+  GameCommand,
+  KeyBindingManager,
+  DEFAULT_KEY_BINDINGS,
+} from "./commands";
 import GameGrid from "./components/GameGrid";
 import GameLog from "./components/GameLog";
 import StatusPanel from "./components/StatusPanel";
@@ -7,6 +12,9 @@ import { GameWorld, Entity, GameState, LogMessage, LogType } from "./types";
 
 const App: React.FC = () => {
   const socketRef = useRef<WebSocket | null>(null);
+  const keyBindingManager = useRef<KeyBindingManager>(
+    new KeyBindingManager(DEFAULT_KEY_BINDINGS),
+  );
 
   // --- React State (For Rendering) ---
   const [world, setWorld] = useState<GameWorld | null>(null);
@@ -113,29 +121,73 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const sendCommand = (command: string) => {
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
-      addLog("No connection to server", LogType.ERROR);
+  const sendCommand = useCallback(
+    (action: string, payload?: any, description?: string) => {
+      if (
+        !socketRef.current ||
+        socketRef.current.readyState !== WebSocket.OPEN
+      ) {
+        addLog("No connection to server", LogType.ERROR);
+        return;
+      }
+
+      const message: GameCommand = {
+        action,
+        payload,
+      };
+
+      socketRef.current.send(JSON.stringify(message));
+      // TODO: Localisation
+      // Use description if provided, otherwise show action + payload
+      const logMessage = description
+        ? `Вы ${description}`
+        : `Вызвана команда ${action}${payload ? ` ${JSON.stringify(payload)}` : ""}`;
+
+      addLog(logMessage, LogType.COMMAND);
+    },
+    [],
+  );
+
+  const sendTextCommand = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) {
       return;
     }
 
-    // TODO: Сделать прием в функцию sendCommand уже облекта сообщения,
-    // а здесь просто разобрать его в json и отправить
-    const message = {
-      type: command,
-    };
-
-    socketRef.current.send(JSON.stringify(message));
-    addLog(command, LogType.COMMAND);
+    sendCommand("TEXT", { text: trimmed });
     setCommandInput("");
   };
 
   // --- UI Handlers ---
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      sendCommand(commandInput);
+      sendTextCommand(commandInput);
     }
   };
+
+  // Global key handler for game controls
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in input field
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      const command = keyBindingManager.current.getCommand(e.code);
+      if (command) {
+        e.preventDefault();
+        sendCommand(command.action, command.payload, command.description);
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, [sendCommand]);
 
   if (!world || !player) {
     return <div className="text-white p-10">Connecting to server...</div>;
