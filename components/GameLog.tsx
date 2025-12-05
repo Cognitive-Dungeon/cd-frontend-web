@@ -73,7 +73,7 @@ const GameLog: React.FC<GameLogProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-neutral-950 border-l border-neutral-800 p-4 font-mono text-sm overflow-hidden">
+    <div className="flex flex-col h-full bg-neutral-950 border-l border-neutral-800 p-4 font-mono text-sm overflow-hidden game-log-container">
       <div className="mb-2 text-xs text-gray-500 uppercase tracking-widest border-b border-gray-800 pb-1">
         Журнал Приключений
       </div>

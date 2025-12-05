@@ -60,6 +60,7 @@ const App: React.FC = () => {
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [followedEntityId, setFollowedEntityId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const commandInputRef = useRef<HTMLInputElement>(null);
   const [playerPosKey, setPlayerPosKey] = useState<string>("");
   const followInitializedRef = useRef(false);
 
@@ -570,6 +571,9 @@ const App: React.FC = () => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       sendTextCommand(commandInput);
+    } else if (e.key === "Escape") {
+      // Убираем фокус с поля ввода при нажатии Escape
+      commandInputRef.current?.blur();
     }
   };
 
@@ -581,6 +585,12 @@ const App: React.FC = () => {
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
       ) {
+        return;
+      }
+
+      // Ignore if target is within the chat/log area (user might be interacting with text)
+      const target = e.target as HTMLElement;
+      if (target && target.closest(".game-log-container")) {
         return;
       }
 
@@ -675,6 +685,11 @@ const App: React.FC = () => {
           e.clientY >= rect.top &&
           e.clientY <= rect.bottom
         ) {
+          // Убираем фокус с поля ввода при клике на карту
+          if (commandInputRef.current === document.activeElement) {
+            commandInputRef.current.blur();
+          }
+
           hasMoved = false;
           setIsPanning(true);
 
@@ -916,6 +931,7 @@ const App: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="text-cyan-500 font-bold">{">"}</span>
               <input
+                ref={commandInputRef}
                 type="text"
                 value={commandInput}
                 onChange={(e) => setCommandInput(e.target.value)}
