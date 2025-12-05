@@ -1,4 +1,5 @@
 import { FC, useState, useCallback, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 import { SYMBOLS, COLORS } from "../constants";
 import { GameWorld, Entity, Position, EntityType } from "../types";
@@ -403,68 +404,70 @@ const GameGrid: FC<GameGridProps> = ({
       </div>
 
       {/* Контекстное меню */}
-      {contextMenu && (
-        <div
-          ref={contextMenuRef}
-          data-context-menu
-          className="fixed bg-neutral-800 border border-neutral-600 rounded shadow-xl z-50 min-w-48"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
-        >
-          <div className="p-2 border-b border-neutral-700 text-xs text-gray-400">
-            Клетка ({contextMenu.cellX}, {contextMenu.cellY})
-          </div>
+      {contextMenu &&
+        createPortal(
+          <div
+            ref={contextMenuRef}
+            data-context-menu
+            className="fixed bg-neutral-800 border border-neutral-600 rounded shadow-xl z-50 min-w-48"
+            style={{ left: contextMenu.x, top: contextMenu.y }}
+          >
+            <div className="p-2 border-b border-neutral-700 text-xs text-gray-400">
+              Клетка ({contextMenu.cellX}, {contextMenu.cellY})
+            </div>
 
-          {contextMenu.entities.length > 0 && (
-            <div className="py-1">
-              <div className="px-3 py-1 text-xs text-gray-500 uppercase">
-                Сущности:
-              </div>
-              {contextMenu.entities.map((entity) => (
-                <button
-                  key={entity.id}
-                  className="w-full px-3 py-2 text-left hover:bg-neutral-700 flex items-center gap-2"
-                  onClick={() => {
-                    if (onSelectEntity) {
-                      onSelectEntity(entity.id);
-                    }
-                    setContextMenu(null);
-                  }}
-                >
-                  <span className={`text-xl ${entity.color}`}>
-                    {entity.symbol}
-                  </span>
-                  <span className="text-sm text-gray-300">{entity.name}</span>
-                  {entity.label && (
-                    <span className="ml-auto text-xs bg-red-600 px-1 rounded">
-                      {entity.label}
+            {contextMenu.entities.length > 0 && (
+              <div className="py-1">
+                <div className="px-3 py-1 text-xs text-gray-500 uppercase">
+                  Сущности:
+                </div>
+                {contextMenu.entities.map((entity) => (
+                  <button
+                    key={entity.id}
+                    className="w-full px-3 py-2 text-left hover:bg-neutral-700 flex items-center gap-2"
+                    onClick={() => {
+                      if (onSelectEntity) {
+                        onSelectEntity(entity.id);
+                      }
+                      setContextMenu(null);
+                    }}
+                  >
+                    <span className={`text-xl ${entity.color}`}>
+                      {entity.symbol}
                     </span>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
+                    <span className="text-sm text-gray-300">{entity.name}</span>
+                    {entity.label && (
+                      <span className="ml-auto text-xs bg-red-600 px-1 rounded">
+                        {entity.label}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
 
-          {contextMenu.entities.length === 0 && (
-            <div className="px-3 py-2 text-sm text-gray-500 italic">
-              Пустая клетка
-            </div>
-          )}
+            {contextMenu.entities.length === 0 && (
+              <div className="px-3 py-2 text-sm text-gray-500 italic">
+                Пустая клетка
+              </div>
+            )}
 
-          <div className="border-t border-neutral-700 py-1">
-            <button
-              className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-gray-400"
-              onClick={() => {
-                if (onSelectPosition) {
-                  onSelectPosition(contextMenu.cellX, contextMenu.cellY);
-                }
-                setContextMenu(null);
-              }}
-            >
-              Выбрать позицию
-            </button>
-          </div>
-        </div>
-      )}
+            <div className="border-t border-neutral-700 py-1">
+              <button
+                className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-gray-400"
+                onClick={() => {
+                  if (onSelectPosition) {
+                    onSelectPosition(contextMenu.cellX, contextMenu.cellY);
+                  }
+                  setContextMenu(null);
+                }}
+              >
+                Выбрать позицию
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* Индикатор перетаскивания */}
       {isDragging && (
