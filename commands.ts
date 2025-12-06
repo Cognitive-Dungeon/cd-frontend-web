@@ -118,6 +118,30 @@ export const CommandCastArea: GameCommand = {
   requiresPositionTarget: true,
 };
 
+// --- Speech Commands ---
+// TODO: Ждем контракта от бекенда, надо будет переделать. Сейчас просто заглушка
+
+// ГОВОРИТЬ
+export const CommandSay: GameCommand = {
+  action: "SAY",
+  label: "Say",
+  description: "Вы сказали: {text}",
+};
+
+// ШЕПТАТЬ
+export const CommandWhisper: GameCommand = {
+  action: "WHISPER",
+  label: "Whisper",
+  description: "Вы прошептали: {text}",
+};
+
+// КРИЧАТЬ
+export const CommandYell: GameCommand = {
+  action: "YELL",
+  label: "Yell",
+  description: "Вы крикнули: {text}",
+};
+
 // --- Key Bindings Map ---
 
 /**

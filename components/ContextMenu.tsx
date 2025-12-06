@@ -38,7 +38,9 @@ export const ContextMenu: FC<ContextMenuProps> = ({
 
   // Adjust position to keep menu within viewport bounds
   useEffect(() => {
-    if (!menuRef.current) return;
+    if (!menuRef.current) {
+      return;
+    }
 
     const menuRect = menuRef.current.getBoundingClientRect();
     const viewportWidth = window.innerWidth;

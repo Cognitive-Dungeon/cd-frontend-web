@@ -6,9 +6,12 @@ import {
   CommandCastArea,
   CommandInspect,
   CommandPickup,
+  CommandSay,
   CommandTalk,
   CommandTeleport,
   CommandTrade,
+  CommandWhisper,
+  CommandYell,
   GameCommand,
   KeyBindingManager,
   DEFAULT_KEY_BINDINGS,
@@ -316,6 +319,9 @@ const App: React.FC = () => {
           TRADE: CommandTrade,
           TELEPORT: CommandTeleport,
           CAST_AREA: CommandCastArea,
+          SAY: CommandSay,
+          WHISPER: CommandWhisper,
+          YELL: CommandYell,
         };
         const foundCommand = commandMap[action];
         if (foundCommand) {
@@ -354,6 +360,11 @@ const App: React.FC = () => {
         if (payload?.x !== undefined && payload?.y !== undefined) {
           const clickablePosition = `<span class="cursor-pointer text-orange-400 hover:underline" data-position-x="${payload.x}" data-position-y="${payload.y}">(${payload.x}, ${payload.y})</span>`;
           logMessage = logMessage.replace(/\{position\}/g, clickablePosition);
+        }
+
+        // Замена {text} для речевых команд
+        if (payload?.text !== undefined) {
+          logMessage = logMessage.replace(/\{text\}/g, String(payload.text));
         }
       } else if (payload?.targetId) {
         // Fallback если нет описания
@@ -396,6 +407,7 @@ const App: React.FC = () => {
     [entityRegistry, player, activeEntityId, addLog],
   );
 
+  // TODO: Ждем контракта от бекенда, надо будет переделать. Сейчас просто заглушка
   const sendTextCommand = useCallback(
     (text: string, type: "SAY" | "WHISPER" | "YELL" = "SAY") => {
       const trimmed = text.trim();
@@ -403,7 +415,8 @@ const App: React.FC = () => {
         return;
       }
 
-      sendCommand("TEXT", { text: trimmed, type });
+      // Отправляем команду с типом речи (SAY/WHISPER/YELL) и текстом в payload
+      sendCommand(type, { text: trimmed });
     },
     [sendCommand],
   );
