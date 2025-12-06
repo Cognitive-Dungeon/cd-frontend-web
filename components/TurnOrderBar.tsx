@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Entity } from "../types";
-import { Users, Sword, User } from "lucide-react";
 
 interface TurnOrderBarProps {
   entities: Entity[];
@@ -71,14 +70,12 @@ export const TurnOrderBar: React.FC<TurnOrderBarProps> = ({
   // Card width (40px) + gap (8px) = 48px per card
   // const scrollOffset = activeIndex >= 0 ? activeIndex * 48 : 0;
 
-  const getEntityIcon = (entity: Entity) => {
-    if (entity.id === playerId) {
-      return <User size={20} className="entity-icon player-icon" />;
-    }
-    if (entity.isHostile) {
-      return <Sword size={20} className="entity-icon hostile-icon" />;
-    }
-    return <Users size={20} className="entity-icon npc-icon" />;
+  const getEntitySymbol = (entity: Entity) => {
+    return entity.symbol || "?";
+  };
+
+  const getEntityColor = (entity: Entity) => {
+    return entity.color || "text-gray-400";
   };
 
   const getEntityClassName = (entity: Entity) => {
@@ -124,14 +121,12 @@ export const TurnOrderBar: React.FC<TurnOrderBarProps> = ({
               title={getTooltipText(entity)}
               onClick={() => onEntityClick?.(entity.id)}
             >
-              <div className="card-icon-compact">{getEntityIcon(entity)}</div>
+              <div
+                className={`card-icon-compact text-xl ${getEntityColor(entity)}`}
+              >
+                {getEntitySymbol(entity)}
+              </div>
               <div className="card-label-compact">{entity.label}</div>
-              {entity.id === activeEntityId && (
-                <div className="active-indicator-compact">
-                  <div className="pulse-ring-compact" />
-                  <div className="pulse-dot-compact" />
-                </div>
-              )}
               {entity.stats && (
                 <div className="card-hp-compact">
                   <div

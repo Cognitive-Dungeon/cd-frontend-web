@@ -1,5 +1,5 @@
 import { Settings, Users } from "lucide-react";
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 import Dock from "./Dock";
 import { useWindowManager } from "./WindowManager";
@@ -8,6 +8,7 @@ import Window from "./Window";
 import KeybindingsSettings from "../KeybindingsSettings";
 import { TurnOrderWindow } from "../TurnOrderWindow";
 import { TurnOrderBar } from "../TurnOrderBar";
+import CasinoWindow from "../EasterEggs/CasinoWindow";
 import { KeyBindingManager } from "../../commands";
 import { Entity } from "../../types";
 
@@ -15,6 +16,21 @@ const DOCK_WINDOW_ID = "system-dock";
 const SETTINGS_WINDOW_ID = "settings";
 const TURN_ORDER_WINDOW_ID = "turn-order";
 const TURN_ORDER_BAR_WINDOW_ID = "turn-order-bar";
+const CASINO_WINDOW_ID = "easter-egg-casino";
+
+// Konami code sequence
+const KONAMI_CODE = [
+  "ArrowUp",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowLeft",
+  "ArrowRight",
+  "KeyB",
+  "KeyA",
+];
 
 interface WindowSystemProps {
   keyBindingManager: KeyBindingManager;
@@ -34,11 +50,33 @@ const WindowSystem: FC<WindowSystemProps> = ({
   const {
     windows,
     openWindow,
+    closeWindow,
     minimizeWindow,
     updateWindowContent,
     resetWindowLayout,
   } = useWindowManager();
   const turnOrderBarInitializedRef = useRef(false);
+
+  const handleOpenCasino = () => {
+    const casinoExists = windows.some((w) => w.id === CASINO_WINDOW_ID);
+    if (!casinoExists) {
+      openWindow({
+        id: CASINO_WINDOW_ID,
+        title: "🎰 Взлом КАЗИНО",
+        closeable: true,
+        minimizable: true,
+        resizable: false,
+        showInDock: true,
+        defaultPosition: {
+          x: window.innerWidth / 2 - 250,
+          y: window.innerHeight / 2 - 200,
+        },
+        defaultSize: { width: 500, height: 400 },
+        lockSize: true,
+        content: <CasinoWindow onClose={() => closeWindow(CASINO_WINDOW_ID)} />,
+      });
+    }
+  };
 
   // Автоматически открываем Dock и Settings при монтировании
   useEffect(() => {
@@ -75,6 +113,7 @@ const WindowSystem: FC<WindowSystemProps> = ({
           <KeybindingsSettings
             keyBindingManager={keyBindingManager}
             resetWindowLayout={resetWindowLayout}
+            onOpenCasino={handleOpenCasino}
           />
         ),
       });

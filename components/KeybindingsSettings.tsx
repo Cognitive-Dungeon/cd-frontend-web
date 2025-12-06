@@ -21,6 +21,7 @@ import {
 interface KeybindingsSettingsProps {
   keyBindingManager: KeyBindingManager;
   resetWindowLayout?: () => Promise<void>;
+  onOpenCasino?: () => void;
 }
 
 interface KeyBindingRow {
@@ -69,6 +70,7 @@ const commandsEqual = (
 const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
   keyBindingManager,
   resetWindowLayout,
+  onOpenCasino,
 }) => {
   const [activeTab, setActiveTab] = useState<"keybindings" | "windows">(
     "keybindings",
@@ -584,30 +586,49 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
           </>
         )}
 
-        {activeTab === "windows" && resetWindowLayout && (
+        {activeTab === "windows" && (
           <>
             <h2 className="text-lg font-bold mb-4">Система окон</h2>
 
-            <div className="p-4 bg-neutral-800/50 border border-neutral-700 rounded">
-              <h3 className="text-md font-semibold mb-2">Расположение окон</h3>
-              <p className="text-sm text-gray-400 mb-3">
-                Сбросить расположение всех окон к значениям по умолчанию
-              </p>
-              <button
-                onClick={async () => {
-                  if (
-                    confirm(
-                      "Сбросить расположение окон к значениям по умолчанию? Страница будет перезагружена.",
-                    )
-                  ) {
-                    await resetWindowLayout();
-                  }
-                }}
-                className="px-4 py-2 bg-orange-600 hover:bg-orange-500 border border-orange-500 rounded transition-colors text-sm font-semibold"
-              >
-                Сбросить расположение окон
-              </button>
-            </div>
+            {resetWindowLayout && (
+              <div className="p-4 bg-neutral-800/50 border border-neutral-700 rounded mb-4">
+                <h3 className="text-md font-semibold mb-2">
+                  Расположение окон
+                </h3>
+                <p className="text-sm text-gray-400 mb-3">
+                  Сбросить расположение всех окон к значениям по умолчанию
+                </p>
+                <button
+                  onClick={async () => {
+                    if (
+                      confirm(
+                        "Сбросить расположение окон к значениям по умолчанию? Страница будет перезагружена.",
+                      )
+                    ) {
+                      await resetWindowLayout();
+                    }
+                  }}
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-500 border border-orange-500 rounded transition-colors text-sm font-semibold"
+                >
+                  Сбросить расположение окон
+                </button>
+              </div>
+            )}
+
+            {onOpenCasino && (
+              <div className="p-4 bg-neutral-800/50 border border-neutral-700 rounded">
+                <h3 className="text-md font-semibold mb-2">🎰 Пасхалка</h3>
+                <p className="text-sm text-gray-400 mb-3">
+                  Откройте секретное окно для настоящих ценителей мемов
+                </p>
+                <button
+                  onClick={onOpenCasino}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-500 border border-red-500 rounded transition-colors text-sm font-semibold"
+                >
+                  🎰 Открыть казино
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>

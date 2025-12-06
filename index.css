@@ -53,19 +53,7 @@
 
 .turn-order-card-compact.active {
     border-color: #06b6d4;
-    background: linear-gradient(135deg, #0e4855 0%, #0a3038 100%);
-    box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
-    animation: pulse-border-compact 2s ease-in-out infinite;
-}
-
-@keyframes pulse-border-compact {
-    0%,
-    100% {
-        box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
-    }
-    50% {
-        box-shadow: 0 0 24px rgba(6, 182, 212, 0.7);
-    }
+    background: #0e7490;
 }
 
 .turn-order-card-compact.player {
@@ -74,7 +62,7 @@
 
 .turn-order-card-compact.player.active {
     border-color: #06b6d4;
-    background: linear-gradient(135deg, #1e40af 0%, #0e4855 100%);
+    background: #0e7490;
 }
 
 .turn-order-card-compact.hostile {
@@ -83,7 +71,7 @@
 
 .turn-order-card-compact.hostile.active {
     border-color: #ef4444;
-    background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+    background: #991b1b;
 }
 
 .turn-order-card-compact.dead {

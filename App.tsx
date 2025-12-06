@@ -242,10 +242,7 @@ const App: React.FC = () => {
       ) {
         const activeEntity = entityRegistry.get(activeEntityId);
         const activeName = activeEntity?.name || "Unknown";
-        addLog(
-          `Not your turn! Waiting for ${activeName}'s turn...`,
-          LogType.ERROR,
-        );
+        // Silently block command when not player's turn
         return;
       }
 
@@ -367,10 +364,7 @@ const App: React.FC = () => {
       if (activeEntityId && activeEntityId !== player.id) {
         const activeEntity = entityRegistry.get(activeEntityId);
         const activeName = activeEntity?.name || "Unknown";
-        addLog(
-          `Not your turn! Waiting for ${activeName}'s turn...`,
-          LogType.ERROR,
-        );
+        // Silently block movement when not player's turn
         return;
       }
 
@@ -449,10 +443,7 @@ const App: React.FC = () => {
       if (activeEntityId && activeEntityId !== player.id) {
         const activeEntity = entityRegistry.get(activeEntityId);
         const activeName = activeEntity?.name || "Unknown";
-        addLog(
-          `Not your turn! Waiting for ${activeName}'s turn...`,
-          LogType.ERROR,
-        );
+        // Silently block pathfinding when not player's turn
         return;
       }
 
