@@ -88,26 +88,29 @@ const App: React.FC = () => {
   }, [player, entities]);
 
   // --- Helper Functions ---
-  const addLog = (
-    text: string,
-    type: LogType = LogType.INFO,
-    commandData?: { action: string; payload?: any },
-    position?: Position,
-    playerPosition?: Position,
-  ) => {
-    setLogs((prev) => [
-      ...prev,
-      {
-        id: Math.random().toString(36).substr(2, 9),
-        text,
-        type,
-        timestamp: Date.now(),
-        commandData,
-        position,
-        playerPosition,
-      },
-    ]);
-  };
+  const addLog = useCallback(
+    (
+      text: string,
+      type: LogType = LogType.INFO,
+      commandData?: { action: string; payload?: any },
+      position?: Position,
+      playerPosition?: Position,
+    ) => {
+      setLogs((prev) => [
+        ...prev,
+        {
+          id: `log-${Date.now()}-${Math.random()}`,
+          text,
+          type,
+          timestamp: Date.now(),
+          commandData,
+          position,
+          playerPosition,
+        },
+      ]);
+    },
+    [],
+  );
 
   // --- WebSocket: Connect to Server ---
   useEffect(() => {
@@ -240,8 +243,6 @@ const App: React.FC = () => {
         activeEntityId !== player.id &&
         !nonTurnCommands.includes(action)
       ) {
-        const activeEntity = entityRegistry.get(activeEntityId);
-        const activeName = activeEntity?.name || "Unknown";
         // Silently block command when not player's turn
         return;
       }
@@ -362,8 +363,6 @@ const App: React.FC = () => {
 
       // Check if it's player's turn
       if (activeEntityId && activeEntityId !== player.id) {
-        const activeEntity = entityRegistry.get(activeEntityId);
-        const activeName = activeEntity?.name || "Unknown";
         // Silently block movement when not player's turn
         return;
       }
@@ -373,7 +372,7 @@ const App: React.FC = () => {
 
       sendCommand("MOVE", { dx, dy }, `переместились на (${x}, ${y})`);
     },
-    [player, sendCommand, activeEntityId, entityRegistry, addLog],
+    [player, sendCommand, activeEntityId, entityRegistry],
   );
 
   const handleSelectEntity = useCallback((entityId: string | null) => {
@@ -855,7 +854,9 @@ const App: React.FC = () => {
           // Определяем, за какой сущностью следим
           const followedEntity = entityRegistry.get(followedEntityId);
 
-          if (!followedEntity) {return panOffset;}
+          if (!followedEntity) {
+            return panOffset;
+          }
 
           const container = containerRef.current;
           const containerWidth = container.clientWidth;

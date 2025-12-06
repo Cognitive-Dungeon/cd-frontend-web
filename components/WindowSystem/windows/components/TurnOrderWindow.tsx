@@ -1,5 +1,5 @@
 import { Users, Sword, User, Heart, Zap, Coins, Shield } from "lucide-react";
-import React from "react";
+import { FC } from "react";
 
 import { Entity } from "../../../../types";
 
@@ -9,7 +9,7 @@ interface TurnOrderWindowProps {
   playerId: string | null;
 }
 
-export const TurnOrderWindow: React.FC<TurnOrderWindowProps> = ({
+export const TurnOrderWindow: FC<TurnOrderWindowProps> = ({
   entities,
   activeEntityId,
   playerId,
@@ -30,17 +30,31 @@ export const TurnOrderWindow: React.FC<TurnOrderWindowProps> = ({
   };
 
   const getEntityTypeLabel = (entity: Entity) => {
-    if (entity.id === playerId) {return "Player";}
-    if (entity.isHostile) {return "Hostile";}
-    if (entity.npcType) {return entity.npcType;}
+    if (entity.id === playerId) {
+      return "Player";
+    }
+    if (entity.isHostile) {
+      return "Hostile";
+    }
+    if (entity.npcType) {
+      return entity.npcType;
+    }
     return "NPC";
   };
 
   const getStatusClass = (entity: Entity) => {
-    if (entity.isDead) {return "text-gray-500";}
-    if (entity.id === activeEntityId) {return "text-cyan-400";}
-    if (entity.id === playerId) {return "text-blue-400";}
-    if (entity.isHostile) {return "text-red-400";}
+    if (entity.isDead) {
+      return "text-gray-500";
+    }
+    if (entity.id === activeEntityId) {
+      return "text-cyan-400";
+    }
+    if (entity.id === playerId) {
+      return "text-blue-400";
+    }
+    if (entity.isHostile) {
+      return "text-red-400";
+    }
     return "text-green-400";
   };
 
@@ -218,7 +232,7 @@ export const TurnOrderWindow: React.FC<TurnOrderWindowProps> = ({
                 Waiting for{" "}
                 {sortedEntities.find((e) => e.id === activeEntityId)?.name ||
                   "Unknown"}
-                's turn...
+                &apos;s turn...
               </span>
             </div>
           )}
