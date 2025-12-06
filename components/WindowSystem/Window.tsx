@@ -18,10 +18,14 @@ interface WindowProps {
 interface WindowContextType {
   isMinimized: boolean;
   minimizeBehavior?: MinimizeBehavior;
+  windowId: string;
+  restoreWindow: () => void;
 }
 
 export const WindowContext = createContext<WindowContextType>({
   isMinimized: false,
+  windowId: "",
+  restoreWindow: () => {},
 });
 
 export const useWindowContext = () => useContext(WindowContext);
@@ -31,6 +35,7 @@ const Window: FC<WindowProps> = ({ window }) => {
     closeWindow,
     focusWindow,
     minimizeWindow,
+    restoreWindow,
     updateWindowPosition,
     updateWindowSize,
     windows,
@@ -308,6 +313,8 @@ const Window: FC<WindowProps> = ({ window }) => {
       value={{
         isMinimized: window.isMinimized,
         minimizeBehavior: window.minimizeBehavior,
+        windowId: window.id,
+        restoreWindow: () => restoreWindow(window.id),
       }}
     >
       {isDragging && snapZone !== "none" && (

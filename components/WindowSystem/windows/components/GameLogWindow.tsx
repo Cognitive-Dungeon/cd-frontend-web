@@ -28,7 +28,7 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
     "SAY",
   );
 
-  const { isMinimized } = useWindowContext();
+  const { isMinimized, restoreWindow } = useWindowContext();
   const [transientLogs, setTransientLogs] = useState<LogMessage[]>([]);
   const lastLogIdRef = useRef<string | null>(null);
 
@@ -39,7 +39,11 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
       if (lastLog.id !== lastLogIdRef.current) {
         if (isMinimized) {
           setTimeout(() => {
-            setTransientLogs((prev) => [...prev, lastLog]);
+            setTransientLogs((prev) => {
+              const newLogs = [...prev, lastLog];
+              // Keep only last 5 messages
+              return newLogs.slice(-5);
+            });
           }, 0);
           setTimeout(() => {
             setTransientLogs((prev) => prev.filter((l) => l.id !== lastLog.id));
@@ -273,7 +277,12 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
           (filter) => (
             <button
               key={filter}
-              onClick={() => setActiveFilter(filter)}
+              onClick={() => {
+                setActiveFilter(filter);
+                if (isMinimized) {
+                  restoreWindow();
+                }
+              }}
               className={`flex-1 py-1.5 text-xs font-medium transition-colors border-b-2 ${
                 activeFilter === filter
                   ? "text-white border-cyan-500 bg-neutral-800"
