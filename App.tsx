@@ -130,10 +130,21 @@ const App: React.FC = () => {
             setWorld(msg.world);
           }
           if (msg.player) {
-            const normalizedPlayer = {
+            // Normalize player: extract render data if present
+            let normalizedPlayer: any = {
               ...msg.player,
               inventory: msg.player.inventory ?? [],
             };
+
+            if (msg.player.render && typeof msg.player.render === "object") {
+              normalizedPlayer = {
+                ...normalizedPlayer,
+                symbol: msg.player.render.symbol ?? msg.player.symbol,
+                color: msg.player.render.color ?? msg.player.color,
+                label: msg.player.render.label ?? msg.player.label,
+              };
+            }
+
             setPlayer(normalizedPlayer);
             // Инициализируем следование за игроком только один раз при первой загрузке
             if (!followInitializedRef.current && normalizedPlayer.id) {
@@ -142,7 +153,19 @@ const App: React.FC = () => {
             }
           }
           if (Array.isArray(msg.entities)) {
-            setEntities(msg.entities);
+            // Normalize entities: extract render data if present
+            const normalizedEntities = msg.entities.map((entity: any) => {
+              if (entity.render && typeof entity.render === "object") {
+                return {
+                  ...entity,
+                  symbol: entity.render.symbol ?? entity.symbol,
+                  color: entity.render.color ?? entity.color,
+                  label: entity.render.label ?? entity.label,
+                };
+              }
+              return entity;
+            });
+            setEntities(normalizedEntities);
           }
           if (msg.gameState) {
             setGameState(msg.gameState);
