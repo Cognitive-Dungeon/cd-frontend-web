@@ -7,6 +7,7 @@ import {
   EntityType,
   GameWorld,
   Position,
+  SpeechBubble,
 } from "../types";
 
 import { ContextMenu } from "./ContextMenu";
@@ -20,6 +21,7 @@ interface GameGridProps {
   fovRadius: number;
   zoom: number;
   followedEntityId?: string | null;
+  speechBubbles?: SpeechBubble[];
   onMovePlayer?: (x: number, y: number) => void;
   onSelectEntity?: (entityId: string | null) => void;
   onSelectPosition?: (x: number, y: number) => void;
@@ -38,6 +40,7 @@ const GameGrid: FC<GameGridProps> = ({
   entities,
   zoom,
   followedEntityId = null,
+  speechBubbles = [],
   onMovePlayer,
   onSelectEntity,
   onSelectPosition,
@@ -417,6 +420,9 @@ const GameGrid: FC<GameGridProps> = ({
             const isFollowedEntity = entity.id === followedEntityId;
             const shouldAnimate = !isFollowedEntity || !followedEntityId;
 
+            // Find speech bubble for this entity
+            const bubble = speechBubbles.find((b) => b.entityId === entity.id);
+
             return (
               <div
                 key={entity.id}
@@ -432,6 +438,52 @@ const GameGrid: FC<GameGridProps> = ({
                 }}
               >
                 {renderEntity(entity, entityIndex, totalInCell)}
+                {bubble && (
+                  <div
+                    className="absolute left-1/2 -translate-x-1/2 pointer-events-none speech-bubble z-50"
+                    style={{
+                      bottom: `${CELL_SIZE + 8}px`,
+                      maxWidth: `${CELL_SIZE * 5}px`,
+                      minWidth: `${CELL_SIZE * 2}px`,
+                    }}
+                  >
+                    <div className="relative bg-white text-neutral-900 text-xs rounded-xl px-3 py-1.5 shadow-2xl border-2 border-neutral-800/20">
+                      <div className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-sans font-medium leading-tight">
+                        {bubble.text.length > 60
+                          ? bubble.text.substring(0, 60) + "..."
+                          : bubble.text}
+                      </div>
+                      {/* Speech bubble tail */}
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2"
+                        style={{
+                          bottom: "-8px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 0,
+                            height: 0,
+                            borderLeft: "8px solid transparent",
+                            borderRight: "8px solid transparent",
+                            borderTop: "8px solid rgba(0, 0, 0, 0.2)",
+                          }}
+                        />
+                        <div
+                          className="absolute left-1/2 -translate-x-1/2"
+                          style={{
+                            bottom: "1px",
+                            width: 0,
+                            height: 0,
+                            borderLeft: "7px solid transparent",
+                            borderRight: "7px solid transparent",
+                            borderTop: "7px solid white",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

@@ -27,6 +27,13 @@ export enum LogType {
   SUCCESS = "SUCCESS",
 }
 
+export interface SpeechBubble {
+  id: string;
+  entityId: string;
+  text: string;
+  timestamp: number;
+}
+
 export interface Position {
   x: number;
   y: number;

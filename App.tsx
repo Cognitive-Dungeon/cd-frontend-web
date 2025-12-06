@@ -25,6 +25,7 @@ import {
   LogType,
   Position,
   ContextMenuData,
+  SpeechBubble,
 } from "./types";
 import { findPath } from "./utils/pathfinding";
 
@@ -61,6 +62,7 @@ const App: React.FC = () => {
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [followedEntityId, setFollowedEntityId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuData | null>(null);
+  const [speechBubbles, setSpeechBubbles] = useState<SpeechBubble[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const followInitializedRef = useRef(false);
@@ -91,6 +93,12 @@ const App: React.FC = () => {
     return registry;
   }, [player, entities]);
 
+  // Ref для доступа к текущему entityRegistry без создания зависимости
+  const entityRegistryRef = useRef(entityRegistry);
+  useEffect(() => {
+    entityRegistryRef.current = entityRegistry;
+  }, [entityRegistry]);
+
   // --- Helper Functions ---
   const addLog = useCallback(
     (
@@ -100,10 +108,12 @@ const App: React.FC = () => {
       position?: Position,
       playerPosition?: Position,
     ) => {
+      const logId = `log-${Date.now()}-${Math.random()}`;
+
       setLogs((prev) => [
         ...prev,
         {
-          id: `log-${Date.now()}-${Math.random()}`,
+          id: logId,
           text,
           type,
           timestamp: Date.now(),
@@ -112,6 +122,39 @@ const App: React.FC = () => {
           playerPosition,
         },
       ]);
+
+      // Create speech bubble for SPEECH type messages
+      if (type === LogType.SPEECH) {
+        // Parse entity name from text (format: "EntityName: 'speech text'")
+        const match = text.match(/^(.+?):\s*["""'](.+?)["""']$/);
+        if (match) {
+          const speakerName = match[1].trim();
+          const speechText = match[2].trim();
+
+          // Find entity by name using ref to avoid dependency cycle
+          const speaker = [...entityRegistryRef.current.values()].find(
+            (e) => e.name === speakerName,
+          );
+
+          if (speaker) {
+            const bubbleId = `bubble-${Date.now()}-${Math.random()}`;
+            setSpeechBubbles((prev) => [
+              ...prev,
+              {
+                id: bubbleId,
+                entityId: speaker.id,
+                text: speechText,
+                timestamp: Date.now(),
+              },
+            ]);
+
+            // Remove speech bubble after 5 seconds
+            setTimeout(() => {
+              setSpeechBubbles((prev) => prev.filter((b) => b.id !== bubbleId));
+            }, 5000);
+          }
+        }
+      }
     },
     [],
   );
@@ -206,17 +249,20 @@ const App: React.FC = () => {
             }
           });
         }
-      } catch {
-        addLog("WS parse error", LogType.ERROR);
+      } catch (error) {
+        console.error("WebSocket parse error:", error);
+        addLog(`WS parse error: ${error}`, LogType.ERROR);
       }
     };
 
-    ws.onerror = () => {
-      addLog("WS error", LogType.ERROR);
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      addLog("WS error - check console for details", LogType.ERROR);
     };
 
-    ws.onclose = () => {
-      addLog("Disconnected from server", LogType.INFO);
+    ws.onclose = (event) => {
+      console.log("WebSocket closed:", event.code, event.reason);
+      addLog(`Disconnected from server (${event.code})`, LogType.INFO);
     };
 
     return () => {
@@ -1034,6 +1080,7 @@ const App: React.FC = () => {
                 fovRadius={8}
                 zoom={zoom}
                 followedEntityId={followedEntityId}
+                speechBubbles={speechBubbles}
                 onMovePlayer={handleMovePlayer}
                 onSelectEntity={handleSelectEntity}
                 onSelectPosition={handleSelectPosition}
