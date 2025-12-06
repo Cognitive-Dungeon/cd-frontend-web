@@ -776,9 +776,9 @@ const App: React.FC = () => {
           e.clientY >= rect.top &&
           e.clientY <= rect.bottom
         ) {
-          // Убираем фокус с поля ввода при клике на карту
-          if (commandInputRef.current === document.activeElement) {
-            commandInputRef.current.blur();
+          // Убираем фокус с активного элемента (например, поля ввода чата) при клике на карту
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
           }
 
           hasMoved = false;
