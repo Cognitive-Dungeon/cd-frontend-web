@@ -959,10 +959,10 @@ const App: React.FC = () => {
     const entityPixelY = followedEntity.pos.y * CELL_SIZE + CELL_SIZE / 2;
 
     // Вычисляем offset, чтобы сущность была в центре контейнера
-    // Учитываем смещение от border в GameGrid
-    const offsetX = containerDimensions.width / 2 - entityPixelX + borderOffset;
+    // Учитываем смещение от border в GameGrid (GameGrid сдвигается влево/вверх на -borderOffset)
+    const offsetX = containerDimensions.width / 2 - entityPixelX - borderOffset;
     const offsetY =
-      containerDimensions.height / 2 - entityPixelY + borderOffset;
+      containerDimensions.height / 2 - entityPixelY - borderOffset;
 
     return { x: offsetX, y: offsetY };
   }, [
