@@ -68,17 +68,16 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
 
   // Load default layout on first mount
   useEffect(() => {
-    applyDefaultLayout().then((loaded) => {
-      if (loaded) {
-        console.log("Default window layout loaded");
-      }
+    applyDefaultLayout().then(() => {
       setLayoutLoaded(true);
     });
   }, []);
 
   // Recalculate magnetic snap positions after all windows are loaded
   useEffect(() => {
-    if (!layoutLoaded || windows.length === 0) {return;}
+    if (!layoutLoaded || windows.length === 0) {
+      return;
+    }
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
@@ -95,11 +94,15 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
         windowId: string,
         visited = new Set<string>(),
       ): number => {
-        if (visited.has(windowId)) {return 0;} // Circular dependency, treat as depth 0
+        if (visited.has(windowId)) {
+          return 0;
+        } // Circular dependency, treat as depth 0
         visited.add(windowId);
 
         const window = windowsById.get(windowId);
-        if (!window || !window.magneticSnap?.windowId) {return 0;}
+        if (!window || !window.magneticSnap?.windowId) {
+          return 0;
+        }
 
         const targetId = window.magneticSnap.windowId;
         return 1 + getDependencyDepth(targetId, visited);
@@ -583,6 +586,33 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
     );
   }, []);
 
+  const undockWindow = useCallback((id: string) => {
+    setWindows((prev) =>
+      prev.map((w) => {
+        if (w.id === id && w.docked !== "none" && w.beforeDockedState) {
+          const updated = {
+            ...w,
+            docked: "none" as DockedPosition,
+            position: w.beforeDockedState.position,
+            size: w.beforeDockedState.size,
+            beforeDockedState: undefined,
+          };
+          // Save the undocked state
+          saveWindowState(
+            w.id,
+            w.beforeDockedState.position,
+            w.beforeDockedState.size,
+            w.isMinimized,
+            "none",
+            w.magneticSnap,
+          );
+          return updated;
+        }
+        return w;
+      }),
+    );
+  }, []);
+
   const dockWindow = useCallback(
     (id: string, position: DockedPosition) => {
       if (position === "none") {
@@ -619,35 +649,8 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
         }),
       );
     },
-    [getDockedBounds],
+    [getDockedBounds, undockWindow],
   );
-
-  const undockWindow = useCallback((id: string) => {
-    setWindows((prev) =>
-      prev.map((w) => {
-        if (w.id === id && w.docked !== "none" && w.beforeDockedState) {
-          const updated = {
-            ...w,
-            docked: "none" as DockedPosition,
-            position: w.beforeDockedState.position,
-            size: w.beforeDockedState.size,
-            beforeDockedState: undefined,
-          };
-          // Save the undocked state
-          saveWindowState(
-            w.id,
-            w.beforeDockedState.position,
-            w.beforeDockedState.size,
-            w.isMinimized,
-            "none",
-            w.magneticSnap,
-          );
-          return updated;
-        }
-        return w;
-      }),
-    );
-  }, []);
 
   const updateMagneticSnap = useCallback((id: string, snap: any) => {
     setWindows((prev) =>

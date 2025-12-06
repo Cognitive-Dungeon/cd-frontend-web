@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, FC } from "react";
+import { useRef, useState, useEffect, FC, useCallback } from "react";
 
 import { WindowState, DockedPosition } from "./types";
 import { useWindowManager } from "./WindowManager";
@@ -54,115 +54,132 @@ const Window: FC<WindowProps> = ({ window }) => {
     });
   };
 
-  const detectSnapZone = (mouseX: number, mouseY: number): DockedPosition => {
-    if (!window.dockable) {return "none";}
-
-    const viewportWidth = globalThis.innerWidth;
-
-    if (mouseX < SNAP_THRESHOLD) {
-      return "left";
-    } else if (mouseX > viewportWidth - SNAP_THRESHOLD) {
-      return "right";
-    }
-
-    return "none";
-  };
-
-  const applyMagneticSnap = (
-    x: number,
-    y: number,
-  ): { x: number; y: number } => {
-    if (!window.dockable) {return { x, y };}
-
-    let newX = x;
-    let newY = y;
-    const viewportWidth = globalThis.innerWidth;
-    const viewportHeight = globalThis.innerHeight;
-
-    const magneticSnap: any = {};
-    let snappedToWindow: string | undefined;
-
-    // Snap to screen edges
-    if (Math.abs(x) < MAGNETIC_THRESHOLD) {
-      newX = 0;
-      magneticSnap.left = true;
-    } else if (
-      Math.abs(x + window.size.width - viewportWidth) < MAGNETIC_THRESHOLD
-    ) {
-      newX = viewportWidth - window.size.width;
-      magneticSnap.right = true;
-    }
-
-    if (Math.abs(y) < MAGNETIC_THRESHOLD) {
-      newY = 0;
-      magneticSnap.top = true;
-    } else if (
-      Math.abs(y + window.size.height - viewportHeight) < MAGNETIC_THRESHOLD
-    ) {
-      newY = viewportHeight - window.size.height;
-      magneticSnap.bottom = true;
-    }
-
-    // Snap to other windows
-    windows.forEach((otherWindow) => {
-      if (otherWindow.id === window.id || otherWindow.isMinimized) {return;}
-
-      const otherRight = otherWindow.position.x + otherWindow.size.width;
-      const otherBottom = otherWindow.position.y + otherWindow.size.height;
-      const thisRight = x + window.size.width;
-      const thisBottom = y + window.size.height;
-
-      const verticalOverlap = !(
-        y > otherBottom || thisBottom < otherWindow.position.y
-      );
-      if (verticalOverlap) {
-        if (Math.abs(thisRight - otherWindow.position.x) < MAGNETIC_THRESHOLD) {
-          newX = otherWindow.position.x - window.size.width;
-          snappedToWindow = otherWindow.id;
-          magneticSnap.windowEdge = "left";
-        }
-        if (Math.abs(x - otherRight) < MAGNETIC_THRESHOLD) {
-          newX = otherRight;
-          snappedToWindow = otherWindow.id;
-          magneticSnap.windowEdge = "right";
-        }
+  const detectSnapZone = useCallback(
+    (mouseX: number): DockedPosition => {
+      if (!window.dockable) {
+        return "none";
       }
 
-      const horizontalOverlap = !(
-        x > otherRight || thisRight < otherWindow.position.x
-      );
-      if (horizontalOverlap) {
-        if (
-          Math.abs(thisBottom - otherWindow.position.y) < MAGNETIC_THRESHOLD
-        ) {
-          newY = otherWindow.position.y - window.size.height;
-          snappedToWindow = otherWindow.id;
-          magneticSnap.windowEdge = "top";
-        }
-        if (Math.abs(y - otherBottom) < MAGNETIC_THRESHOLD) {
-          newY = otherBottom;
-          snappedToWindow = otherWindow.id;
-          magneticSnap.windowEdge = "bottom";
-        }
-      }
-    });
+      const viewportWidth = globalThis.innerWidth;
 
-    // Update magnetic snap state
-    if (Object.keys(magneticSnap).length > 0 || snappedToWindow) {
-      if (snappedToWindow) {
-        magneticSnap.windowId = snappedToWindow;
+      if (mouseX < SNAP_THRESHOLD) {
+        return "left";
+      } else if (mouseX > viewportWidth - SNAP_THRESHOLD) {
+        return "right";
       }
-      updateMagneticSnap(window.id, magneticSnap);
-    } else {
-      updateMagneticSnap(window.id, {});
-    }
 
-    return { x: newX, y: newY };
-  };
+      return "none";
+    },
+    [window.dockable],
+  );
+
+  const applyMagneticSnap = useCallback(
+    (x: number, y: number): { x: number; y: number } => {
+      if (!window.dockable) {
+        return { x, y };
+      }
+
+      let newX = x;
+      let newY = y;
+      const viewportWidth = globalThis.innerWidth;
+      const viewportHeight = globalThis.innerHeight;
+
+      const magneticSnap: any = {};
+      let snappedToWindow: string | undefined;
+
+      // Snap to screen edges
+      if (Math.abs(x) < MAGNETIC_THRESHOLD) {
+        newX = 0;
+        magneticSnap.left = true;
+      } else if (
+        Math.abs(x + window.size.width - viewportWidth) < MAGNETIC_THRESHOLD
+      ) {
+        newX = viewportWidth - window.size.width;
+        magneticSnap.right = true;
+      }
+
+      if (Math.abs(y) < MAGNETIC_THRESHOLD) {
+        newY = 0;
+        magneticSnap.top = true;
+      } else if (
+        Math.abs(y + window.size.height - viewportHeight) < MAGNETIC_THRESHOLD
+      ) {
+        newY = viewportHeight - window.size.height;
+        magneticSnap.bottom = true;
+      }
+
+      // Snap to other windows
+      windows.forEach((otherWindow) => {
+        if (otherWindow.id === window.id || otherWindow.isMinimized) {
+          return;
+        }
+
+        const otherRight = otherWindow.position.x + otherWindow.size.width;
+        const otherBottom = otherWindow.position.y + otherWindow.size.height;
+        const thisRight = x + window.size.width;
+        const thisBottom = y + window.size.height;
+
+        const verticalOverlap = !(
+          y > otherBottom || thisBottom < otherWindow.position.y
+        );
+        if (verticalOverlap) {
+          if (
+            Math.abs(thisRight - otherWindow.position.x) < MAGNETIC_THRESHOLD
+          ) {
+            newX = otherWindow.position.x - window.size.width;
+            snappedToWindow = otherWindow.id;
+            magneticSnap.windowEdge = "left";
+          }
+          if (Math.abs(x - otherRight) < MAGNETIC_THRESHOLD) {
+            newX = otherRight;
+            snappedToWindow = otherWindow.id;
+            magneticSnap.windowEdge = "right";
+          }
+        }
+
+        const horizontalOverlap = !(
+          x > otherRight || thisRight < otherWindow.position.x
+        );
+        if (horizontalOverlap) {
+          if (
+            Math.abs(thisBottom - otherWindow.position.y) < MAGNETIC_THRESHOLD
+          ) {
+            newY = otherWindow.position.y - window.size.height;
+            snappedToWindow = otherWindow.id;
+            magneticSnap.windowEdge = "top";
+          }
+          if (Math.abs(y - otherBottom) < MAGNETIC_THRESHOLD) {
+            newY = otherBottom;
+            snappedToWindow = otherWindow.id;
+            magneticSnap.windowEdge = "bottom";
+          }
+        }
+      });
+
+      // Update magnetic snap state
+      if (Object.keys(magneticSnap).length > 0 || snappedToWindow) {
+        if (snappedToWindow) {
+          magneticSnap.windowId = snappedToWindow;
+        }
+        updateMagneticSnap(window.id, magneticSnap);
+      } else {
+        updateMagneticSnap(window.id, {});
+      }
+
+      return { x: newX, y: newY };
+    },
+    [
+      window.dockable,
+      window.size.width,
+      window.size.height,
+      window.id,
+      windows,
+      updateMagneticSnap,
+    ],
+  );
 
   useEffect(() => {
     if (!isDragging) {
-      setSnapZone("none");
       return;
     }
 
@@ -170,7 +187,7 @@ const Window: FC<WindowProps> = ({ window }) => {
       const newX = e.clientX - dragOffset.x;
       const newY = e.clientY - dragOffset.y;
 
-      const zone = detectSnapZone(e.clientX, e.clientY);
+      const zone = detectSnapZone(e.clientX);
       setSnapZone(zone);
 
       const snapped = applyMagneticSnap(newX, newY);
@@ -180,7 +197,7 @@ const Window: FC<WindowProps> = ({ window }) => {
     const handleMouseUp = (e: MouseEvent) => {
       setIsDragging(false);
 
-      const zone = detectSnapZone(e.clientX, e.clientY);
+      const zone = detectSnapZone(e.clientX);
       if (zone !== "none" && window.dockable !== false) {
         dockWindow(window.id, zone);
       }
@@ -200,12 +217,10 @@ const Window: FC<WindowProps> = ({ window }) => {
     dragOffset,
     window.id,
     window.dockable,
-    window.size.width,
-    window.size.height,
     updateWindowPosition,
     dockWindow,
-    updateMagneticSnap,
-    windows,
+    applyMagneticSnap,
+    detectSnapZone,
   ]);
 
   const handleResizeMouseDown = (e: React.MouseEvent) => {
@@ -256,7 +271,14 @@ const Window: FC<WindowProps> = ({ window }) => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isResizing, resizeStart, window.id, updateWindowSize]);
+  }, [
+    isResizing,
+    resizeStart,
+    window.id,
+    updateWindowSize,
+    window.resizableX,
+    window.resizableY,
+  ]);
 
   if (window.isMinimized) {
     return null;

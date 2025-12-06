@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useRef, useCallback } from "react";
 
 import { KeyBindingManager } from "../../commands";
 import { Entity } from "../../types";
@@ -18,7 +18,6 @@ import {
   CASINO_WINDOW_ID,
   createCasinoWindowConfig,
 } from "./windows";
-
 
 interface WindowSystemProps {
   keyBindingManager: KeyBindingManager;
@@ -45,16 +44,13 @@ const WindowSystem: FC<WindowSystemProps> = ({
   } = useWindowManager();
   const turnOrderBarInitializedRef = useRef(false);
 
-  const handleOpenCasino = () => {
-    const casinoExists = windows.some((w) => w.id === CASINO_WINDOW_ID);
-    if (!casinoExists) {
-      openWindow(
-        createCasinoWindowConfig({
-          onClose: () => closeWindow(CASINO_WINDOW_ID),
-        }),
-      );
-    }
-  };
+  const handleOpenCasino = useCallback(() => {
+    openWindow(
+      createCasinoWindowConfig({
+        onClose: () => closeWindow(CASINO_WINDOW_ID),
+      }),
+    );
+  }, [openWindow, closeWindow]);
 
   // Автоматически открываем Dock и Settings при монтировании
   useEffect(() => {
@@ -108,6 +104,9 @@ const WindowSystem: FC<WindowSystemProps> = ({
     activeEntityId,
     playerId,
     onEntityClick,
+    handleOpenCasino,
+    keyBindingManager,
+    resetWindowLayout,
   ]);
 
   // Update TurnOrderBar content when entities or turn data changes

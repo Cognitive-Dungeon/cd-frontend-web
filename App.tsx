@@ -62,7 +62,7 @@ const App: React.FC = () => {
   const [followedEntityId, setFollowedEntityId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const commandInputRef = useRef<HTMLInputElement>(null);
-  const [playerPosKey, setPlayerPosKey] = useState<string>("");
+
   const followInitializedRef = useRef(false);
 
   // Pathfinding state
@@ -227,7 +227,7 @@ const App: React.FC = () => {
       }
       socketRef.current = null;
     };
-  }, []);
+  }, [addLog]);
 
   const sendCommand = useCallback(
     (action: string, payload?: any, description?: string) => {
@@ -346,7 +346,7 @@ const App: React.FC = () => {
         playerPosition,
       );
     },
-    [entityRegistry, player],
+    [entityRegistry, player, activeEntityId, addLog],
   );
 
   const sendTextCommand = (text: string) => {
@@ -376,7 +376,7 @@ const App: React.FC = () => {
 
       sendCommand("MOVE", { dx, dy }, `переместились на (${x}, ${y})`);
     },
-    [player, sendCommand, activeEntityId, addLog],
+    [player, sendCommand, activeEntityId],
   );
 
   const handleSelectEntity = useCallback((entityId: string | null) => {
@@ -438,7 +438,7 @@ const App: React.FC = () => {
         setPanOffset({ x: offsetX, y: offsetY });
       }
     },
-    [entityRegistry, world, zoom, containerDimensions, addLog, activeEntityId],
+    [entityRegistry, world, zoom, containerDimensions],
   );
 
   const handleGoToPathfinding = useCallback(
@@ -486,12 +486,13 @@ const App: React.FC = () => {
         { x: player.pos.x, y: player.pos.y },
       );
     },
-    [player, world, activeEntityId, entityRegistry, addLog],
+    [player, world, activeEntityId, addLog],
   );
 
   const handleFollowEntity = useCallback((entityId: string | null) => {
     setFollowedEntityId(entityId);
     if (entityId) {
+      // eslint-disable-next-line no-console
       console.log("Следим за сущностью:", entityId);
     }
   }, []);
@@ -520,11 +521,17 @@ const App: React.FC = () => {
     const dy = nextStep.y - currentPlayerPos.y;
 
     // Send move command
-    sendCommand("MOVE", { dx, dy }, `пошли на (${nextStep.x}, ${nextStep.y})`);
+    setTimeout(() => {
+      sendCommand(
+        "MOVE",
+        { dx, dy },
+        `пошли на (${nextStep.x}, ${nextStep.y})`,
+      );
 
-    // Mark that we're waiting for server response
-    setWaitingForMoveResponse(true);
-    lastCommandedPosRef.current = nextStep;
+      // Mark that we're waiting for server response
+      setWaitingForMoveResponse(true);
+      lastCommandedPosRef.current = nextStep;
+    }, 0);
 
     // TODO: В будущем будем ждать нашего хода (turn-based система). ПОКА НЕ РЕАЛИЗОВАНО
     // Set timeout as fallback in case server doesn't respond
@@ -575,9 +582,11 @@ const App: React.FC = () => {
       }
 
       // Remove completed step from path
-      setCurrentPath((prev) => prev.slice(1));
-      setWaitingForMoveResponse(false);
-      lastCommandedPosRef.current = null;
+      setTimeout(() => {
+        setCurrentPath((prev) => prev.slice(1));
+        setWaitingForMoveResponse(false);
+        lastCommandedPosRef.current = null;
+      }, 0);
     } else {
       // Check if player position changed but not to expected position
       // This means server blocked the move
@@ -587,21 +596,23 @@ const App: React.FC = () => {
         (currentPos.x !== prevPos.x || currentPos.y !== prevPos.y)
       ) {
         // Position changed but not to where we expected - server moved us elsewhere
-        addLog(
-          `Сервер переместил на неожиданную позицию (${currentPos.x}, ${currentPos.y}). Остановка пути.`,
-          LogType.ERROR,
-          undefined,
-          { x: currentPos.x, y: currentPos.y },
-        );
-        if (pathfindingTimeoutRef.current) {
-          clearTimeout(pathfindingTimeoutRef.current);
-          pathfindingTimeoutRef.current = null;
-        }
-        setIsPathfinding(false);
-        setCurrentPath([]);
-        setPathfindingTarget(null);
-        setWaitingForMoveResponse(false);
-        lastCommandedPosRef.current = null;
+        setTimeout(() => {
+          addLog(
+            `Сервер переместил на неожиданную позицию (${currentPos.x}, ${currentPos.y}). Остановка пути.`,
+            LogType.ERROR,
+            undefined,
+            { x: currentPos.x, y: currentPos.y },
+          );
+          if (pathfindingTimeoutRef.current) {
+            clearTimeout(pathfindingTimeoutRef.current);
+            pathfindingTimeoutRef.current = null;
+          }
+          setIsPathfinding(false);
+          setCurrentPath([]);
+          setPathfindingTarget(null);
+          setWaitingForMoveResponse(false);
+          lastCommandedPosRef.current = null;
+        }, 0);
       }
     }
   }, [
@@ -623,16 +634,18 @@ const App: React.FC = () => {
       player.pos.x === pathfindingTarget.x &&
       player.pos.y === pathfindingTarget.y
     ) {
-      addLog(
-        `Достигли цели <span class="cursor-pointer text-orange-400 hover:underline" data-position-x="${pathfindingTarget.x}" data-position-y="${pathfindingTarget.y}">(${pathfindingTarget.x}, ${pathfindingTarget.y})</span>`,
-        LogType.SUCCESS,
-        undefined,
-        pathfindingTarget,
-        { x: player.pos.x, y: player.pos.y },
-      );
-      setIsPathfinding(false);
-      setCurrentPath([]);
-      setPathfindingTarget(null);
+      setTimeout(() => {
+        addLog(
+          `Достигли цели <span class="cursor-pointer text-orange-400 hover:underline" data-position-x="${pathfindingTarget.x}" data-position-y="${pathfindingTarget.y}">(${pathfindingTarget.x}, ${pathfindingTarget.y})</span>`,
+          LogType.SUCCESS,
+          undefined,
+          pathfindingTarget,
+          { x: player.pos.x, y: player.pos.y },
+        );
+        setIsPathfinding(false);
+        setCurrentPath([]);
+        setPathfindingTarget(null);
+      }, 0);
     }
   }, [
     player?.pos.x,
@@ -851,20 +864,6 @@ const App: React.FC = () => {
     zoom,
   ]);
 
-  // Обновляем ключ позиции при изменении позиции отслеживаемой сущности
-  useEffect(() => {
-    if (followedEntityId) {
-      const followedEntity = entityRegistry.get(followedEntityId);
-
-      if (followedEntity) {
-        const newPosKey = `${followedEntity.pos.x},${followedEntity.pos.y}`;
-        if (newPosKey !== playerPosKey) {
-          setPlayerPosKey(newPosKey);
-        }
-      }
-    }
-  }, [entityRegistry, followedEntityId, playerPosKey]);
-
   // Update container dimensions when they change
   useEffect(() => {
     const updateDimensions = () => {
@@ -876,9 +875,21 @@ const App: React.FC = () => {
       }
     };
 
+    // Initial update
     updateDimensions();
-    window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
+
+    // Use ResizeObserver to track container size changes
+    const resizeObserver = new ResizeObserver(() => {
+      updateDimensions();
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, []);
 
   // Вычисляем offset для центрирования на отслеживаемой сущности

@@ -47,7 +47,6 @@ interface ContextMenu {
 const GameGrid: FC<GameGridProps> = ({
   world,
   entities,
-  playerPos,
   zoom,
   followedEntityId = null,
   onMovePlayer,
@@ -187,9 +186,6 @@ const GameGrid: FC<GameGridProps> = ({
 
   const renderEntity = (entity: Entity, index: number, total: number) => {
     const isPlayer = entity.type === EntityType.PLAYER;
-
-    // Ключ для анимации - чтобы React понимал что это та же сущность
-    const animationKey = `${entity.id}-${entity.pos.x}-${entity.pos.y}`;
 
     // Позиционирование для двух сущностей в клетке
     const position =
@@ -407,7 +403,7 @@ const GameGrid: FC<GameGridProps> = ({
     <div className="relative">
       {/* Сетка */}
       <div
-        className="relative bg-black select-none shadow-2xl shadow-black border-neutral-800"
+        className="relative bg-black select-none shadow-2xl shadow-black border-neutral-800 box-content"
         style={{
           width: world.width * CELL_SIZE,
           height: world.height * CELL_SIZE,
@@ -415,6 +411,7 @@ const GameGrid: FC<GameGridProps> = ({
           gridTemplateColumns: `repeat(${world.width}, ${CELL_SIZE}px)`,
           gridTemplateRows: `repeat(${world.height}, ${CELL_SIZE}px)`,
           borderWidth: `${Math.max(2, zoom * 2)}px`,
+          transform: `translate(-${Math.max(2, zoom * 2)}px, -${Math.max(2, zoom * 2)}px)`,
         }}
       >
         {world.map.flatMap((row, y) => row.map((_, x) => renderCell(x, y)))}

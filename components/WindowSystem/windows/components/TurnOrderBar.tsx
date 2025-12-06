@@ -65,9 +65,11 @@ export const TurnOrderBar: React.FC<TurnOrderBarProps> = ({
         newOffset = activeCardEnd - containerWidth;
       }
 
-      setScrollOffset(newOffset);
+      setTimeout(() => {
+        setScrollOffset(newOffset);
+      }, 0);
     }
-  }, [activeIndex, activeEntityId]);
+  }, [activeIndex, activeEntityId, scrollOffset]);
 
   // Calculate scroll offset to center active entity in the ribbon
   // Card width (40px) + gap (8px) = 48px per card
