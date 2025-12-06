@@ -404,10 +404,11 @@ const App: React.FC = () => {
         const containerWidth = containerRef.current.clientWidth;
         const containerHeight = containerRef.current.clientHeight;
         const CELL_SIZE = 50 * zoom;
+        const borderOffset = Math.max(2, zoom * 2);
         const positionPixelX = position.x * CELL_SIZE + CELL_SIZE / 2;
         const positionPixelY = position.y * CELL_SIZE + CELL_SIZE / 2;
-        const offsetX = containerWidth / 2 - positionPixelX;
-        const offsetY = containerHeight / 2 - positionPixelY;
+        const offsetX = containerWidth / 2 - positionPixelX + borderOffset;
+        const offsetY = containerHeight / 2 - positionPixelY + borderOffset;
         setPanOffset({ x: offsetX, y: offsetY });
       }
     },
@@ -430,12 +431,15 @@ const App: React.FC = () => {
 
       if (world) {
         const CELL_SIZE = 50 * zoom;
+        const borderOffset = Math.max(2, zoom * 2);
 
         const entityPixelX = entity.pos.x * CELL_SIZE + CELL_SIZE / 2;
         const entityPixelY = entity.pos.y * CELL_SIZE + CELL_SIZE / 2;
 
-        const offsetX = containerDimensions.width / 2 - entityPixelX;
-        const offsetY = containerDimensions.height / 2 - entityPixelY;
+        const offsetX =
+          containerDimensions.width / 2 - entityPixelX + borderOffset;
+        const offsetY =
+          containerDimensions.height / 2 - entityPixelY + borderOffset;
 
         setPanOffset({ x: offsetX, y: offsetY });
       }
@@ -799,13 +803,14 @@ const App: React.FC = () => {
               const containerWidth = containerRef.current.clientWidth;
               const containerHeight = containerRef.current.clientHeight;
               const CELL_SIZE = 50 * zoom;
+              const borderOffset = Math.max(2, zoom * 2);
               const entityPixelX =
                 followedEntity.pos.x * CELL_SIZE + CELL_SIZE / 2;
               const entityPixelY =
                 followedEntity.pos.y * CELL_SIZE + CELL_SIZE / 2;
               currentOffset = {
-                x: containerWidth / 2 - entityPixelX,
-                y: containerHeight / 2 - entityPixelY,
+                x: containerWidth / 2 - entityPixelX + borderOffset,
+                y: containerHeight / 2 - entityPixelY + borderOffset,
               };
             }
           }
@@ -900,14 +905,18 @@ const App: React.FC = () => {
     }
 
     const CELL_SIZE = 50 * zoom;
+    // GameGrid применяет transform для учета border
+    const borderOffset = Math.max(2, zoom * 2);
 
     // Позиция отслеживаемой сущности в пикселях относительно сетки
     const entityPixelX = followedEntity.pos.x * CELL_SIZE + CELL_SIZE / 2;
     const entityPixelY = followedEntity.pos.y * CELL_SIZE + CELL_SIZE / 2;
 
     // Вычисляем offset, чтобы сущность была в центре контейнера
-    const offsetX = containerDimensions.width / 2 - entityPixelX;
-    const offsetY = containerDimensions.height / 2 - entityPixelY;
+    // Учитываем смещение от border в GameGrid
+    const offsetX = containerDimensions.width / 2 - entityPixelX + borderOffset;
+    const offsetY =
+      containerDimensions.height / 2 - entityPixelY + borderOffset;
 
     return { x: offsetX, y: offsetY };
   }, [
@@ -961,12 +970,15 @@ const App: React.FC = () => {
                         const containerHeight =
                           containerRef.current.clientHeight;
                         const CELL_SIZE = 50 * zoom;
+                        const borderOffset = Math.max(2, zoom * 2);
                         const entityPixelX =
                           followedEntity.pos.x * CELL_SIZE + CELL_SIZE / 2;
                         const entityPixelY =
                           followedEntity.pos.y * CELL_SIZE + CELL_SIZE / 2;
-                        const offsetX = containerWidth / 2 - entityPixelX;
-                        const offsetY = containerHeight / 2 - entityPixelY;
+                        const offsetX =
+                          containerWidth / 2 - entityPixelX + borderOffset;
+                        const offsetY =
+                          containerHeight / 2 - entityPixelY + borderOffset;
                         setPanOffset({ x: offsetX, y: offsetY });
                       }
                     }
