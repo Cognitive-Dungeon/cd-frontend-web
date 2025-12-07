@@ -118,6 +118,22 @@ export const CommandCastArea: GameCommand = {
   requiresPositionTarget: true,
 };
 
+// --- Inventory Commands ---
+
+// БРОСИТЬ - Drop item from inventory to current location
+export const CommandDrop: GameCommand = {
+  action: "DROP",
+  label: "Drop",
+  description: "Вы бросили {name}",
+};
+
+// ИСПОЛЬЗОВАТЬ - Use item from inventory
+export const CommandUse: GameCommand = {
+  action: "USE",
+  label: "Use",
+  description: "Вы использовали {name}",
+};
+
 // --- Speech Commands ---
 // TODO: Ждем контракта от бекенда, надо будет переделать. Сейчас просто заглушка
 

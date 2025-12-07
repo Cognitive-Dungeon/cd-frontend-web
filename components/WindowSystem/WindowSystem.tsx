@@ -1,7 +1,13 @@
 import { FC, useEffect, useRef, useCallback } from "react";
 
 import { KeyBindingManager } from "../../commands";
-import { Entity, LogMessage, Position, ContextMenuData } from "../../types";
+import {
+  Entity,
+  LogMessage,
+  Position,
+  ContextMenuData,
+  Item,
+} from "../../types";
 
 import { getStoredWindowState } from "./utils";
 import Window from "./Window";
@@ -19,6 +25,8 @@ import {
   createCasinoWindowConfig,
   GAME_LOG_WINDOW_ID,
   createGameLogWindowConfig,
+  INVENTORY_WINDOW_ID,
+  createInventoryWindowConfig,
 } from "./windows";
 
 interface WindowSystemProps {
@@ -34,6 +42,9 @@ interface WindowSystemProps {
   onContextMenu?: (data: ContextMenuData) => void;
   splashNotificationsEnabled: boolean;
   onToggleSplashNotifications: (enabled: boolean) => void;
+  playerInventory?: Item[];
+  onUseItem?: (item: Item, targetEntityId?: string) => void;
+  onDropItem?: (item: Item) => void;
 }
 
 const WindowSystem: FC<WindowSystemProps> = ({
@@ -49,6 +60,9 @@ const WindowSystem: FC<WindowSystemProps> = ({
   onContextMenu,
   splashNotificationsEnabled,
   onToggleSplashNotifications,
+  playerInventory = [],
+  onUseItem,
+  onDropItem,
 }) => {
   const {
     windows,
@@ -107,6 +121,17 @@ const WindowSystem: FC<WindowSystemProps> = ({
       );
     }
 
+    const inventoryExists = windows.some((w) => w.id === INVENTORY_WINDOW_ID);
+    if (!inventoryExists) {
+      openWindow(
+        createInventoryWindowConfig({
+          items: playerInventory,
+          onUseItem,
+          onDropItem,
+        }),
+      );
+    }
+
     const turnOrderBarExists = windows.some(
       (w) => w.id === TURN_ORDER_BAR_WINDOW_ID,
     );
@@ -143,6 +168,11 @@ const WindowSystem: FC<WindowSystemProps> = ({
     onGoToEntity,
     onSendCommand,
     onContextMenu,
+    playerInventory,
+    onUseItem,
+    onDropItem,
+    splashNotificationsEnabled,
+    onToggleSplashNotifications,
   ]);
 
   // Update TurnOrderBar content when entities or turn data changes
@@ -207,6 +237,16 @@ const WindowSystem: FC<WindowSystemProps> = ({
     });
     updateWindowContent(GAME_LOG_WINDOW_ID, logConfig.content);
   }, [logs, onGoToPosition, onGoToEntity, onSendCommand, updateWindowContent]);
+
+  // Update InventoryWindow content when player inventory changes
+  useEffect(() => {
+    const inventoryConfig = createInventoryWindowConfig({
+      items: playerInventory,
+      onUseItem,
+      onDropItem,
+    });
+    updateWindowContent(INVENTORY_WINDOW_ID, inventoryConfig.content);
+  }, [playerInventory, onUseItem, onDropItem, updateWindowContent]);
 
   return (
     <>

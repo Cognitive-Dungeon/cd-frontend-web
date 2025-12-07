@@ -12,6 +12,8 @@ import {
   CommandTrade,
   CommandWhisper,
   CommandYell,
+  CommandDrop,
+  CommandUse,
   GameCommand,
   KeyBindingManager,
   DEFAULT_KEY_BINDINGS,
@@ -33,6 +35,7 @@ import {
   Position,
   ContextMenuData,
   SpeechBubble,
+  Item,
 } from "./types";
 import { findPath } from "./utils/pathfinding";
 
@@ -230,6 +233,67 @@ const App: React.FC = () => {
               };
             }
 
+            // Add test items to inventory if empty
+            if (normalizedPlayer.inventory.length === 0) {
+              normalizedPlayer.inventory = [
+                {
+                  id: "test-potion-1",
+                  name: "Зелье Лечения",
+                  type: "POTION",
+                  value: 50,
+                  description: "Восстанавливает 50 HP",
+                  action: {
+                    type: "HEAL",
+                    requiresTarget: false,
+                    value: 50,
+                  },
+                },
+                {
+                  id: "test-sword-1",
+                  name: "Магический Меч",
+                  type: "WEAPON",
+                  value: 25,
+                  description: "Мощное оружие",
+                  action: {
+                    type: "DAMAGE",
+                    requiresTarget: true,
+                    value: 25,
+                  },
+                },
+                {
+                  id: "test-gold-1",
+                  name: "Золотые Монеты",
+                  type: "GOLD",
+                  value: 100,
+                  description: "100 золотых монет",
+                },
+                {
+                  id: "test-potion-2",
+                  name: "Зелье Маны",
+                  type: "POTION",
+                  value: 30,
+                  description: "Восстанавливает 30 маны",
+                  action: {
+                    type: "BUFF",
+                    requiresTarget: false,
+                    value: 30,
+                  },
+                },
+                {
+                  id: "test-weapon-2",
+                  name: "Огненный Посох",
+                  type: "WEAPON",
+                  value: 40,
+                  description: "Наносит огненный урон",
+                  action: {
+                    type: "DAMAGE",
+                    requiresTarget: true,
+                    value: 40,
+                  },
+                },
+              ];
+            }
+
             setPlayer(normalizedPlayer);
             // Инициализируем следование за игроком только один раз при первой загрузке
             if (!followInitializedRef.current && normalizedPlayer.id) {
@@ -353,6 +417,8 @@ const App: React.FC = () => {
           SAY: CommandSay,
           WHISPER: CommandWhisper,
           YELL: CommandYell,
+          USE: CommandUse,
+          DROP: CommandDrop,
         };
         const foundCommand = commandMap[action];
         if (foundCommand) {
@@ -396,6 +462,11 @@ const App: React.FC = () => {
         // Замена {text} для речевых команд
         if (payload?.text !== undefined) {
           logMessage = logMessage.replace(/\{text\}/g, String(payload.text));
+        }
+
+        // Замена {name} для предметов (inventory)
+        if (payload?.name !== undefined) {
+          logMessage = logMessage.replace(/\{name\}/g, String(payload.name));
         }
       } else if (payload?.targetId) {
         // Fallback если нет описания
@@ -450,6 +521,54 @@ const App: React.FC = () => {
       sendCommand(type, { text: trimmed });
     },
     [sendCommand],
+  );
+
+  // TODO: Implement server synchronization for inventory actions
+  const handleUseItem = useCallback(
+    (item: Item, targetEntityId?: string) => {
+      if (!player) {
+        return;
+      }
+
+      // Check if it's player's turn
+      if (activeEntityId && activeEntityId !== player.id) {
+        addLog("Не ваш ход!", LogType.ERROR);
+        return;
+      }
+
+      // Build payload
+      const payload: any = { name: item.name };
+      if (targetEntityId) {
+        payload.targetId = targetEntityId;
+      }
+
+      // Send USE command to server
+      sendCommand(
+        "USE",
+        payload,
+        `использовали ${item.name}${targetEntityId ? ` на {targetName}` : ""}`,
+      );
+    },
+    [player, activeEntityId, sendCommand, addLog],
+  );
+
+  // TODO: Implement server synchronization for inventory actions
+  const handleDropItem = useCallback(
+    (item: Item) => {
+      if (!player) {
+        return;
+      }
+
+      // Check if it's player's turn
+      if (activeEntityId && activeEntityId !== player.id) {
+        addLog("Не ваш ход!", LogType.ERROR);
+        return;
+      }
+
+      // Send DROP command to server
+      sendCommand("DROP", { name: item.name }, `бросили ${item.name}`);
+    },
+    [player, activeEntityId, sendCommand, addLog],
   );
 
   const handleMovePlayer = useCallback(
@@ -1186,6 +1305,9 @@ const App: React.FC = () => {
           onContextMenu={handleContextMenu}
           splashNotificationsEnabled={splashNotificationsEnabled}
           onToggleSplashNotifications={handleToggleSplashNotifications}
+          playerInventory={player.inventory}
+          onUseItem={handleUseItem}
+          onDropItem={handleDropItem}
         />
       </WindowManagerProvider>
 

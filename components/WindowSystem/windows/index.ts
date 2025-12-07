@@ -19,3 +19,7 @@ export {
   GAME_LOG_WINDOW_ID,
   createGameLogWindowConfig,
 } from "./GameLogWindowConfig";
+export {
+  INVENTORY_WINDOW_ID,
+  createInventoryWindowConfig,
+} from "./InventoryWindowConfig";

@@ -54,12 +54,27 @@ export enum ItemType {
   GOLD = "GOLD",
 }
 
+export enum ItemActionType {
+  HEAL = "HEAL",
+  DAMAGE = "DAMAGE",
+  BUFF = "BUFF",
+  INSTANT = "INSTANT",
+}
+
+export interface ItemAction {
+  type: ItemActionType;
+  requiresTarget: boolean;
+  value?: number;
+  description?: string;
+}
+
 export interface Item {
   id: string;
   name: string;
   type: ItemType;
   value: number; // Heal amount or damage or gold amount
   description?: string;
+  action?: ItemAction; // Action when item is used
 }
 
 export interface Entity {

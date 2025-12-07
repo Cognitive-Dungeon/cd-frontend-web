@@ -73,6 +73,7 @@ export interface WindowConfig {
   icon?: React.ReactNode;
   defaultPosition?: WindowPosition;
   defaultSize?: WindowSize;
+  minSize?: WindowSize;
   content: React.ReactNode;
 }
 
