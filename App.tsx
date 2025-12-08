@@ -68,6 +68,7 @@ const App: React.FC = () => {
   const [selectedTargetPosition, setSelectedTargetPosition] =
     useState<Position | null>(null);
   const [zoom, setZoom] = useState(1);
+  const [isZooming, setIsZooming] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
@@ -77,6 +78,7 @@ const App: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const followInitializedRef = useRef(false);
+  const zoomTimeoutRef = useRef<number | null>(null);
 
   // UI Settings
   const [splashNotificationsEnabled, setSplashNotificationsEnabled] = useState(
@@ -104,10 +106,19 @@ const App: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (zoomTimeoutRef.current) {
+      window.clearTimeout(zoomTimeoutRef.current);
+    }
+    setIsZooming(true);
+
     setZoom((prevZoom) => {
       const delta = e.ctrlKey ? -e.deltaY / 100 : e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
       return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, prevZoom + delta));
     });
+
+    zoomTimeoutRef.current = window.setTimeout(() => {
+      setIsZooming(false);
+    }, 150);
   }, []);
 
   useEffect(() => {
@@ -130,6 +141,14 @@ const App: React.FC = () => {
 
     window.addEventListener("wheel", preventPageZoom, { passive: false, capture: true });
     return () => window.removeEventListener("wheel", preventPageZoom, { capture: true });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (zoomTimeoutRef.current) {
+        window.clearTimeout(zoomTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Pathfinding state
@@ -1291,6 +1310,7 @@ const App: React.FC = () => {
                 playerPos={player.pos}
                 fovRadius={8}
                 zoom={zoom}
+                disableAnimations={isZooming}
                 followedEntityId={followedEntityId}
                 speechBubbles={speechBubbles}
                 onMovePlayer={handleMovePlayer}

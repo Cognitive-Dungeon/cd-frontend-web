@@ -20,6 +20,7 @@ interface GameGridProps {
   playerPos: Position;
   fovRadius: number;
   zoom: number;
+  disableAnimations?: boolean;
   followedEntityId?: string | null;
   speechBubbles?: SpeechBubble[];
   onMovePlayer?: (x: number, y: number) => void;
@@ -39,6 +40,7 @@ const GameGrid: FC<GameGridProps> = ({
   world,
   entities,
   zoom,
+  disableAnimations = false,
   followedEntityId = null,
   speechBubbles = [],
   onMovePlayer,
@@ -497,7 +499,8 @@ const GameGrid: FC<GameGridProps> = ({
 
             // Отключаем анимацию для отслеживаемой сущности
             const isFollowedEntity = entity.id === followedEntityId;
-            const shouldAnimate = !isFollowedEntity || !followedEntityId;
+            const shouldAnimate =
+              !disableAnimations && (!isFollowedEntity || !followedEntityId);
 
             // Find speech bubble for this entity
             const bubble = speechBubbles.find((b) => b.entityId === entity.id);
