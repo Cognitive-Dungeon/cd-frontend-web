@@ -1228,7 +1228,6 @@ const App: React.FC = () => {
             ref={containerRef}
             className={`absolute inset-0 overflow-hidden ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
             onWheel={handleWheel}
-            onWheelCapture={handleWheel}
           >
             {/* Индикатор зума и переключатель следования */}
             <div className="absolute top-2 right-2 flex flex-col gap-2 z-50">
