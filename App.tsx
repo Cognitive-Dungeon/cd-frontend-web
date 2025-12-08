@@ -99,6 +99,39 @@ const App: React.FC = () => {
     localStorage.setItem("splashNotificationsEnabled", JSON.stringify(enabled));
   }, []);
 
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    // Блокируем зум страницы, оставляя только зум игрового поля
+    e.preventDefault();
+    e.stopPropagation();
+
+    setZoom((prevZoom) => {
+      const delta = e.ctrlKey ? -e.deltaY / 100 : e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+      return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, prevZoom + delta));
+    });
+  }, []);
+
+  useEffect(() => {
+    const preventPageZoom = (e: WheelEvent) => {
+      if (!containerRef.current || !e.ctrlKey) {
+        return;
+      }
+
+      const rect = containerRef.current.getBoundingClientRect();
+      const isInside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+
+      if (isInside) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("wheel", preventPageZoom, { passive: false, capture: true });
+    return () => window.removeEventListener("wheel", preventPageZoom, { capture: true });
+  }, []);
+
   // Pathfinding state
   const [pathfindingTarget, setPathfindingTarget] = useState<Position | null>(
     null,
@@ -934,55 +967,6 @@ const App: React.FC = () => {
     selectedTargetPosition,
   ]);
 
-  // Обработка зума колесиком мыши
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (!containerRef.current) {
-        return;
-      }
-
-      const rect = containerRef.current.getBoundingClientRect();
-      if (
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom
-      ) {
-        e.preventDefault();
-
-        setZoom((prevZoom) => {
-          // Поддержка pinch-to-zoom на тачпадах (ctrlKey + wheel)
-          // На Mac trackpad pinch gesture генерирует wheel event с ctrlKey
-          let delta: number;
-          if (e.ctrlKey) {
-            // Для pinch gesture используем более точное значение deltaY
-            // Обычно deltaY при pinch меньше, поэтому делим на 100
-            delta = -e.deltaY / 100;
-          } else {
-            // Обычное колесико мыши
-            delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
-            // Keep console.log to prevent optimization issues
-            // eslint-disable-next-line no-console
-            console.log("zoom");
-          }
-          const newZoom = Math.min(
-            MAX_ZOOM,
-            Math.max(MIN_ZOOM, prevZoom + delta),
-          );
-          return newZoom;
-        });
-      }
-    };
-
-    const containerElement = containerRef.current;
-    if (containerElement) {
-      containerElement.addEventListener("wheel", handleWheel, {
-        passive: false,
-      });
-      return () => containerElement.removeEventListener("wheel", handleWheel);
-    }
-  }, []);
-
   // Обработка панорамирования (drag to pan)
   useEffect(() => {
     let hasMoved = false;
@@ -1224,6 +1208,8 @@ const App: React.FC = () => {
           <div
             ref={containerRef}
             className={`absolute inset-0 overflow-hidden ${isPanning ? "cursor-grabbing" : "cursor-grab"}`}
+            onWheel={handleWheel}
+            onWheelCapture={handleWheel}
           >
             {/* Индикатор зума и переключатель следования */}
             <div className="absolute top-2 right-2 flex flex-col gap-2 z-50">
