@@ -56,7 +56,18 @@ const App: React.FC = () => {
   const [world, setWorld] = useState<GameWorld | null>(null);
   const [player, setPlayer] = useState<Entity | null>(null);
   const [entities, setEntities] = useState<Entity[]>([]);
-  const [logs, setLogs] = useState<LogMessage[]>([]);
+  const [logs, setLogs] = useState<LogMessage[]>(() => {
+    // Начальное сообщение с информацией о билде
+    const buildDate = new Date(__BUILD_TIME__).toLocaleString("ru-RU");
+    return [
+      {
+        id: "build-info",
+        text: `Build: ${__GIT_COMMIT__} (${__GIT_BRANCH__}) от ${buildDate}`,
+        type: LogType.INFO,
+        timestamp: Date.now(),
+      },
+    ];
+  });
   const [gameState, setGameState] = useState<GameState>(GameState.EXPLORATION);
   const [activeEntityId, setActiveEntityId] = useState<string | null>(null);
   const prevActiveEntityIdRef = useRef<string | null>(null);

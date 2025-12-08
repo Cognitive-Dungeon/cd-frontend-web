@@ -673,6 +673,21 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                 </label>
               </div>
             </div>
+
+            {/* Информация о билде */}
+            <div className="mt-auto pt-6 border-t border-neutral-700">
+              <div className="text-xs text-gray-500 space-y-1">
+                <p>
+                  <span className="text-gray-400">Коммит:</span>{" "}
+                  <span className="font-mono">{__GIT_COMMIT__}</span>
+                  <span className="text-gray-600"> ({__GIT_BRANCH__})</span>
+                </p>
+                <p>
+                  <span className="text-gray-400">Сборка:</span>{" "}
+                  {new Date(__BUILD_TIME__).toLocaleString("ru-RU")}
+                </p>
+              </div>
+            </div>
           </>
         )}
       </div>
