@@ -1,3 +1,4 @@
+import { Sword, MessageCircle, Hand, Search } from "lucide-react";
 import { FC, useCallback, useState, useRef, useEffect } from "react";
 
 import { COLORS, SYMBOLS } from "../constants";
@@ -11,6 +12,7 @@ import {
 } from "../types";
 
 import { ContextMenu } from "./ContextMenu";
+import { RadialMenu } from "./RadialMenu";
 
 const BASE_CELL_SIZE = 50; // Базовый размер клетки в пикселях
 
@@ -66,10 +68,16 @@ const GameGrid: FC<GameGridProps> = ({
     maxY: number;
   }>({ minX: 0, maxX: world.width, minY: 0, maxY: world.height });
 
+  // Radial menu state
+  const [radialMenu, setRadialMenu] = useState<{
+    entity: Entity;
+    x: number;
+    y: number;
+  } | null>(null);
+
   const gridRef = useRef<HTMLDivElement>(null);
 
   const CELL_SIZE = BASE_CELL_SIZE * zoom;
-
 
   // Calculate visible cells based on viewport
   useEffect(() => {
@@ -147,6 +155,31 @@ const GameGrid: FC<GameGridProps> = ({
       e.stopPropagation();
       const cellEntities = getEntitiesAt(x, y);
 
+      // Check if clicking on already selected position with entities
+      const isAlreadySelected =
+        selectedTargetPosition?.x === x && selectedTargetPosition?.y === y;
+
+      if (isAlreadySelected && cellEntities.length > 0) {
+        // Open radial menu for the top entity
+        const topEntity = cellEntities[cellEntities.length - 1];
+
+        // Get cell position accounting for all transforms (camera offset, etc)
+        const target = e.currentTarget as HTMLElement;
+        const rect = target.getBoundingClientRect();
+
+        setRadialMenu({
+          entity: topEntity,
+          x: rect.left,
+          y: rect.top,
+        });
+        return;
+      }
+
+      // Close radial menu if clicking elsewhere
+      if (radialMenu) {
+        setRadialMenu(null);
+      }
+
       // Выбор позиции
       if (onSelectPosition) {
         onSelectPosition(x, y);
@@ -161,7 +194,13 @@ const GameGrid: FC<GameGridProps> = ({
         onSelectEntity(null);
       }
     },
-    [onSelectEntity, onSelectPosition, getEntitiesAt],
+    [
+      onSelectEntity,
+      onSelectPosition,
+      getEntitiesAt,
+      selectedTargetPosition,
+      radialMenu,
+    ],
   );
 
   const handleContextMenu = useCallback(
@@ -227,6 +266,84 @@ const GameGrid: FC<GameGridProps> = ({
     },
     [draggedEntity, world, onMovePlayer],
   );
+
+  // Radial menu handlers
+  const handleRadialAction = useCallback(
+    (actionId: string, entity: Entity) => {
+      if (!onSendCommand) {
+        return;
+      }
+
+      switch (actionId) {
+        case "attack":
+          onSendCommand("ATTACK", { targetId: entity.id });
+          break;
+        case "talk":
+          onSendCommand("TALK", { targetId: entity.id });
+          break;
+        case "interact":
+          onSendCommand("INTERACT", { targetId: entity.id });
+          break;
+        case "inspect":
+          // For inspection, we can select the entity
+          if (onSelectEntity) {
+            onSelectEntity(entity.id);
+          }
+          break;
+      }
+    },
+    [onSendCommand, onSelectEntity],
+  );
+
+  const getRadialMenuActions = useCallback((entity: Entity) => {
+    const actions = [];
+
+    // Attack action for hostile entities
+    if (entity.isHostile) {
+      actions.push({
+        id: "attack",
+        icon: Sword,
+        label: "Атаковать",
+        color: "#dc2626",
+      });
+    }
+
+    // Talk action for NPCs
+    if (entity.type === EntityType.NPC) {
+      actions.push({
+        id: "talk",
+        icon: MessageCircle,
+        label: "Поговорить",
+        color: "#3b82f6",
+      });
+    }
+
+    // Interact action for chests and items
+    if (
+      entity.type === EntityType.CHEST ||
+      entity.type === EntityType.ITEM ||
+      entity.type === EntityType.EXIT
+    ) {
+      actions.push({
+        id: "interact",
+        icon: Hand,
+        label: "Взаимодействовать",
+        color: "#10b981",
+      });
+    }
+
+    // Inspect action for all entities (except player)
+    if (entity.type !== EntityType.PLAYER) {
+      actions.push({
+        id: "inspect",
+        icon: Search,
+        label: "Осмотреть",
+        color: "#8b5cf6",
+      });
+    }
+
+    return actions;
+  }, []);
 
   const renderEntity = (entity: Entity, index: number, total: number) => {
     const isPlayer = entity.type === EntityType.PLAYER;
@@ -589,6 +706,20 @@ const GameGrid: FC<GameGridProps> = ({
           onSendCommand={onSendCommand}
           onSelectPosition={onSelectPosition}
           onGoToPathfinding={onGoToPathfinding}
+        />
+      )}
+
+      {/* Радиальное меню быстрых действий */}
+      {radialMenu && (
+        <RadialMenu
+          x={radialMenu.x}
+          y={radialMenu.y}
+          entity={radialMenu.entity}
+          actions={getRadialMenuActions(radialMenu.entity)}
+          onAction={handleRadialAction}
+          onClose={() => setRadialMenu(null)}
+          cellSize={CELL_SIZE}
+          zoom={zoom}
         />
       )}
 
