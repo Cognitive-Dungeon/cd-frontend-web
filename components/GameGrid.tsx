@@ -79,9 +79,68 @@ const GameGrid: FC<GameGridProps> = ({
     y: number;
   } | null>(null);
 
+  // Damage tracking
+  const [damageAnimations, setDamageAnimations] = useState<
+    Map<string, { damage: number; timestamp: number }>
+  >(new Map());
+  const previousHpRef = useRef<Map<string, number>>(new Map());
+  const damageTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
   const gridRef = useRef<HTMLDivElement>(null);
 
   const CELL_SIZE = BASE_CELL_SIZE * zoom;
+
+  // Track HP changes and trigger damage animations
+  useEffect(() => {
+    entities.forEach((entity) => {
+      if (entity.stats?.hp !== undefined) {
+        const previousHp = previousHpRef.current.get(entity.id);
+        const currentHp = entity.stats.hp;
+
+        if (previousHp !== undefined && currentHp < previousHp) {
+          // HP decreased - show damage animation
+          const newDamage = previousHp - currentHp;
+
+          setDamageAnimations((prev) => {
+            const newMap = new Map(prev);
+            const existing = newMap.get(entity.id);
+
+            // If there's already an animation, accumulate the damage
+            const totalDamage = existing
+              ? existing.damage + newDamage
+              : newDamage;
+
+            // Update with accumulated damage and new timestamp to restart animation
+            newMap.set(entity.id, {
+              damage: totalDamage,
+              timestamp: Date.now(),
+            });
+            return newMap;
+          });
+
+          // Clear existing timeout if any
+          const existingTimeout = damageTimeoutsRef.current.get(entity.id);
+          if (existingTimeout) {
+            clearTimeout(existingTimeout);
+          }
+
+          // Set new timeout to remove animation after 1 second
+          const timeout = setTimeout(() => {
+            setDamageAnimations((prev) => {
+              const newMap = new Map(prev);
+              newMap.delete(entity.id);
+              return newMap;
+            });
+            damageTimeoutsRef.current.delete(entity.id);
+          }, 1000);
+
+          damageTimeoutsRef.current.set(entity.id, timeout);
+        }
+
+        previousHpRef.current.set(entity.id, currentHp);
+      }
+    });
+  }, [entities]);
 
   // Calculate visible cells based on viewport
   useEffect(() => {
@@ -681,6 +740,10 @@ const GameGrid: FC<GameGridProps> = ({
             // Find speech bubble for this entity
             const bubble = speechBubbles.find((b) => b.entityId === entity.id);
 
+            // Check if entity has damage animation
+            const damageAnim = damageAnimations.get(entity.id);
+            const hasDamageAnim = damageAnim !== undefined;
+
             return (
               <div
                 key={entity.id}
@@ -695,7 +758,49 @@ const GameGrid: FC<GameGridProps> = ({
                     : "none",
                 }}
               >
-                {renderEntity(entity, entityIndex, totalInCell)}
+                {/* Damage flash overlay - key forces restart */}
+                {hasDamageAnim && (
+                  <div
+                    key={`flash-${entity.id}-${damageAnim.timestamp}`}
+                    className="absolute inset-0 bg-red-500 rounded animate-pulse pointer-events-none z-40"
+                    style={{
+                      animation: "damageFlash 0.3s ease-out",
+                      opacity: 0,
+                    }}
+                  />
+                )}
+
+                {/* Floating damage number - key forces restart */}
+                {hasDamageAnim && (
+                  <div
+                    key={`damage-${entity.id}-${damageAnim.timestamp}`}
+                    className="absolute left-1/2 pointer-events-none z-50"
+                    style={{
+                      animation: "floatUp 1s ease-out forwards",
+                      bottom: `${CELL_SIZE / 2}px`,
+                      transform: "translateX(-50%)",
+                    }}
+                  >
+                    <div
+                      className="text-red-500 font-bold drop-shadow-lg"
+                      style={{
+                        fontSize: `${zoom * 20}px`,
+                        textShadow:
+                          "0 0 4px black, 0 0 8px black, 1px 1px 2px black",
+                      }}
+                    >
+                      -{damageAnim.damage}
+                    </div>
+                  </div>
+                )}
+
+                {/* Shake wrapper - key forces restart */}
+                <div
+                  key={`shake-${entity.id}-${hasDamageAnim ? damageAnim.timestamp : 0}`}
+                  className={hasDamageAnim ? "damage-shake" : ""}
+                >
+                  {renderEntity(entity, entityIndex, totalInCell)}
+                </div>
                 {bubble && (
                   <div
                     className="absolute left-1/2 -translate-x-1/2 pointer-events-none speech-bubble z-50"
@@ -793,6 +898,45 @@ const GameGrid: FC<GameGridProps> = ({
           Перетащите игрока в новую клетку
         </div>
       )}
+
+      {/* Damage animation styles */}
+      <style>{`
+        @keyframes damageFlash {
+          0% {
+            opacity: 0.6;
+          }
+          100% {
+            opacity: 0;
+          }
+        }
+
+        @keyframes floatUp {
+          0% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-40px);
+          }
+        }
+
+        @keyframes shake {
+          0%, 100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-2px);
+          }
+          75% {
+            transform: translateX(2px);
+          }
+        }
+
+        .damage-shake {
+          animation: shake 0.3s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 };
