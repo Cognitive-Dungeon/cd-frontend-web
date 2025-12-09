@@ -1265,6 +1265,8 @@ const App: React.FC = () => {
     let hasMoved = false;
     let animationFrameId: number | null = null;
     let pendingPanOffset: { x: number; y: number } | null = null;
+    let totalMovement = 0;
+    const MOVEMENT_THRESHOLD = 400; // pixels - threshold before disabling follow mode
 
     const handleMouseDown = (e: MouseEvent) => {
       if (e.button === 0 && containerRef.current) {
@@ -1324,17 +1326,27 @@ const App: React.FC = () => {
 
     const handleMouseMove = (e: MouseEvent) => {
       if (isPanning) {
+        const deltaX = e.clientX - panStart.x;
+        const deltaY = e.clientY - panStart.y;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        // Track total movement distance
+        if (!hasMoved && distance > 0) {
+          totalMovement = distance;
+        }
+
         hasMoved = true;
-        // Отключаем следование только при реальном перемещении
-        if (followedEntityId && hasMoved) {
+
+        // Отключаем следование только при превышении порога движения
+        if (followedEntityId && totalMovement > MOVEMENT_THRESHOLD) {
           setFollowedEntityId(null);
         }
         e.preventDefault();
 
         // Store pending offset instead of updating immediately
         pendingPanOffset = {
-          x: e.clientX - panStart.x,
-          y: e.clientY - panStart.y,
+          x: deltaX,
+          y: deltaY,
         };
 
         // Use requestAnimationFrame for smooth updates
@@ -1353,6 +1365,7 @@ const App: React.FC = () => {
     const handleMouseUp = () => {
       setIsPanning(false);
       hasMoved = false;
+      totalMovement = 0;
 
       // Cancel any pending animation frame
       if (animationFrameId) {
