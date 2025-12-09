@@ -464,13 +464,24 @@ const GameGrid: FC<GameGridProps> = ({
     }
 
     const cellEntities = getEntitiesAt(x, y);
-    const isVisible = true; // Всегда видимо - туман войны отключен
+    const isVisible = tile.isVisible;
+    const isExplored = tile.isExplored;
 
     const isSelectedPosition =
       selectedTargetPosition?.x === x && selectedTargetPosition?.y === y;
     const isPathfindingTarget =
       pathfindingTarget?.x === x && pathfindingTarget?.y === y;
     const isOnPath = currentPath.some((pos) => pos.x === x && pos.y === y);
+
+    // Determine visibility classes
+    let visibilityClass = "";
+    if (!isVisible && !isExplored) {
+      // Unexplored - completely dark
+      visibilityClass = "bg-black";
+    } else if (!isVisible && isExplored) {
+      // Explored but not visible - dimmed
+      visibilityClass = "opacity-40 grayscale";
+    }
 
     let bgClass = "bg-neutral-900";
     let floorSymbol = SYMBOLS.FLOOR;
@@ -498,7 +509,7 @@ const GameGrid: FC<GameGridProps> = ({
     return (
       <div
         key={`${x}-${y}`}
-        className={`relative border-neutral-700 ${bgClass} flex items-center justify-center cursor-pointer hover:bg-neutral-700/50 transition-colors group`}
+        className={`relative border-neutral-700 ${bgClass} ${visibilityClass} flex items-center justify-center cursor-pointer hover:bg-neutral-700/50 transition-colors group`}
         style={{
           width: CELL_SIZE,
           height: CELL_SIZE,
@@ -509,20 +520,27 @@ const GameGrid: FC<GameGridProps> = ({
         onDragOver={handleDragOver}
         onDrop={(e) => handleDrop(x, y, e)}
       >
+        {/* Unexplored overlay - completely black */}
+        {!isVisible && !isExplored && (
+          <div className="absolute inset-0 bg-black pointer-events-none z-30" />
+        )}
+
         {/* Координаты клетки */}
-        <div
-          className="absolute text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{
-            top: `${zoom * 2}px`,
-            left: `${zoom * 2}px`,
-            fontSize: `${zoom * 8}px`,
-          }}
-        >
-          {x},{y}
-        </div>
+        {isVisible && (
+          <div
+            className="absolute text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{
+              top: `${zoom * 2}px`,
+              left: `${zoom * 2}px`,
+              fontSize: `${zoom * 8}px`,
+            }}
+          >
+            {x},{y}
+          </div>
+        )}
 
         {/* Выделение выбранной позиции */}
-        {isSelectedPosition && (
+        {isSelectedPosition && isVisible && (
           <div
             className={`absolute rounded-lg pointer-events-none z-20 ${
               cellEntities.some((e) => e.id === selectedTargetEntityId)
@@ -537,7 +555,7 @@ const GameGrid: FC<GameGridProps> = ({
         )}
 
         {/* Выделение цели pathfinding */}
-        {isPathfindingTarget && (
+        {isPathfindingTarget && isVisible && (
           <div
             className="absolute rounded-lg pointer-events-none z-20 border-green-500 animate-pulse"
             style={{
@@ -548,17 +566,22 @@ const GameGrid: FC<GameGridProps> = ({
         )}
 
         {/* Подсветка пути */}
-        {isOnPath && !isPathfindingTarget && (
+        {isOnPath && !isPathfindingTarget && isVisible && (
           <div className="absolute inset-0 bg-green-400/20 pointer-events-none z-10" />
         )}
 
         {/* Фон/пол клетки */}
-        <div
-          className={`absolute inset-0 flex items-center justify-center ${floorColor} opacity-20`}
-          style={{ fontSize: `${zoom * 32}px` }}
-        >
-          {floorSymbol}
-        </div>
+        {(isVisible || isExplored) && (
+          <div
+            className={`absolute inset-0 flex items-center justify-center ${floorColor}`}
+            style={{
+              fontSize: `${zoom * 32}px`,
+              opacity: isVisible ? 0.2 : 0.1,
+            }}
+          >
+            {floorSymbol}
+          </div>
+        )}
 
         {/* Индикатор если больше 2 сущностей */}
         {isVisible && cellEntities.length > 2 && (
@@ -621,6 +644,12 @@ const GameGrid: FC<GameGridProps> = ({
               (e) => e.id === entity.id,
             );
             const totalInCell = cellEntities.length;
+
+            // Only render entities on visible tiles
+            const tile = world.map[entity.pos.y]?.[entity.pos.x];
+            if (!tile || !tile.isVisible) {
+              return null;
+            }
 
             // Отключаем анимацию для отслеживаемой сущности
             const isFollowedEntity = entity.id === followedEntityId;
