@@ -490,14 +490,17 @@ const GameGrid: FC<GameGridProps> = ({
       pathfindingTarget?.x === x && pathfindingTarget?.y === y;
     const isOnPath = currentPath.some((pos) => pos.x === x && pos.y === y);
 
-    // Determine visibility classes
+    // Determine visibility classes and border color
     let visibilityClass = "";
+    let borderColor = "rgb(64, 64, 64)"; // neutral-700 default
     if (!isVisible && !isExplored) {
       // Unexplored - completely dark
       visibilityClass = "bg-black";
+      borderColor = "rgb(10, 10, 10)"; // Very dark border
     } else if (!isVisible && isExplored) {
       // Explored but not visible - dimmed
       visibilityClass = "opacity-40 grayscale";
+      borderColor = "rgb(38, 38, 38)"; // Darker border (neutral-800)
     }
 
     let bgClass = "bg-neutral-900";
@@ -526,11 +529,13 @@ const GameGrid: FC<GameGridProps> = ({
     return (
       <div
         key={`${x}-${y}`}
-        className={`relative border-neutral-700 ${bgClass} ${visibilityClass} flex items-center justify-center cursor-pointer hover:bg-neutral-700/50 transition-colors group`}
+        className={`relative ${bgClass} ${visibilityClass} flex items-center justify-center cursor-pointer hover:bg-neutral-700/50 transition-colors group`}
         style={{
           width: CELL_SIZE,
           height: CELL_SIZE,
           borderWidth: `${Math.max(1, zoom * 1)}px`,
+          borderColor: borderColor,
+          borderStyle: "solid",
         }}
         onClick={(e) => handleCellClick(x, y, e)}
         onContextMenu={(e) => handleContextMenu(x, y, e)}
