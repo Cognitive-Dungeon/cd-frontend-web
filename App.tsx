@@ -62,7 +62,7 @@ const App: React.FC = () => {
       },
     ];
   });
-  const [gameState, setGameState] = useState<GameState>(GameState.EXPLORATION);
+  const [gameState] = useState<GameState>(GameState.EXPLORATION);
   const [activeEntityId, setActiveEntityId] = useState<string | null>(null);
   const prevActiveEntityIdRef = useRef<string | null>(null);
 
@@ -350,7 +350,6 @@ const App: React.FC = () => {
       socketRef.current = ws;
 
       ws.onopen = () => {
-        console.log("[App] WebSocket connected");
         setIsConnected(true);
         setIsReconnecting(false);
         setReconnectAttempt(0);
@@ -362,19 +361,16 @@ const App: React.FC = () => {
       ws.onmessage = (evt) => {
         try {
           // TODO: Handle structured server messages with schema (https://github.com/Cognitive-Dungeon/cd-frontend-web/issues/2)
-          console.log("[App] WS message received:", evt.data);
           const msg = JSON.parse(evt.data);
 
           // Handle error responses from server
           if (msg?.error) {
-            console.log("[App] Server error:", msg.error);
             addLog(`Server error: ${msg.error}`, LogType.ERROR);
             // If error during login (like "Entity not found"), reset authentication
             if (
               msg.error.includes("Entity not found") ||
               msg.error.includes("not found")
             ) {
-              console.log("[App] Login error - resetting authentication");
               setIsAuthenticated(false);
               isAuthenticatedRef.current = false;
               setLoginError(msg.error);
@@ -383,17 +379,8 @@ const App: React.FC = () => {
 
           // Handle INIT/UPDATE payloads from server
           if (msg?.type === "INIT" || msg?.type === "UPDATE") {
-            console.log("[App] Received UPDATE", {
-              tick: msg.tick,
-              myEntityId: msg.myEntityId,
-              activeEntityId: msg.activeEntityId,
-              gridSize: msg.grid ? `${msg.grid.w}x${msg.grid.h}` : "none",
-              mapTiles: msg.map?.length,
-              entitiesCount: msg.entities?.length,
-            });
             // Update world from grid and map
             if (msg.grid && Array.isArray(msg.map)) {
-              console.log("[App] Building world from grid and map");
               const newWorld: GameWorld = {
                 width: msg.grid.w,
                 height: msg.grid.h,
@@ -438,19 +425,10 @@ const App: React.FC = () => {
 
               setWorld(newWorld);
               worldRef.current = newWorld;
-              console.log("[App] World updated", {
-                width: newWorld.width,
-                height: newWorld.height,
-                tick: newWorld.globalTick,
-              });
             }
 
             // Handle entities
             if (Array.isArray(msg.entities)) {
-              console.log("[App] Processing entities", {
-                count: msg.entities.length,
-                myEntityId: msg.myEntityId,
-              });
               const normalizedEntities = msg.entities.map((entity: any) => {
                 const normalized: any = {
                   id: entity.id,
@@ -482,11 +460,6 @@ const App: React.FC = () => {
                   (e: any) => e.id === msg.myEntityId,
                 );
                 if (playerEntity) {
-                  console.log("[App] Player entity found", {
-                    id: playerEntity.id,
-                    name: playerEntity.name,
-                    pos: playerEntity.pos,
-                  });
                   setPlayer(playerEntity);
                   // Инициализируем следование за игроком только один раз
                   if (!followInitializedRef.current) {
@@ -553,10 +526,6 @@ const App: React.FC = () => {
 
       ws.onclose = (event) => {
         const wasAuthenticated = isAuthenticatedRef.current;
-        console.log("[App] WebSocket closed", {
-          code: event.code,
-          wasAuthenticated,
-        });
         setIsConnected(false);
         setIsAuthenticated(false);
         isAuthenticatedRef.current = false;
@@ -566,9 +535,6 @@ const App: React.FC = () => {
         // If we weren't authenticated yet, try to reconnect
         if (!wasAuthenticated && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
           reconnectAttempts++;
-          console.log(
-            `[App] Reconnecting (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`,
-          );
           setIsReconnecting(true);
           setReconnectAttempt(reconnectAttempts);
           addLog(
@@ -587,8 +553,6 @@ const App: React.FC = () => {
             `Failed to connect after ${MAX_RECONNECT_ATTEMPTS} attempts`,
             LogType.ERROR,
           );
-        } else {
-          console.log("[App] Disconnected after authentication - no reconnect");
         }
       };
     };
@@ -881,13 +845,11 @@ const App: React.FC = () => {
 
   const handleLogin = useCallback(
     (entityId: string) => {
-      console.log("[App] handleLogin called", { entityId });
       // Clear previous login error
       setLoginError(null);
       sendCommand("LOGIN", { token: entityId }, `Авторизация как ${entityId}`);
       addLog(`Отправлен запрос на авторизацию: ${entityId}`, LogType.INFO);
       // Set authenticated immediately on login send
-      console.log("[App] Setting isAuthenticated = true");
       setIsAuthenticated(true);
       isAuthenticatedRef.current = true;
     },

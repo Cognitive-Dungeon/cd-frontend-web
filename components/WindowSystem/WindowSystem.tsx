@@ -106,13 +106,6 @@ const WindowSystem: FC<WindowSystemProps> = ({
 
   // Автоматически открываем Dock и Settings при монтировании
   useEffect(() => {
-    console.log("[WindowSystem] useEffect triggered", {
-      windowsCount: windows.length,
-      hasOnLogin: !!onLogin,
-      isAuthenticated,
-      wsConnected,
-      loginError,
-    });
     const dockExists = windows.some((w) => w.id === DOCK_WINDOW_ID);
     if (!dockExists) {
       openWindow(createDockWindowConfig());
@@ -186,25 +179,8 @@ const WindowSystem: FC<WindowSystemProps> = ({
     if (onLogin && !isAuthenticated) {
       const loginExists = windows.some((w) => w.id === LOGIN_WINDOW_ID);
       const loginWindow = windows.find((w) => w.id === LOGIN_WINDOW_ID);
-      console.log("[WindowSystem] Login window check:", {
-        onLogin: !!onLogin,
-        isAuthenticated,
-        loginExists,
-        willOpen: !loginExists,
-        loginWindowState: loginWindow
-          ? {
-              id: loginWindow.id,
-              isMinimized: loginWindow.isMinimized,
-              isFocused: loginWindow.isFocused,
-              closeable: loginWindow.closeable,
-              showInDock: loginWindow.showInDock,
-              position: loginWindow.position,
-              size: loginWindow.size,
-            }
-          : "NOT FOUND",
-      });
+
       if (!loginExists) {
-        console.log("[WindowSystem] Opening login window");
         openWindow(
           createLoginWindowConfig({
             onConnect: onLogin,
@@ -214,21 +190,8 @@ const WindowSystem: FC<WindowSystemProps> = ({
           }),
         );
       } else if (loginWindow?.isMinimized) {
-        console.log(
-          "[WindowSystem] Login window exists but is minimized - restoring",
-        );
         restoreWindow(LOGIN_WINDOW_ID);
-      } else {
-        console.log("[WindowSystem] Login window already exists and visible", {
-          isMinimized: loginWindow?.isMinimized,
-          isFocused: loginWindow?.isFocused,
-        });
       }
-    } else {
-      console.log("[WindowSystem] Skipping login window:", {
-        hasOnLogin: !!onLogin,
-        isAuthenticated,
-      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -347,16 +310,10 @@ const WindowSystem: FC<WindowSystemProps> = ({
 
   // Auto-close login window after successful authentication
   useEffect(() => {
-    console.log("[WindowSystem] Auth check for auto-close:", {
-      isAuthenticated,
-      loginWindowClosedRef: loginWindowClosedRef.current,
-    });
     if (isAuthenticated && !loginWindowClosedRef.current) {
-      console.log("[WindowSystem] Scheduling login window close in 2s");
       loginWindowClosedRef.current = true;
       // Wait a bit to show the success message, then close
       setTimeout(() => {
-        console.log("[WindowSystem] Closing login window");
         closeWindow(LOGIN_WINDOW_ID);
       }, 2000);
     }

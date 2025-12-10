@@ -17,34 +17,18 @@ export const LoginWindow: FC<LoginWindowProps> = ({
 
   const handleConnect = () => {
     const trimmedId = entityId.trim();
-    console.log("[LoginWindow] handleConnect called", { entityId: trimmedId });
     if (trimmedId) {
-      console.log("[LoginWindow] Calling onConnect with entityId:", trimmedId);
       onConnect(trimmedId);
-    } else {
-      console.log("[LoginWindow] Empty entityId, skipping connect");
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      console.log("[LoginWindow] Enter key pressed", {
-        isConnected,
-        wsConnected,
-        canConnect: !isConnected && wsConnected,
-      });
       if (!isConnected && wsConnected) {
         handleConnect();
       }
     }
   };
-
-  console.log("[LoginWindow] Rendering", {
-    isConnected,
-    wsConnected,
-    hasLoginError: !!loginError,
-    entityId: entityId.length > 0 ? `${entityId.length} chars` : "empty",
-  });
 
   return (
     <div style={{ padding: "30px" }}>
