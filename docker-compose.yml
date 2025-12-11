@@ -1,0 +1,11 @@
+services:
+  frontend:
+    container_name: cd-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+    ports:
+      - "3060:80"
