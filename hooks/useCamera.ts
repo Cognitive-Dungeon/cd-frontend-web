@@ -1,10 +1,8 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 
+import { MIN_ZOOM, MAX_ZOOM, ZOOM_STEP } from "../constants";
 import { Position, Entity, GameWorld } from "../types";
-
-const MIN_ZOOM = 0.5;
-const MAX_ZOOM = 3;
-const ZOOM_STEP = 0.1;
+import { calculateCameraOffset } from "../utils/camera";
 
 interface UseCameraProps {
   world: GameWorld | null;
@@ -64,17 +62,15 @@ export const useCamera = ({
         if (followedEntityId && containerRef.current) {
           const followedEntity = entityRegistry.get(followedEntityId);
           if (followedEntity) {
-            const CELL_SIZE = 50 * zoom;
             const containerWidth = containerRef.current.clientWidth;
             const containerHeight = containerRef.current.clientHeight;
-            const entityPixelX =
-              followedEntity.pos.x * CELL_SIZE + CELL_SIZE / 2;
-            const entityPixelY =
-              followedEntity.pos.y * CELL_SIZE + CELL_SIZE / 2;
-            currentOffset = {
-              x: containerWidth / 2 - entityPixelX,
-              y: containerHeight / 2 - entityPixelY,
-            };
+            currentOffset = calculateCameraOffset(
+              followedEntity.pos.x,
+              followedEntity.pos.y,
+              containerWidth,
+              containerHeight,
+              zoom,
+            );
           }
           setFollowedEntityId(null);
         }
@@ -200,15 +196,13 @@ export const useCamera = ({
             if (followedEntity && containerRef.current) {
               const containerWidth = containerRef.current.clientWidth;
               const containerHeight = containerRef.current.clientHeight;
-              const CELL_SIZE = 50 * zoom;
-              const entityPixelX =
-                followedEntity.pos.x * CELL_SIZE + CELL_SIZE / 2;
-              const entityPixelY =
-                followedEntity.pos.y * CELL_SIZE + CELL_SIZE / 2;
-              currentOffset = {
-                x: containerWidth / 2 - entityPixelX,
-                y: containerHeight / 2 - entityPixelY,
-              };
+              currentOffset = calculateCameraOffset(
+                followedEntity.pos.x,
+                followedEntity.pos.y,
+                containerWidth,
+                containerHeight,
+                zoom,
+              );
             }
           }
 
@@ -310,17 +304,13 @@ export const useCamera = ({
       return panOffset;
     }
 
-    const CELL_SIZE = 50 * zoom;
-    const containerWidth = containerSize.width;
-    const containerHeight = containerSize.height;
-
-    const entityPixelX = followedEntity.pos.x * CELL_SIZE + CELL_SIZE / 2;
-    const entityPixelY = followedEntity.pos.y * CELL_SIZE + CELL_SIZE / 2;
-
-    const offsetX = containerWidth / 2 - entityPixelX;
-    const offsetY = containerHeight / 2 - entityPixelY;
-
-    return { x: offsetX, y: offsetY };
+    return calculateCameraOffset(
+      followedEntity.pos.x,
+      followedEntity.pos.y,
+      containerSize.width,
+      containerSize.height,
+      zoom,
+    );
   }, [
     followedEntityId,
     world,
@@ -382,12 +372,14 @@ export const useCamera = ({
       if (containerRef.current && world) {
         const containerWidth = containerRef.current.clientWidth;
         const containerHeight = containerRef.current.clientHeight;
-        const CELL_SIZE = 50 * zoom;
-        const positionPixelX = position.x * CELL_SIZE + CELL_SIZE / 2;
-        const positionPixelY = position.y * CELL_SIZE + CELL_SIZE / 2;
-        const offsetX = containerWidth / 2 - positionPixelX;
-        const offsetY = containerHeight / 2 - positionPixelY;
-        setPanOffset({ x: offsetX, y: offsetY });
+        const offset = calculateCameraOffset(
+          position.x,
+          position.y,
+          containerWidth,
+          containerHeight,
+          zoom,
+        );
+        setPanOffset(offset);
       }
     },
     [world, zoom, containerRef],
@@ -403,12 +395,14 @@ export const useCamera = ({
       setFollowedEntityId(null);
 
       if (world && containerRef.current) {
-        const CELL_SIZE = 50 * zoom;
-        const entityPixelX = entity.pos.x * CELL_SIZE + CELL_SIZE / 2;
-        const entityPixelY = entity.pos.y * CELL_SIZE + CELL_SIZE / 2;
-        const offsetX = containerRef.current.clientWidth / 2 - entityPixelX;
-        const offsetY = containerRef.current.clientHeight / 2 - entityPixelY;
-        setPanOffset({ x: offsetX, y: offsetY });
+        const offset = calculateCameraOffset(
+          entity.pos.x,
+          entity.pos.y,
+          containerRef.current.clientWidth,
+          containerRef.current.clientHeight,
+          zoom,
+        );
+        setPanOffset(offset);
       }
     },
     [entityRegistry, world, zoom, containerRef],
@@ -429,12 +423,14 @@ export const useCamera = ({
         if (followedEntity) {
           const containerWidth = containerRef.current.clientWidth;
           const containerHeight = containerRef.current.clientHeight;
-          const CELL_SIZE = 50 * zoom;
-          const entityPixelX = followedEntity.pos.x * CELL_SIZE + CELL_SIZE / 2;
-          const entityPixelY = followedEntity.pos.y * CELL_SIZE + CELL_SIZE / 2;
-          const offsetX = containerWidth / 2 - entityPixelX;
-          const offsetY = containerHeight / 2 - entityPixelY;
-          setPanOffset({ x: offsetX, y: offsetY });
+          const offset = calculateCameraOffset(
+            followedEntity.pos.x,
+            followedEntity.pos.y,
+            containerWidth,
+            containerHeight,
+            zoom,
+          );
+          setPanOffset(offset);
         }
       }
       setFollowedEntityId(null);

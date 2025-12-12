@@ -10,11 +10,10 @@ import {
   Position,
   SpeechBubble,
 } from "../types";
+import { getCellSize } from "../utils/camera";
 
 import { ContextMenu } from "./ContextMenu";
 import { RadialMenu } from "./RadialMenu";
-
-const BASE_CELL_SIZE = 50; // Базовый размер клетки в пикселях
 
 interface GameGridProps {
   world: GameWorld;
@@ -88,7 +87,7 @@ const GameGrid: FC<GameGridProps> = ({
 
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const CELL_SIZE = BASE_CELL_SIZE * zoom;
+  const CELL_SIZE = getCellSize(zoom);
 
   // Track HP changes and trigger damage animations
   useEffect(() => {

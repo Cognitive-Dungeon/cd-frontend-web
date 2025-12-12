@@ -6,6 +6,7 @@ import {
   CommandInteract,
   GameCommand,
 } from "../commands";
+import { ACTION_TYPES } from "../constants";
 import {
   ClientToServerCommand,
   LogType,
@@ -16,17 +17,6 @@ import {
   ClientToServerEntityTargetPayload,
   ClientToServerCustomPayload,
 } from "../types";
-
-// Константы для типов действий
-const ACTION_TYPES = {
-  LOGIN: "LOGIN" as const,
-  MOVE: "MOVE" as const,
-  ATTACK: "ATTACK" as const,
-  TALK: "TALK" as const,
-  INTERACT: "INTERACT" as const,
-  WAIT: "WAIT" as const,
-  CUSTOM: "CUSTOM" as const,
-};
 
 type CommandHandler<T = any> = (payload: T) => ClientToServerCommand | null;
 
