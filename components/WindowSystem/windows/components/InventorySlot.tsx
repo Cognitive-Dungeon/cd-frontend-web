@@ -8,14 +8,13 @@
  * - Drag-and-drop support (LMB)
  * - Context menu on right-click
  * - Visual states: normal, hover, dragging, drop target
- * - Item type-based coloring and icons
+ * - Server-driven item symbols and colors
  * - Tooltip with item info
  *
- * Item Icons:
- * - 🧪 POTION (green)
- * - ⚔️ WEAPON (red)
- * - 💰 GOLD (yellow)
- * - 📦 Default (gray)
+ * Item Display:
+ * - Uses `item.symbol` from server (e.g., "†", "!", "$")
+ * - Uses `item.color` from server (e.g., "#C0C0C0", "#FFD700")
+ * - Fallback: "?" symbol with gray color if not provided
  *
  * Usage:
  * ```tsx
@@ -93,30 +92,13 @@ export const InventorySlot: FC<InventorySlotProps> = ({
   };
 
   const getItemIcon = (item: Item) => {
-    // TODO: Add proper icons/images based on item type
-    switch (item.type) {
-      case "POTION":
-        return "!";
-      case "WEAPON":
-        return "/";
-      case "GOLD":
-        return "$";
-      default:
-        return "?";
-    }
+    // Use symbol from server data
+    return item.symbol || "?";
   };
 
   const getItemColor = (item: Item) => {
-    switch (item.type) {
-      case "POTION":
-        return "text-green-400";
-      case "WEAPON":
-        return "text-red-400";
-      case "GOLD":
-        return "text-yellow-400";
-      default:
-        return "text-gray-400";
-    }
+    // Use color from server data, fallback to gray
+    return item.color || "#9CA3AF";
   };
 
   return (
@@ -146,7 +128,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
     >
       {item ? (
         <>
-          <div className={`text-3xl ${getItemColor(item)}`}>
+          <div className="text-3xl" style={{ color: getItemColor(item) }}>
             {getItemIcon(item)}
           </div>
           <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-[8px] text-center px-1 py-0.5 truncate">

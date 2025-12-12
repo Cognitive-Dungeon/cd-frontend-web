@@ -84,6 +84,8 @@ export interface Item {
   defense?: number;
   weight?: number;
   isSentient?: boolean;
+  symbol?: string; // Visual symbol from server (e.g., "†", "!", "$")
+  color?: string; // Hex color from server (e.g., "#C0C0C0")
 }
 
 export interface Entity {
