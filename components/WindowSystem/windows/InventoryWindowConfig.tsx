@@ -1,6 +1,6 @@
 import { Package } from "lucide-react";
 
-import { Item } from "../../../types";
+import { Item, ServerToClientEquipmentView } from "../../../types";
 import { WindowConfig } from "../types";
 
 import { InventoryWindow } from "./components/InventoryWindow";
@@ -14,15 +14,21 @@ interface CreateInventoryWindowConfigProps {
     currentWeight?: number;
     maxWeight?: number;
   } | null;
+  equipment?: ServerToClientEquipmentView | null;
   onUseItem?: (item: Item, targetEntityId?: string) => void;
   onDropItem?: (item: Item) => void;
+  onEquipItem?: (item: Item) => void;
+  onUnequipItem?: (item: Item) => void;
 }
 
 export const createInventoryWindowConfig = ({
   items,
   inventoryData,
+  equipment,
   onUseItem,
   onDropItem,
+  onEquipItem,
+  onUnequipItem,
 }: CreateInventoryWindowConfigProps): WindowConfig => {
   const itemCount = items.length;
 
@@ -44,8 +50,11 @@ export const createInventoryWindowConfig = ({
       <InventoryWindow
         items={items}
         inventoryData={inventoryData}
+        equipment={equipment}
         onUseItem={onUseItem}
         onDropItem={onDropItem}
+        onEquipItem={onEquipItem}
+        onUnequipItem={onUnequipItem}
       />
     ),
   };

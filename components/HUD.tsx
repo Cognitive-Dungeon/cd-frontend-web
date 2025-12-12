@@ -1,7 +1,13 @@
 import type { FC } from "react";
 
 import { KeyBindingManager } from "../commands";
-import type { Entity, GameState, LogMessage, Item } from "../types";
+import type {
+  Entity,
+  GameState,
+  LogMessage,
+  Item,
+  ServerToClientEquipmentView,
+} from "../types";
 
 import StatusPanel from "./StatusPanel";
 import { WindowSystem } from "./WindowSystem";
@@ -29,8 +35,11 @@ interface HUDProps {
     currentWeight?: number;
     maxWeight?: number;
   } | null;
+  playerEquipment?: ServerToClientEquipmentView | null;
   onUseItem: (item: Item, targetEntityId?: string) => void;
   onDropItem: (item: Item) => void;
+  onEquipItem: (item: Item) => void;
+  onUnequipItem: (item: Item) => void;
   onLogin: (entityId: string) => void;
   isAuthenticated: boolean;
   wsConnected: boolean;
@@ -58,8 +67,11 @@ export const HUD: FC<HUDProps> = ({
   onToggleSplashNotifications,
   playerInventory,
   playerInventoryData,
+  playerEquipment,
   onUseItem,
   onDropItem,
+  onEquipItem,
+  onUnequipItem,
   onLogin,
   isAuthenticated,
   wsConnected,
@@ -96,8 +108,11 @@ export const HUD: FC<HUDProps> = ({
         onToggleSplashNotifications={onToggleSplashNotifications}
         playerInventory={playerInventory}
         playerInventoryData={playerInventoryData}
+        playerEquipment={playerEquipment}
         onUseItem={onUseItem}
         onDropItem={onDropItem}
+        onEquipItem={onEquipItem}
+        onUnequipItem={onUnequipItem}
         onLogin={onLogin}
         isAuthenticated={isAuthenticated}
         wsConnected={wsConnected}

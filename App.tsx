@@ -153,6 +153,8 @@ const App: React.FC = () => {
     sendTextCommand,
     handleUseItem,
     handleDropItem,
+    handleEquipItem,
+    handleUnequipItem,
     handleLogin: commandLogin,
     handleMovePlayer,
   } = useCommandSystem({
@@ -318,8 +320,11 @@ const App: React.FC = () => {
           onToggleSplashNotifications={handleToggleSplashNotifications}
           playerInventory={player?.inventory ?? []}
           playerInventoryData={player?.inventoryData}
+          playerEquipment={player?.equipment}
           onUseItem={handleUseItem}
           onDropItem={handleDropItem}
+          onEquipItem={handleEquipItem}
+          onUnequipItem={handleUnequipItem}
           onLogin={handleLogin}
           isAuthenticated={isAuthenticated}
           wsConnected={isConnected}

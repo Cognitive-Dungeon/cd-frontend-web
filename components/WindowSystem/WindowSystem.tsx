@@ -7,6 +7,7 @@ import {
   Position,
   ContextMenuData,
   Item,
+  ServerToClientEquipmentView,
 } from "../../types";
 
 import { getStoredWindowState } from "./utils";
@@ -55,8 +56,11 @@ interface WindowSystemProps {
     currentWeight?: number;
     maxWeight?: number;
   } | null;
+  playerEquipment?: ServerToClientEquipmentView | null;
   onUseItem?: (item: Item, targetEntityId?: string) => void;
   onDropItem?: (item: Item) => void;
+  onEquipItem?: (item: Item) => void;
+  onUnequipItem?: (item: Item) => void;
   onLogin?: (entityId: string) => void;
   isAuthenticated?: boolean;
   wsConnected?: boolean;
@@ -82,8 +86,11 @@ const WindowSystem: FC<WindowSystemProps> = ({
   onToggleSplashNotifications,
   playerInventory = [],
   playerInventoryData,
+  playerEquipment,
   onUseItem,
   onDropItem,
+  onEquipItem,
+  onUnequipItem,
   onLogin,
   isAuthenticated = false,
   wsConnected = false,
@@ -189,8 +196,11 @@ const WindowSystem: FC<WindowSystemProps> = ({
         createInventoryWindowConfig({
           items: playerInventory,
           inventoryData: playerInventoryData,
+          equipment: playerEquipment,
           onUseItem,
           onDropItem,
+          onEquipItem,
+          onUnequipItem,
         }),
       );
     }
@@ -331,16 +341,22 @@ const WindowSystem: FC<WindowSystemProps> = ({
     const inventoryConfig = createInventoryWindowConfig({
       items: playerInventory,
       inventoryData: playerInventoryData,
+      equipment: playerEquipment,
       onUseItem,
       onDropItem,
+      onEquipItem,
+      onUnequipItem,
     });
     updateWindowContent(INVENTORY_WINDOW_ID, inventoryConfig.content);
     updateWindowBadge(INVENTORY_WINDOW_ID, inventoryConfig.badge);
   }, [
     playerInventory,
     playerInventoryData,
+    playerEquipment,
     onUseItem,
     onDropItem,
+    onEquipItem,
+    onUnequipItem,
     updateWindowContent,
     updateWindowBadge,
   ]);

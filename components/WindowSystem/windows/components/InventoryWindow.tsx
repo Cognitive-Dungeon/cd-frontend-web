@@ -2,12 +2,12 @@
  * InventoryWindow Component
  *
  * Displays player inventory in a grid layout with drag-and-drop support
- * and context menu actions (USE, DROP).
+ * and context menu actions (USE, DROP, EQUIP).
  *
  * Features:
  * - Grid layout (4 columns)
  * - Only shows filled slots
- * - Right-click context menu for USE/DROP actions
+ * - Right-click context menu for USE/DROP/EQUIP actions
  * - Drag-and-drop visual feedback (infrastructure for future item swapping)
  * - Empty state when no items
  * - Target requirement detection
@@ -24,14 +24,15 @@
  *   items={player.inventory}
  *   onUseItem={(item, targetId) => sendCommand("USE", { name: item.name, targetId })}
  *   onDropItem={(item) => sendCommand("DROP", { name: item.name })}
+ *   onEquipItem={(item) => sendCommand("EQUIP", { itemId: item.id })}
  * />
  * ```
  */
 
-import { Package, Trash2, Sparkles } from "lucide-react";
+import { Package, Trash2, Sparkles, Shield, ShieldOff } from "lucide-react";
 import { FC, useState, useRef, useEffect } from "react";
 
-import { Item } from "../../../../types";
+import { Item, ServerToClientEquipmentView } from "../../../../types";
 
 import { InventorySlot } from "./InventorySlot";
 
@@ -39,11 +40,14 @@ interface InventoryWindowProps {
   items: Item[];
   onUseItem?: (item: Item, targetEntityId?: string) => void;
   onDropItem?: (item: Item) => void;
+  onEquipItem?: (item: Item) => void;
+  onUnequipItem?: (item: Item) => void;
   inventoryData?: {
     maxSlots?: number;
     currentWeight?: number;
     maxWeight?: number;
   } | null;
+  equipment?: ServerToClientEquipmentView | null;
 }
 
 interface ContextMenuState {
@@ -56,7 +60,10 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
   items,
   onUseItem,
   onDropItem,
+  onEquipItem,
+  onUnequipItem,
   inventoryData,
+  equipment,
 }) => {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [draggedItem, setDraggedItem] = useState<Item | null>(null);
@@ -105,6 +112,23 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
   const handleDropItem = (item: Item) => {
     setContextMenu(null);
     onDropItem?.(item);
+  };
+
+  const handleEquipItem = (item: Item) => {
+    setContextMenu(null);
+    onEquipItem?.(item);
+  };
+
+  const handleUnequipItem = (item: Item) => {
+    setContextMenu(null);
+    onUnequipItem?.(item);
+  };
+
+  const isItemEquipped = (item: Item): boolean => {
+    if (!equipment) {
+      return false;
+    }
+    return equipment.weapon?.id === item.id || equipment.armor?.id === item.id;
   };
 
   const handleDragStart = (item: Item) => {
@@ -205,6 +229,23 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
                 </span>
               )}
             </button>
+            {isItemEquipped(contextMenu.item) ? (
+              <button
+                onClick={() => handleUnequipItem(contextMenu.item)}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-yellow-400 flex items-center gap-2"
+              >
+                <ShieldOff className="w-4 h-4" />
+                <span>Unequip</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => handleEquipItem(contextMenu.item)}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-cyan-400 flex items-center gap-2"
+              >
+                <Shield className="w-4 h-4" />
+                <span>Equip</span>
+              </button>
+            )}
             <button
               onClick={() => handleDropItem(contextMenu.item)}
               className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-red-400 flex items-center gap-2"
