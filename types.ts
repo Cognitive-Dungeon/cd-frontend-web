@@ -1,6 +1,8 @@
 // TODO: Привести в порядок, учитывая диздок
 // https://github.com/Cognitive-Dungeon/cd-techdoc
 
+export * from "./types/server";
+
 export enum EntityType {
   PLAYER = "PLAYER",
   ENEMY_GOBLIN = "GOBLIN",

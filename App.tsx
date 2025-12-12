@@ -8,7 +8,11 @@ import {
   SplashNotification,
   useSplashNotifications,
 } from "./components/SplashNotification";
-import { WindowManagerProvider } from "./components/WindowSystem";
+import {
+  WindowManagerProvider,
+  useWindowManager,
+} from "./components/WindowSystem";
+import { createServerSelectionWindowConfig } from "./components/WindowSystem/windows";
 import {
   useGameState,
   useWebSocket,
@@ -17,7 +21,7 @@ import {
   useCommandSystem,
   useInputHandling,
 } from "./hooks";
-import { ContextMenuData } from "./types";
+import { ContextMenuData, ServerInfo, ServerManager, LogType } from "./types";
 
 const App: React.FC = () => {
   const keyBindingManager = useMemo(() => {
@@ -85,8 +89,16 @@ const App: React.FC = () => {
     localStorage.setItem("splashNotificationsEnabled", JSON.stringify(enabled));
   }, []);
 
-  // WebSocket hook
-  const { sendCommand: wsSendCommand, setAuthenticated } = useWebSocket({
+  // Server state
+  const [selectedServer, setSelectedServer] = useState<ServerInfo | null>(null);
+
+  // WebSocket hook (no auto-connect)
+  const {
+    sendCommand: wsSendCommand,
+    setAuthenticated,
+    connect: wsConnect,
+    isInitialized: wsInitialized,
+  } = useWebSocket({
     onMessage: handleServerMessage,
     onConnectionChange: setIsConnected,
     onAuthenticationChange: (authenticated) => {
@@ -96,7 +108,19 @@ const App: React.FC = () => {
     onReconnectChange: setIsReconnecting,
     onLoginError: setLoginError,
     addLog,
+    autoConnect: false,
   });
+
+  // Handle server selection and connect
+  const handleServerConnect = useCallback(
+    (server: ServerInfo) => {
+      setSelectedServer(server);
+      const url = ServerManager.getServerUrl(server);
+      addLog(`Connecting to ${server.name} (${url})...`, LogType.INFO);
+      wsConnect(url);
+    },
+    [wsConnect, addLog],
+  );
 
   // Camera hook
   const {
@@ -225,6 +249,43 @@ const App: React.FC = () => {
     ? entities.find((e) => e.id === selectedTargetEntityId)
     : null;
 
+  // Component to handle server selection window
+  const ServerSelectionHandler = () => {
+    const { openWindow, windows, closeWindow } = useWindowManager();
+
+    useEffect(() => {
+      // Only show server selection if not connected and window not already open
+      if (!selectedServer && wsInitialized) {
+        const serverWindowExists = windows.some(
+          (w) => w.id === "server-selection",
+        );
+        if (!serverWindowExists) {
+          openWindow(
+            createServerSelectionWindowConfig({
+              onConnect: handleServerConnect,
+            }),
+          );
+        }
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedServer, wsInitialized, windows, openWindow]);
+
+    // Close server selection window after connecting
+    useEffect(() => {
+      if (selectedServer && isConnected) {
+        const serverWindowExists = windows.some(
+          (w) => w.id === "server-selection",
+        );
+        if (serverWindowExists) {
+          closeWindow("server-selection");
+        }
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedServer, isConnected, windows, closeWindow]);
+
+    return null;
+  };
+
   return (
     <div className="flex flex-col h-screen w-full bg-neutral-950 overflow-hidden text-gray-300 font-mono">
       {/* Connection Status Indicators */}
@@ -237,6 +298,7 @@ const App: React.FC = () => {
 
       {/* HUD - Status Panel and Windows */}
       <WindowManagerProvider>
+        <ServerSelectionHandler />
         <HUD
           player={player}
           entities={entities}

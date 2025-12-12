@@ -32,3 +32,7 @@ export {
   ENTITY_INSPECTOR_WINDOW_ID,
   createEntityInspectorWindowConfig,
 } from "./EntityInspectorWindowConfig";
+export {
+  SERVER_SELECTION_WINDOW_ID,
+  createServerSelectionWindowConfig,
+} from "./ServerSelectionWindowConfig";

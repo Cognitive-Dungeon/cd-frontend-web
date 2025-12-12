@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 
 import {
   WebSocketService,
@@ -18,6 +18,7 @@ interface UseWebSocketProps {
   onReconnectChange: (isReconnecting: boolean, attempt: number) => void;
   onLoginError: (error: string | null) => void;
   addLog: (text: string, type: LogType) => void;
+  autoConnect?: boolean; // Auto-connect on mount
   config?: WebSocketConfig;
 }
 
@@ -43,9 +44,11 @@ export const useWebSocket = ({
   onReconnectChange,
   onLoginError,
   addLog,
+  autoConnect = false,
   config = {},
 }: UseWebSocketProps) => {
   const serviceRef = useRef<WebSocketService | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Store callbacks in refs to avoid recreation
   const onMessageRef = useRef(onMessage);
@@ -82,7 +85,7 @@ export const useWebSocket = ({
 
   // Initialize WebSocketService and setup event listeners
   useEffect(() => {
-    // Создаем сервис с конфигурацией
+    // Создаем сервис с конфигурацией (без автоподключения)
     const serviceConfig: WebSocketConfig = {
       maxReconnectAttempts: 10,
       reconnectDelay: 3000,
@@ -93,6 +96,7 @@ export const useWebSocket = ({
     const service = new WebSocketService(serviceConfig);
 
     serviceRef.current = service;
+    setIsInitialized(true);
 
     // Обработка события подключения
     service.on(WebSocketEvent.CONNECTED, () => {
@@ -169,16 +173,47 @@ export const useWebSocket = ({
       onAuthenticationChangeRef.current(data.isAuthenticated);
     });
 
-    // Подключаемся к серверу
-    service.connect();
+    // Подключаемся к серверу только если autoConnect = true
+    if (autoConnect) {
+      service.connect();
+    }
 
     // Cleanup при размонтировании
     return () => {
       service.destroy();
       serviceRef.current = null;
+      setIsInitialized(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Пустой массив зависимостей - запускаем только один раз, config стабилен
+
+  /**
+   * Подключение к серверу с указанным URL
+   *
+   * @param url - URL WebSocket сервера
+   */
+  const connect = useCallback((url: string) => {
+    if (!serviceRef.current) {
+      addLogRef.current("WebSocket service not initialized", LogType.ERROR);
+      return;
+    }
+
+    // Обновляем конфиг с новым URL
+    (serviceRef.current as any).config.url = url;
+
+    // Подключаемся
+    serviceRef.current.connect();
+  }, []);
+
+  /**
+   * Отключение от сервера
+   */
+  const disconnect = useCallback(() => {
+    if (!serviceRef.current) {
+      return;
+    }
+    serviceRef.current.disconnect();
+  }, []);
 
   /**
    * Отправка команды на сервер
@@ -259,5 +294,8 @@ export const useWebSocket = ({
     setAuthenticated,
     getMetrics,
     reconnect,
+    connect,
+    disconnect,
+    isInitialized,
   };
 };

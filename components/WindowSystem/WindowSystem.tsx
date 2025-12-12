@@ -216,8 +216,8 @@ const WindowSystem: FC<WindowSystemProps> = ({
       );
     }
 
-    // Always open login window when not authenticated
-    if (onLogin && !isAuthenticated) {
+    // Always open login window when not authenticated (but only if connected to server)
+    if (onLogin && !isAuthenticated && wsConnected) {
       const loginExists = windows.some((w) => w.id === LOGIN_WINDOW_ID);
       const loginWindow = windows.find((w) => w.id === LOGIN_WINDOW_ID);
 
