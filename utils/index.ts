@@ -9,3 +9,24 @@ export {
 
 // Экспорт утилит для поиска пути
 export { findPath } from "./pathfinding";
+
+// Экспорт типизированных билдеров команд
+export {
+  createLoginCommand,
+  createMoveCommand,
+  createMoveToPositionCommand,
+  createMoveCommandFromPayload,
+  createAttackCommand,
+  createTalkCommand,
+  createInteractCommand,
+  createWaitCommand,
+  createCustomCommand,
+  createEntityTargetCommand,
+  isMoveCommand,
+  isEntityTargetCommand,
+  isLoginCommand,
+  extractTargetId,
+  extractMoveCoordinates,
+  validateCommand,
+  safeSerializeCommand,
+} from "./commandBuilders";

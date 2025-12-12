@@ -17,8 +17,14 @@ import {
   ClientToServerEntityTargetPayload,
   ClientToServerCustomPayload,
 } from "../types";
-
-type CommandHandler<T = any> = (payload: T) => ClientToServerCommand | null;
+import {
+  CommandPayloadMap,
+  CommandAction,
+  CreateClientCommandFn,
+  CommandHandlersMap,
+  LoginPayload,
+  getCommandMetadata,
+} from "../types/commands";
 
 interface UseCommandSystemProps {
   player: Entity | null;
@@ -41,31 +47,36 @@ export const useCommandSystem = ({
   sendCommand: wsSendCommand,
   addLog,
 }: UseCommandSystemProps) => {
-  // Маппинг обработчиков команд
-  const commandHandlers: Record<
-    ClientToServerCommand["action"],
-    CommandHandler
-  > = useMemo(
+  // Маппинг обработчиков команд с улучшенной типизацией
+  const commandHandlers: CommandHandlersMap = useMemo(
     () => ({
-      [ACTION_TYPES.LOGIN]: (p: { token: string }) =>
+      [ACTION_TYPES.LOGIN]: (p: LoginPayload): ClientToServerCommand | null =>
         p.token ? { action: ACTION_TYPES.LOGIN, token: p.token } : null,
 
-      [ACTION_TYPES.MOVE]: (p: ClientToServerMovePayload) => ({
+      [ACTION_TYPES.MOVE]: (
+        p: ClientToServerMovePayload,
+      ): ClientToServerCommand => ({
         action: ACTION_TYPES.MOVE,
         payload: { dx: p.dx, dy: p.dy, x: p.x, y: p.y },
       }),
 
-      [ACTION_TYPES.ATTACK]: (p: ClientToServerEntityTargetPayload) =>
+      [ACTION_TYPES.ATTACK]: (
+        p: ClientToServerEntityTargetPayload,
+      ): ClientToServerCommand | null =>
         p.targetId
           ? { action: ACTION_TYPES.ATTACK, payload: { targetId: p.targetId } }
           : null,
 
-      [ACTION_TYPES.TALK]: (p: ClientToServerEntityTargetPayload) =>
+      [ACTION_TYPES.TALK]: (
+        p: ClientToServerEntityTargetPayload,
+      ): ClientToServerCommand | null =>
         p.targetId
           ? { action: ACTION_TYPES.TALK, payload: { targetId: p.targetId } }
           : null,
 
-      [ACTION_TYPES.INTERACT]: (p: ClientToServerEntityTargetPayload) =>
+      [ACTION_TYPES.INTERACT]: (
+        p: ClientToServerEntityTargetPayload,
+      ): ClientToServerCommand | null =>
         p.targetId
           ? {
               action: ACTION_TYPES.INTERACT,
@@ -73,9 +84,14 @@ export const useCommandSystem = ({
             }
           : null,
 
-      [ACTION_TYPES.WAIT]: () => ({ action: ACTION_TYPES.WAIT, payload: {} }),
+      [ACTION_TYPES.WAIT]: (): ClientToServerCommand => ({
+        action: ACTION_TYPES.WAIT,
+        payload: {},
+      }),
 
-      [ACTION_TYPES.CUSTOM]: (p: ClientToServerCustomPayload) => ({
+      [ACTION_TYPES.CUSTOM]: (
+        p: ClientToServerCustomPayload,
+      ): ClientToServerCommand => ({
         action: ACTION_TYPES.CUSTOM,
         payload: p,
       }),
@@ -85,35 +101,62 @@ export const useCommandSystem = ({
 
   /**
    * Создает типизированную команду из action и payload
+   *
+   * Эта функция обеспечивает полную проверку типов на этапе компиляции:
+   * TypeScript автоматически выводит тип payload из типа action.
+   *
+   * @example
+   * ```typescript
+   * // TypeScript знает, что для MOVE нужен ClientToServerMovePayload
+   * createClientCommand("MOVE", { dx: 1, dy: 0 }); // ✅ OK
+   * createClientCommand("MOVE", { targetId: "123" }); // ❌ Type error!
+   *
+   * // TypeScript знает, что для ATTACK нужен ClientToServerEntityTargetPayload
+   * createClientCommand("ATTACK", { targetId: "123" }); // ✅ OK
+   * createClientCommand("ATTACK", { dx: 1 }); // ❌ Type error!
+   * ```
    */
-  const createClientCommand = useCallback(
-    (action: string, payload: any): ClientToServerCommand | null => {
-      const handler =
-        commandHandlers[action as ClientToServerCommand["action"]];
-      return handler ? handler(payload) : null;
+  const createClientCommand: CreateClientCommandFn = useCallback(
+    <T extends CommandAction>(
+      action: T,
+      payload: CommandPayloadMap[T],
+    ): ClientToServerCommand | null => {
+      const handler = commandHandlers[action];
+      return handler ? handler(payload as any) : null;
     },
     [commandHandlers],
   );
 
   /**
    * Отправляет команду на сервер с валидацией и логированием
+   *
+   * Для полной типобезопасности используйте типизированные методы:
+   * - handleMovePlayer() для MOVE
+   * - handleLogin() для LOGIN
+   * и т.д.
    */
   const sendCommand = useCallback(
     (action: string, payload?: any, description?: string) => {
+      // Получаем метаданные команды для проверки доступности
+      const metadata = getCommandMetadata(action as CommandAction);
+
       // Check if it's player's turn (except for non-gameplay commands)
-      const nonTurnCommands = ["INSPECT", "TALK"];
       if (
         activeEntityId &&
         player &&
         activeEntityId !== player.id &&
-        !nonTurnCommands.includes(action)
+        metadata &&
+        !metadata.availableOutOfTurn
       ) {
         addLog("Сейчас не ваш ход — действие отклонено", LogType.INFO);
         return;
       }
 
       // Создаем типизированную команду
-      const command = createClientCommand(action, payload ?? {});
+      const command = createClientCommand(
+        action as CommandAction,
+        payload ?? {},
+      );
       if (!command) {
         addLog(`Неизвестная команда: ${action}`, LogType.ERROR);
         return;
