@@ -1,10 +1,15 @@
 import { useRef, useEffect, useCallback } from "react";
 
 import {
-  ClientToServerCommand,
-  serializeClientCommand,
-  LogType,
-} from "../types";
+  WebSocketService,
+  WebSocketEvent,
+  WebSocketConfig,
+  MessageEventData,
+  DisconnectedEventData,
+  ReconnectAttemptEventData,
+  ErrorEventData,
+} from "../services";
+import { ClientToServerCommand, LogType } from "../types";
 
 interface UseWebSocketProps {
   onMessage: (data: any) => void;
@@ -13,8 +18,24 @@ interface UseWebSocketProps {
   onReconnectChange: (isReconnecting: boolean, attempt: number) => void;
   onLoginError: (error: string | null) => void;
   addLog: (text: string, type: LogType) => void;
+  config?: WebSocketConfig;
 }
 
+/**
+ * React Hook для управления WebSocket соединением
+ *
+ * Использует WebSocketService для всей логики работы с WebSocket.
+ * Предоставляет простой интерфейс для отправки команд и получения событий.
+ *
+ * @example
+ * ```typescript
+ * const { sendCommand, isConnected } = useWebSocket({
+ *   onMessage: handleServerMessage,
+ *   onConnectionChange: setIsConnected,
+ *   // ... остальные callbacks
+ * });
+ * ```
+ */
 export const useWebSocket = ({
   onMessage,
   onConnectionChange,
@@ -22,14 +43,11 @@ export const useWebSocket = ({
   onReconnectChange,
   onLoginError,
   addLog,
+  config = {},
 }: UseWebSocketProps) => {
-  const socketRef = useRef<WebSocket | null>(null);
-  const isAuthenticatedRef = useRef(false);
-  const reconnectTimeoutRef = useRef<number | null>(null);
-  const reconnectAttemptsRef = useRef(0);
-  const isConnectingRef = useRef(false);
+  const serviceRef = useRef<WebSocketService | null>(null);
 
-  // Store callbacks in refs to avoid useEffect re-running
+  // Store callbacks in refs to avoid recreation
   const onMessageRef = useRef(onMessage);
   const onConnectionChangeRef = useRef(onConnectionChange);
   const onAuthenticationChangeRef = useRef(onAuthenticationChange);
@@ -62,204 +80,184 @@ export const useWebSocket = ({
     addLogRef.current = addLog;
   }, [addLog]);
 
-  // Single useEffect for connection management - runs only once on mount
+  // Initialize WebSocketService and setup event listeners
   useEffect(() => {
-    const MAX_RECONNECT_ATTEMPTS = 10;
-    const RECONNECT_DELAY = 3000;
-    let isMounted = true;
+    // Создаем сервис с конфигурацией
+    const serviceConfig: WebSocketConfig = {
+      maxReconnectAttempts: 10,
+      reconnectDelay: 3000,
+      autoReconnect: true,
+      debug: false,
+      ...config,
+    };
+    const service = new WebSocketService(serviceConfig);
 
-    const connect = () => {
-      // Prevent multiple simultaneous connection attempts
-      if (isConnectingRef.current) {
-        return;
-      }
+    serviceRef.current = service;
 
-      // Prevent connecting if already connected
-      if (
-        socketRef.current?.readyState === WebSocket.CONNECTING ||
-        socketRef.current?.readyState === WebSocket.OPEN
-      ) {
-        return;
-      }
+    // Обработка события подключения
+    service.on(WebSocketEvent.CONNECTED, () => {
+      onConnectionChangeRef.current(true);
+      onReconnectChangeRef.current(false, 0);
+      onLoginErrorRef.current(null);
+      addLogRef.current("Connected to server", LogType.INFO);
+    });
 
-      isConnectingRef.current = true;
+    // Обработка события отключения
+    service.on(WebSocketEvent.DISCONNECTED, (data: DisconnectedEventData) => {
+      onConnectionChangeRef.current(false);
+      addLogRef.current(
+        `Disconnected from server (${data.code})`,
+        LogType.INFO,
+      );
+    });
 
-      // Clean up any existing socket
-      if (socketRef.current) {
-        try {
-          socketRef.current.close();
-        } catch {
-          // Ignore close errors
-        }
-        socketRef.current = null;
-      }
+    // Обработка входящих сообщений
+    service.on(WebSocketEvent.MESSAGE, (data: MessageEventData) => {
+      try {
+        const msg = data.data;
 
-      // Определяем URL для WebSocket с учётом окружения
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      let wsUrl: string;
+        // Handle error responses from server
+        if (msg?.error) {
+          addLogRef.current(`Server error: ${msg.error}`, LogType.ERROR);
 
-      // В dev режиме (Vite dev server на :3000) используем прокси
-      // В production или при прямом подключении - используем backend порт
-      const isDev = window.location.port === "3000";
-
-      if (isDev) {
-        // Development: используем Vite proxy
-        wsUrl = `${protocol}//${window.location.host}/ws`;
-      } else {
-        // Production: подключаемся напрямую к backend (порт 8080)
-        const backendHost = window.location.hostname;
-        const backendPort = "8080";
-        wsUrl = `${protocol}//${backendHost}:${backendPort}/ws`;
-      }
-
-      const ws = new WebSocket(wsUrl);
-      socketRef.current = ws;
-
-      ws.onopen = () => {
-        isConnectingRef.current = false;
-
-        if (!isMounted) {
-          ws.close();
-          return;
-        }
-
-        onConnectionChangeRef.current(true);
-        onReconnectChangeRef.current(false, 0);
-        onLoginErrorRef.current(null);
-        reconnectAttemptsRef.current = 0;
-        addLogRef.current("Connected to server", LogType.INFO);
-      };
-
-      ws.onmessage = (evt) => {
-        if (!isMounted) {
-          return;
-        }
-
-        try {
-          const msg = JSON.parse(evt.data);
-
-          // Handle error responses from server
-          if (msg?.error) {
-            addLogRef.current(`Server error: ${msg.error}`, LogType.ERROR);
-            // If error during login (like "Entity not found"), reset authentication
-            if (
-              msg.error.includes("Entity not found") ||
-              msg.error.includes("not found")
-            ) {
-              onAuthenticationChangeRef.current(false);
-              isAuthenticatedRef.current = false;
-              onLoginErrorRef.current(msg.error);
-            }
+          // If error during login (like "Entity not found"), reset authentication
+          if (
+            msg.error.includes("Entity not found") ||
+            msg.error.includes("not found")
+          ) {
+            service.setAuthenticated(false);
+            onLoginErrorRef.current(msg.error);
           }
-
-          // Pass message to handler
-          onMessageRef.current(msg);
-        } catch (error) {
-          console.error("WebSocket parse error:", error);
-          addLogRef.current(`WS parse error: ${error}`, LogType.ERROR);
-        }
-      };
-
-      ws.onerror = () => {
-        isConnectingRef.current = false;
-        // Error details are not available in browser WebSocket API
-        // The actual error will come through onclose
-      };
-
-      ws.onclose = (event) => {
-        isConnectingRef.current = false;
-        socketRef.current = null;
-
-        if (!isMounted) {
-          return;
         }
 
-        const wasAuthenticated = isAuthenticatedRef.current;
-        onConnectionChangeRef.current(false);
-        onAuthenticationChangeRef.current(false);
-        isAuthenticatedRef.current = false;
+        // Pass message to handler
+        onMessageRef.current(msg);
+      } catch (error) {
+        console.error("Error processing message:", error);
+        addLogRef.current(`Error processing message: ${error}`, LogType.ERROR);
+      }
+    });
 
+    // Обработка попыток переподключения
+    service.on(
+      WebSocketEvent.RECONNECT_ATTEMPT,
+      (data: ReconnectAttemptEventData) => {
+        onReconnectChangeRef.current(true, data.attempt);
         addLogRef.current(
-          `Disconnected from server (${event.code})`,
+          `Reconnecting... (attempt ${data.attempt}/${data.maxAttempts})`,
           LogType.INFO,
         );
+      },
+    );
 
-        // If we weren't authenticated yet, try to reconnect
-        if (
-          !wasAuthenticated &&
-          reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS
-        ) {
-          reconnectAttemptsRef.current++;
-          onReconnectChangeRef.current(true, reconnectAttemptsRef.current);
-          addLogRef.current(
-            `Reconnecting... (attempt ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})`,
-            LogType.INFO,
-          );
-          reconnectTimeoutRef.current = window.setTimeout(() => {
-            if (isMounted) {
-              connect();
-            }
-          }, RECONNECT_DELAY);
-        } else if (!wasAuthenticated) {
-          console.error(
-            `[useWebSocket] Failed to connect after ${MAX_RECONNECT_ATTEMPTS} attempts`,
-          );
+    // Обработка ошибок
+    service.on(WebSocketEvent.ERROR, (data: ErrorEventData) => {
+      console.error(`[WebSocket Error] ${data.type}:`, data.message);
+
+      if (data.type === "connection") {
+        addLogRef.current(`Connection error: ${data.message}`, LogType.ERROR);
+
+        // Если превышено максимальное количество попыток
+        if (data.message.includes("Maximum reconnection")) {
           onReconnectChangeRef.current(false, 0);
-          addLogRef.current(
-            `Failed to connect after ${MAX_RECONNECT_ATTEMPTS} attempts`,
-            LogType.ERROR,
-          );
         }
-      };
-    };
+      }
+    });
 
-    connect();
+    // Обработка изменения аутентификации
+    service.on(WebSocketEvent.AUTH_CHANGE, (data) => {
+      onAuthenticationChangeRef.current(data.isAuthenticated);
+    });
 
+    // Подключаемся к серверу
+    service.connect();
+
+    // Cleanup при размонтировании
     return () => {
-      isMounted = false;
-
-      // Clean up reconnect timeout
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
-      }
-
-      // Close WebSocket connection
-      if (socketRef.current) {
-        try {
-          socketRef.current.close();
-        } catch {
-          // Ignore close errors
-        }
-        socketRef.current = null;
-      }
-
-      isConnectingRef.current = false;
+      service.destroy();
+      serviceRef.current = null;
     };
-  }, []); // Empty dependency array - run only once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Пустой массив зависимостей - запускаем только один раз, config стабилен
 
-  const sendCommand = useCallback((command: ClientToServerCommand) => {
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
-      addLogRef.current("Not connected to server", LogType.ERROR);
+  /**
+   * Отправка команды на сервер
+   *
+   * @param command - Команда для отправки
+   * @returns true если команда отправлена, false если нет подключения
+   */
+  const sendCommand = useCallback((command: ClientToServerCommand): boolean => {
+    if (!serviceRef.current) {
+      addLogRef.current("WebSocket service not initialized", LogType.ERROR);
       return false;
     }
 
-    const serialized = serializeClientCommand(command);
-    socketRef.current.send(serialized);
-    return true;
+    const result = serviceRef.current.send(command, {
+      queue: true, // Добавлять в очередь, если не подключено
+    });
+
+    if (!result.success && !result.queued) {
+      addLogRef.current(
+        result.error || "Failed to send command",
+        LogType.ERROR,
+      );
+      return false;
+    }
+
+    if (result.queued) {
+      addLogRef.current(
+        "Command queued (will be sent when connected)",
+        LogType.INFO,
+      );
+    }
+
+    return result.success || result.queued;
   }, []);
 
-  const isConnected = useCallback(() => {
-    return socketRef.current?.readyState === WebSocket.OPEN;
+  /**
+   * Проверка состояния подключения
+   *
+   * @returns true если подключено к серверу
+   */
+  const isConnected = useCallback((): boolean => {
+    return serviceRef.current?.isConnected() ?? false;
   }, []);
 
-  const setAuthenticated = useCallback((value: boolean) => {
-    isAuthenticatedRef.current = value;
+  /**
+   * Установка статуса аутентификации
+   *
+   * @param value - Статус аутентификации
+   */
+  const setAuthenticated = useCallback((value: boolean): void => {
+    serviceRef.current?.setAuthenticated(value);
+  }, []);
+
+  /**
+   * Получение метрик соединения
+   *
+   * @returns Метрики WebSocket соединения
+   */
+  const getMetrics = useCallback(() => {
+    return serviceRef.current?.getMetrics();
+  }, []);
+
+  /**
+   * Ручное переподключение
+   */
+  const reconnect = useCallback(() => {
+    if (serviceRef.current) {
+      serviceRef.current.disconnect();
+      setTimeout(() => {
+        serviceRef.current?.connect();
+      }, 100);
+    }
   }, []);
 
   return {
     sendCommand,
     isConnected,
     setAuthenticated,
+    getMetrics,
+    reconnect,
   };
 };
