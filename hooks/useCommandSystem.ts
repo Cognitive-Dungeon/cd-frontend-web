@@ -4,6 +4,11 @@ import {
   CommandAttack,
   CommandTalk,
   CommandInteract,
+  CommandPickup,
+  CommandDrop,
+  CommandUse,
+  CommandEquip,
+  CommandUnequip,
   GameCommand,
 } from "../commands";
 import { ACTION_TYPES } from "../constants";
@@ -16,6 +21,7 @@ import {
   ClientToServerMovePayload,
   ClientToServerEntityTargetPayload,
   ClientToServerCustomPayload,
+  ClientToServerItemPayload,
 } from "../types";
 import {
   CommandPayloadMap,
@@ -88,6 +94,44 @@ export const useCommandSystem = ({
         action: ACTION_TYPES.WAIT,
         payload: {},
       }),
+
+      [ACTION_TYPES.PICKUP]: (
+        p: ClientToServerItemPayload,
+      ): ClientToServerCommand | null =>
+        p.itemId
+          ? { action: ACTION_TYPES.PICKUP, payload: { itemId: p.itemId } }
+          : null,
+
+      [ACTION_TYPES.DROP]: (
+        p: ClientToServerItemPayload,
+      ): ClientToServerCommand | null =>
+        p.itemId
+          ? {
+              action: ACTION_TYPES.DROP,
+              payload: { itemId: p.itemId, count: p.count },
+            }
+          : null,
+
+      [ACTION_TYPES.USE]: (
+        p: ClientToServerItemPayload,
+      ): ClientToServerCommand | null =>
+        p.itemId
+          ? { action: ACTION_TYPES.USE, payload: { itemId: p.itemId } }
+          : null,
+
+      [ACTION_TYPES.EQUIP]: (
+        p: ClientToServerItemPayload,
+      ): ClientToServerCommand | null =>
+        p.itemId
+          ? { action: ACTION_TYPES.EQUIP, payload: { itemId: p.itemId } }
+          : null,
+
+      [ACTION_TYPES.UNEQUIP]: (
+        p: ClientToServerItemPayload,
+      ): ClientToServerCommand | null =>
+        p.itemId
+          ? { action: ACTION_TYPES.UNEQUIP, payload: { itemId: p.itemId } }
+          : null,
 
       [ACTION_TYPES.CUSTOM]: (
         p: ClientToServerCustomPayload,
@@ -175,6 +219,11 @@ export const useCommandSystem = ({
           ATTACK: CommandAttack,
           TALK: CommandTalk,
           INTERACT: CommandInteract,
+          PICKUP: CommandPickup,
+          DROP: CommandDrop,
+          USE: CommandUse,
+          EQUIP: CommandEquip,
+          UNEQUIP: CommandUnequip,
         };
         const foundCommand = commandMap[action];
         if (foundCommand) {
@@ -289,7 +338,7 @@ export const useCommandSystem = ({
    * Обрабатывает использование предмета
    */
   const handleUseItem = useCallback(
-    (item: Item, targetEntityId?: string) => {
+    (item: Item) => {
       if (!player) {
         return;
       }
@@ -299,16 +348,7 @@ export const useCommandSystem = ({
         return;
       }
 
-      const payload: any = { name: item.name };
-      if (targetEntityId) {
-        payload.targetId = targetEntityId;
-      }
-
-      sendCommand(
-        "USE",
-        payload,
-        `использовали ${item.name}${targetEntityId ? ` на {targetName}` : ""}`,
-      );
+      sendCommand("USE", { itemId: item.id }, `использовали ${item.name}`);
     },
     [player, activeEntityId, sendCommand, addLog],
   );
@@ -327,7 +367,64 @@ export const useCommandSystem = ({
         return;
       }
 
-      sendCommand("DROP", { name: item.name }, `бросили ${item.name}`);
+      sendCommand("DROP", { itemId: item.id }, `бросили ${item.name}`);
+    },
+    [player, activeEntityId, sendCommand, addLog],
+  );
+
+  /**
+   * Обрабатывает подбор предмета
+   */
+  const handlePickupItem = useCallback(
+    (item: Item) => {
+      if (!player) {
+        return;
+      }
+
+      if (activeEntityId && activeEntityId !== player.id) {
+        addLog("Не ваш ход!", LogType.ERROR);
+        return;
+      }
+
+      sendCommand("PICKUP", { itemId: item.id }, `подобрали ${item.name}`);
+    },
+    [player, activeEntityId, sendCommand, addLog],
+  );
+
+  /**
+   * Обрабатывает экипировку предмета
+   */
+  const handleEquipItem = useCallback(
+    (item: Item) => {
+      if (!player) {
+        return;
+      }
+
+      if (activeEntityId && activeEntityId !== player.id) {
+        addLog("Не ваш ход!", LogType.ERROR);
+        return;
+      }
+
+      sendCommand("EQUIP", { itemId: item.id }, `надели ${item.name}`);
+    },
+    [player, activeEntityId, sendCommand, addLog],
+  );
+
+  /**
+   * Обрабатывает снятие экипировки
+   */
+  const handleUnequipItem = useCallback(
+    (item: Item) => {
+      if (!player) {
+        return;
+      }
+
+      if (activeEntityId && activeEntityId !== player.id) {
+        addLog("Не ваш ход!", LogType.ERROR);
+        return;
+      }
+
+      sendCommand("UNEQUIP", { itemId: item.id }, `сняли ${item.name}`);
     },
     [player, activeEntityId, sendCommand, addLog],
   );
@@ -370,6 +467,9 @@ export const useCommandSystem = ({
     sendTextCommand,
     handleUseItem,
     handleDropItem,
+    handlePickupItem,
+    handleEquipItem,
+    handleUnequipItem,
     handleLogin,
     handleMovePlayer,
   };

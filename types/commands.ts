@@ -10,6 +10,7 @@ import {
   ClientToServerMovePayload,
   ClientToServerEntityTargetPayload,
   ClientToServerCustomPayload,
+  ClientToServerItemPayload,
 } from "../types";
 
 /**
@@ -46,6 +47,11 @@ export type CommandPayloadMap = {
   TALK: ClientToServerEntityTargetPayload;
   INTERACT: ClientToServerEntityTargetPayload;
   WAIT: WaitPayload;
+  PICKUP: ClientToServerItemPayload;
+  DROP: ClientToServerItemPayload;
+  USE: ClientToServerItemPayload;
+  EQUIP: ClientToServerItemPayload;
+  UNEQUIP: ClientToServerItemPayload;
   CUSTOM: ClientToServerCustomPayload;
 };
 
@@ -79,7 +85,7 @@ export type CommandAction = ClientToServerCommand["action"];
  */
 export type CreateClientCommandFn = <T extends CommandAction>(
   action: T,
-  payload: CommandPayloadMap[T]
+  payload: CommandPayloadMap[T],
 ) => ClientToServerCommand | null;
 
 /**
@@ -88,7 +94,7 @@ export type CreateClientCommandFn = <T extends CommandAction>(
  * @template T - Тип action
  */
 export type TypedCommandHandler<T extends CommandAction> = (
-  payload: CommandPayloadMap[T]
+  payload: CommandPayloadMap[T],
 ) => ClientToServerCommand | null;
 
 /**
@@ -131,6 +137,11 @@ export function isValidCommandAction(action: string): action is CommandAction {
     "TALK",
     "INTERACT",
     "WAIT",
+    "PICKUP",
+    "DROP",
+    "USE",
+    "EQUIP",
+    "UNEQUIP",
     "CUSTOM",
   ];
   return validActions.includes(action as CommandAction);
@@ -151,7 +162,7 @@ export function isValidCommandAction(action: string): action is CommandAction {
  */
 export function validateCommandPayload(
   action: CommandAction,
-  payload: any
+  payload: any,
 ): payload is CommandPayloadMap[typeof action] {
   switch (action) {
     case "LOGIN":
@@ -172,6 +183,13 @@ export function validateCommandPayload(
 
     case "WAIT":
       return payload == null || Object.keys(payload).length === 0;
+
+    case "PICKUP":
+    case "DROP":
+    case "USE":
+    case "EQUIP":
+    case "UNEQUIP":
+      return typeof payload === "object" && typeof payload.itemId === "string";
 
     case "CUSTOM":
       return typeof payload === "object";
@@ -247,6 +265,46 @@ export const COMMAND_METADATA: Record<CommandAction, CommandMetadata> = {
     action: "WAIT",
     displayName: "Ждать",
     description: "Пропустить ход",
+    requiresTarget: false,
+    requiresPosition: false,
+    availableOutOfTurn: false,
+  },
+  PICKUP: {
+    action: "PICKUP",
+    displayName: "Подобрать",
+    description: "Подобрать предмет",
+    requiresTarget: false,
+    requiresPosition: false,
+    availableOutOfTurn: false,
+  },
+  DROP: {
+    action: "DROP",
+    displayName: "Бросить",
+    description: "Бросить предмет",
+    requiresTarget: false,
+    requiresPosition: false,
+    availableOutOfTurn: false,
+  },
+  USE: {
+    action: "USE",
+    displayName: "Использовать",
+    description: "Использовать предмет",
+    requiresTarget: false,
+    requiresPosition: false,
+    availableOutOfTurn: false,
+  },
+  EQUIP: {
+    action: "EQUIP",
+    displayName: "Надеть",
+    description: "Надеть предмет",
+    requiresTarget: false,
+    requiresPosition: false,
+    availableOutOfTurn: false,
+  },
+  UNEQUIP: {
+    action: "UNEQUIP",
+    displayName: "Снять",
+    description: "Снять предмет",
     requiresTarget: false,
     requiresPosition: false,
     availableOutOfTurn: false,

@@ -91,8 +91,7 @@ export const CommandInspect: GameCommand = {
 export const CommandPickup: GameCommand = {
   action: "PICKUP",
   label: "Pick Up",
-  description: "Вы подобрали {targetName}",
-  requiresEntityTarget: true,
+  description: "Вы подобрали {name}",
 };
 
 export const CommandInteract: GameCommand = {
@@ -139,6 +138,20 @@ export const CommandUse: GameCommand = {
   action: "USE",
   label: "Use",
   description: "Вы использовали {name}",
+};
+
+// НАДЕТЬ - Equip item from inventory
+export const CommandEquip: GameCommand = {
+  action: "EQUIP",
+  label: "Equip",
+  description: "Вы надели {name}",
+};
+
+// СНЯТЬ - Unequip item
+export const CommandUnequip: GameCommand = {
+  action: "UNEQUIP",
+  label: "Unequip",
+  description: "Вы сняли {name}",
 };
 
 // --- Speech Commands ---

@@ -75,6 +75,13 @@ export interface Item {
   value: number; // Heal amount or damage or gold amount
   description?: string;
   action?: ItemAction; // Action when item is used
+  category?: string;
+  isStackable?: boolean;
+  stackSize?: number;
+  damage?: number;
+  defense?: number;
+  weight?: number;
+  isSentient?: boolean;
 }
 
 export interface Entity {
@@ -207,6 +214,42 @@ export interface ServerToClientEntityRender {
 }
 
 /**
+ * Вид предмета (Server -> Client)
+ */
+export interface ServerToClientItemView {
+  id: string;
+  name: string;
+  symbol: string;
+  color: string;
+  category: string;
+  isStackable: boolean;
+  stackSize: number;
+  damage?: number;
+  defense?: number;
+  weight: number;
+  value: number;
+  isSentient: boolean;
+}
+
+/**
+ * Инвентарь сущности (Server -> Client)
+ */
+export interface ServerToClientInventoryView {
+  items: ServerToClientItemView[];
+  maxSlots: number;
+  currentWeight: number;
+  maxWeight: number;
+}
+
+/**
+ * Экипировка сущности (Server -> Client)
+ */
+export interface ServerToClientEquipmentView {
+  weapon?: ServerToClientItemView;
+  armor?: ServerToClientItemView;
+}
+
+/**
  * Вид сущности, видимый клиенту (Server -> Client)
  */
 export interface ServerToClientEntityView {
@@ -222,6 +265,10 @@ export interface ServerToClientEntityView {
   render: ServerToClientEntityRender;
   /** Характеристики сущности (опционально) */
   stats?: ServerToClientStatsView;
+  /** Инвентарь (виден только владельцу) */
+  inventory?: ServerToClientInventoryView;
+  /** Экипировка (видна только владельцу) */
+  equipment?: ServerToClientEquipmentView;
 }
 
 /**
@@ -300,6 +347,14 @@ export interface ClientToServerDropPayload {
 }
 
 /**
+ * Payload для команд с предметами (Client -> Server)
+ */
+export interface ClientToServerItemPayload {
+  itemId: string;
+  count?: number;
+}
+
+/**
  * Payload для текстовых команд (Client -> Server)
  */
 export interface ClientToServerTextPayload {
@@ -324,6 +379,11 @@ export type ClientToServerAction =
   | "TALK"
   | "INTERACT"
   | "WAIT"
+  | "PICKUP"
+  | "DROP"
+  | "USE"
+  | "EQUIP"
+  | "UNEQUIP"
   | "CUSTOM";
 
 /**
@@ -347,6 +407,10 @@ export type ClientToServerCommand =
   | {
       action: "WAIT";
       payload?: Record<string, never> | null;
+    }
+  | {
+      action: "PICKUP" | "DROP" | "USE" | "EQUIP" | "UNEQUIP";
+      payload: ClientToServerItemPayload;
     }
   | {
       action: "CUSTOM";

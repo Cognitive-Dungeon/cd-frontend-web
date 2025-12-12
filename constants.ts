@@ -85,5 +85,10 @@ export const ACTION_TYPES = {
   TALK: "TALK" as const,
   INTERACT: "INTERACT" as const,
   WAIT: "WAIT" as const,
+  PICKUP: "PICKUP" as const,
+  DROP: "DROP" as const,
+  USE: "USE" as const,
+  EQUIP: "EQUIP" as const,
+  UNEQUIP: "UNEQUIP" as const,
   CUSTOM: "CUSTOM" as const,
 };
