@@ -350,6 +350,9 @@ const GameGrid: FC<GameGridProps> = ({
         case "talk":
           onSendCommand("TALK", { targetId: entity.id });
           break;
+        case "pickup":
+          onSendCommand("PICKUP", { itemId: entity.id });
+          break;
         case "interact":
           onSendCommand("INTERACT", { targetId: entity.id });
           break;
@@ -393,12 +396,18 @@ const GameGrid: FC<GameGridProps> = ({
       });
     }
 
-    // Interact action for chests and items
-    if (
-      entity.type === EntityType.CHEST ||
-      entity.type === EntityType.ITEM ||
-      entity.type === EntityType.EXIT
-    ) {
+    // Pickup action for items
+    if (entity.type === EntityType.ITEM) {
+      actions.push({
+        id: "pickup",
+        icon: Hand,
+        label: "Подобрать",
+        color: "#10b981",
+      });
+    }
+
+    // Interact action for chests and exits
+    if (entity.type === EntityType.CHEST || entity.type === EntityType.EXIT) {
       actions.push({
         id: "interact",
         icon: Hand,

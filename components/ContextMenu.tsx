@@ -180,21 +180,21 @@ export const ContextMenu: FC<ContextMenuProps> = ({
                   <span>Осмотреть</span>
                 </button>
                 */}
-                {/* TODO: Uncomment when PICKUP is implemented on server
-                <button
-                  type="button"
-                  className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-green-400 flex items-center gap-1.5"
-                  onMouseDown={() => {
-                    if (onSendCommand) {
-                      onSendCommand("PICKUP", { targetId: entity.id });
-                    }
-                    onClose();
-                  }}
-                >
-                  <Package className="w-3 h-3" />
-                  <span>Подобрать</span>
-                </button>
-                */}
+                {entity.type === "ITEM" && (
+                  <button
+                    type="button"
+                    className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-green-400 flex items-center gap-1.5"
+                    onMouseDown={() => {
+                      if (onSendCommand) {
+                        onSendCommand("PICKUP", { itemId: entity.id });
+                      }
+                      onClose();
+                    }}
+                  >
+                    <Hand className="w-3 h-3" />
+                    <span>Подобрать</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-cyan-400 flex items-center gap-1.5"

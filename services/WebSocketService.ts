@@ -44,8 +44,8 @@ const DEFAULT_CONFIG: Required<WebSocketConfig> = {
   maxReconnectDelay: 30000,
   reconnectDelayMultiplier: 1.5,
   connectionTimeout: 10000,
-  heartbeatInterval: 30000,
-  heartbeatTimeout: 5000,
+  heartbeatInterval: 0, // Disabled by default (0 = off)
+  heartbeatTimeout: 10000,
   autoReconnect: true,
   maxQueueSize: 100,
   debug: false,
@@ -558,6 +558,12 @@ export class WebSocketService {
    */
   private startHeartbeat(): void {
     this.stopHeartbeat();
+
+    // Skip if heartbeat disabled (interval = 0)
+    if (this.config.heartbeatInterval === 0) {
+      this.log("Heartbeat disabled");
+      return;
+    }
 
     this.heartbeatInterval = window.setInterval(() => {
       this.sendHeartbeat();
