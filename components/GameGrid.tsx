@@ -33,6 +33,7 @@ interface GameGridProps {
   onGoToPathfinding?: (position: Position) => void;
   onContextMenu?: (data: ContextMenuData) => void;
   onRadialMenuChange?: (isOpen: boolean) => void;
+  onInspectEntity?: (entity: Entity) => void;
   selectedTargetEntityId?: string | null;
   selectedTargetPosition?: Position | null;
   pathfindingTarget?: Position | null;
@@ -55,9 +56,10 @@ const GameGrid: FC<GameGridProps> = ({
   onGoToPathfinding,
   onContextMenu,
   onRadialMenuChange,
-  selectedTargetEntityId,
-  selectedTargetPosition,
-  pathfindingTarget,
+  onInspectEntity,
+  selectedTargetEntityId = null,
+  selectedTargetPosition = null,
+  pathfindingTarget = null,
   currentPath = [],
 }) => {
   const [localContextMenu, setLocalContextMenu] =
@@ -870,6 +872,7 @@ const GameGrid: FC<GameGridProps> = ({
           onSendCommand={onSendCommand}
           onSelectPosition={onSelectPosition}
           onGoToPathfinding={onGoToPathfinding}
+          onInspectEntity={onInspectEntity}
         />
       )}
 

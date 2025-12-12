@@ -6,11 +6,12 @@ import {
   Sparkles,
   Navigation,
   Hand,
+  FileJson,
 } from "lucide-react";
 import { FC, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { ContextMenuData, Position } from "../types";
+import { ContextMenuData, Position, Entity } from "../types";
 
 interface ContextMenuProps {
   data: ContextMenuData;
@@ -20,6 +21,7 @@ interface ContextMenuProps {
   onSendCommand?: (action: string, payload?: any) => void;
   onSelectPosition?: (x: number, y: number) => void;
   onGoToPathfinding?: (position: Position) => void;
+  onInspectEntity?: (entity: Entity) => void;
 }
 
 export const ContextMenu: FC<ContextMenuProps> = ({
@@ -30,6 +32,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({
   onSendCommand,
   onSelectPosition,
   onGoToPathfinding,
+  onInspectEntity,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ left: data.x, top: data.y });
@@ -136,6 +139,19 @@ export const ContextMenu: FC<ContextMenuProps> = ({
               >
                 <Focus className="w-3 h-3" />
                 <span>Следить за {entity.name}</span>
+              </button>
+              <button
+                type="button"
+                className="w-full px-3 py-1 text-left text-xs hover:bg-neutral-700 text-purple-400 flex items-center gap-1.5"
+                onMouseDown={() => {
+                  if (onInspectEntity) {
+                    onInspectEntity(entity);
+                  }
+                  onClose();
+                }}
+              >
+                <FileJson className="w-3 h-3" />
+                <span>Открыть в редакторе</span>
               </button>
 
               <div className="border-t border-neutral-700 mt-1 pt-1">

@@ -9,12 +9,18 @@ export const INVENTORY_WINDOW_ID = "inventory-window";
 
 interface CreateInventoryWindowConfigProps {
   items: Item[];
+  inventoryData?: {
+    maxSlots?: number;
+    currentWeight?: number;
+    maxWeight?: number;
+  } | null;
   onUseItem?: (item: Item, targetEntityId?: string) => void;
   onDropItem?: (item: Item) => void;
 }
 
 export const createInventoryWindowConfig = ({
   items,
+  inventoryData,
   onUseItem,
   onDropItem,
 }: CreateInventoryWindowConfigProps): WindowConfig => {
@@ -34,6 +40,7 @@ export const createInventoryWindowConfig = ({
     content: (
       <InventoryWindow
         items={items}
+        inventoryData={inventoryData}
         onUseItem={onUseItem}
         onDropItem={onDropItem}
       />

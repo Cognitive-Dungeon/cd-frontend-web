@@ -29,6 +29,9 @@ import {
   createInventoryWindowConfig,
   LOGIN_WINDOW_ID,
   createLoginWindowConfig,
+  createJSONViewerWindowConfig,
+  ENTITY_INSPECTOR_WINDOW_ID,
+  createEntityInspectorWindowConfig,
 } from "./windows";
 
 interface WindowSystemProps {
@@ -42,9 +45,16 @@ interface WindowSystemProps {
   onGoToEntity?: (entityId: string) => void;
   onSendCommand?: (text: string, type: "SAY" | "WHISPER" | "YELL") => void;
   onContextMenu?: (data: ContextMenuData) => void;
+  onOpenJSONViewer?: (data: any, title?: string) => void;
+  onInspectEntity?: (handler: (entity: Entity) => void) => void;
   splashNotificationsEnabled: boolean;
   onToggleSplashNotifications: (enabled: boolean) => void;
   playerInventory?: Item[];
+  playerInventoryData?: {
+    maxSlots?: number;
+    currentWeight?: number;
+    maxWeight?: number;
+  } | null;
   onUseItem?: (item: Item, targetEntityId?: string) => void;
   onDropItem?: (item: Item) => void;
   onLogin?: (entityId: string) => void;
@@ -66,9 +76,12 @@ const WindowSystem: FC<WindowSystemProps> = ({
   onGoToEntity,
   onSendCommand,
   onContextMenu,
+  onOpenJSONViewer,
+  onInspectEntity,
   splashNotificationsEnabled,
   onToggleSplashNotifications,
   playerInventory = [],
+  playerInventoryData,
   onUseItem,
   onDropItem,
   onLogin,
@@ -90,6 +103,23 @@ const WindowSystem: FC<WindowSystemProps> = ({
   const turnOrderBarInitializedRef = useRef(false);
   const loginWindowClosedRef = useRef(false);
   const windowsRef = useRef(windows);
+  const prevEntitiesRef = useRef<Entity[]>([]);
+  const handleInspectEntityRef = useRef<(entity: Entity) => void>();
+
+  // Handle opening entity inspector - update ref on every render
+  handleInspectEntityRef.current = (entity: Entity) => {
+    openWindow(createEntityInspectorWindowConfig({ entity, entities }));
+  };
+
+  // Expose stable wrapper through onInspectEntity prop (only once on mount)
+  useEffect(() => {
+    if (onInspectEntity) {
+      onInspectEntity((entity: Entity) => {
+        handleInspectEntityRef.current?.(entity);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Keep ref in sync with windows state
   useEffect(() => {
@@ -103,6 +133,13 @@ const WindowSystem: FC<WindowSystemProps> = ({
       }),
     );
   }, [openWindow, closeWindow]);
+
+  const handleOpenJSONViewer = useCallback(
+    (data: any, title?: string) => {
+      openWindow(createJSONViewerWindowConfig({ data, title }));
+    },
+    [openWindow],
+  );
 
   // Автоматически открываем Dock и Settings при монтировании
   useEffect(() => {
@@ -148,6 +185,7 @@ const WindowSystem: FC<WindowSystemProps> = ({
       openWindow(
         createInventoryWindowConfig({
           items: playerInventory,
+          inventoryData: playerInventoryData,
           onUseItem,
           onDropItem,
         }),
@@ -289,11 +327,63 @@ const WindowSystem: FC<WindowSystemProps> = ({
   useEffect(() => {
     const inventoryConfig = createInventoryWindowConfig({
       items: playerInventory,
+      inventoryData: playerInventoryData,
       onUseItem,
       onDropItem,
     });
     updateWindowContent(INVENTORY_WINDOW_ID, inventoryConfig.content);
-  }, [playerInventory, onUseItem, onDropItem, updateWindowContent]);
+  }, [
+    playerInventory,
+    playerInventoryData,
+    onUseItem,
+    onDropItem,
+    updateWindowContent,
+  ]);
+
+  // Update EntityInspectorWindow content when entities change
+  useEffect(() => {
+    // Find all open entity inspector windows
+    const inspectorWindows = windowsRef.current.filter((window) =>
+      window.id.startsWith(ENTITY_INSPECTOR_WINDOW_ID),
+    );
+
+    if (inspectorWindows.length === 0) {
+      return;
+    }
+
+    // Check if any relevant entity changed
+    let shouldUpdate = false;
+    const prevEntities = prevEntitiesRef.current;
+
+    inspectorWindows.forEach((window) => {
+      const entityId = window.id.replace(`${ENTITY_INSPECTOR_WINDOW_ID}-`, "");
+      const currentEntity = entities.find((e) => e.id === entityId);
+      const prevEntity = prevEntities.find((e) => e.id === entityId);
+
+      if (JSON.stringify(currentEntity) !== JSON.stringify(prevEntity)) {
+        shouldUpdate = true;
+      }
+    });
+
+    if (!shouldUpdate) {
+      return;
+    }
+
+    prevEntitiesRef.current = entities;
+
+    // Update content for each inspector window
+    inspectorWindows.forEach((window) => {
+      const entityId = window.id.replace(`${ENTITY_INSPECTOR_WINDOW_ID}-`, "");
+      const entity = entities.find((e) => e.id === entityId);
+      if (entity) {
+        const inspectorConfig = createEntityInspectorWindowConfig({
+          entity,
+          entities,
+        });
+        updateWindowContent(window.id, inspectorConfig.content);
+      }
+    });
+  }, [entities, updateWindowContent]);
 
   // Update LoginWindow content when connection state changes
   useEffect(() => {
@@ -306,7 +396,7 @@ const WindowSystem: FC<WindowSystemProps> = ({
       });
       updateWindowContent(LOGIN_WINDOW_ID, loginConfig.content);
     }
-  }, [isAuthenticated, wsConnected, loginError, onLogin, updateWindowContent]);
+  }, [onLogin, isAuthenticated, wsConnected, loginError, updateWindowContent]);
 
   // Auto-close login window after successful authentication
   useEffect(() => {

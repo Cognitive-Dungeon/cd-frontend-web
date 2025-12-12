@@ -52,6 +52,17 @@ const App: React.FC = () => {
   const [radialMenuOpen, setRadialMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const prevActiveEntityIdRef = useRef<string | null>(null);
+  const [inspectEntityHandler, setInspectEntityHandler] = useState<
+    ((entity: any) => void) | null
+  >(null);
+
+  // Memoized callback to prevent infinite loop in WindowSystem
+  const handleInspectEntityCallback = useCallback(
+    (handler: (entity: any) => void) => {
+      setInspectEntityHandler(() => handler);
+    },
+    [],
+  );
 
   // UI Settings
   const [splashNotificationsEnabled, setSplashNotificationsEnabled] = useState(
@@ -240,9 +251,11 @@ const App: React.FC = () => {
           onGoToEntity={handleGoToEntityWrapper}
           onSendCommand={sendTextCommand}
           onContextMenu={handleContextMenu}
+          onInspectEntity={handleInspectEntityCallback}
           splashNotificationsEnabled={splashNotificationsEnabled}
           onToggleSplashNotifications={handleToggleSplashNotifications}
           playerInventory={player?.inventory ?? []}
+          playerInventoryData={player?.inventoryData}
           onUseItem={handleUseItem}
           onDropItem={handleDropItem}
           onLogin={handleLogin}
@@ -287,6 +300,7 @@ const App: React.FC = () => {
             onContextMenu={handleContextMenu}
             onRadialMenuChange={setRadialMenuOpen}
             onCloseContextMenu={() => setContextMenu(null)}
+            onInspectEntity={(entity) => inspectEntityHandler?.(entity)}
           />
         </div>
       </div>

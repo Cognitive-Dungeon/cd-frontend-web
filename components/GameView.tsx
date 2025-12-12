@@ -41,6 +41,7 @@ interface GameViewProps {
   onContextMenu: (data: ContextMenuData) => void;
   onRadialMenuChange: (open: boolean) => void;
   onCloseContextMenu: () => void;
+  onInspectEntity?: (entity: Entity) => void;
 }
 
 export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
@@ -74,6 +75,7 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
       onContextMenu,
       onRadialMenuChange,
       onCloseContextMenu,
+      onInspectEntity,
     },
     containerRef,
   ) => {
@@ -176,6 +178,7 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
                 onGoToPathfinding={onGoToPathfinding}
                 onContextMenu={onContextMenu}
                 onRadialMenuChange={onRadialMenuChange}
+                onInspectEntity={onInspectEntity}
                 selectedTargetEntityId={selectedTargetEntityId}
                 selectedTargetPosition={selectedTargetPosition}
                 pathfindingTarget={pathfindingTarget}
@@ -195,6 +198,7 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
             onSendCommand={onSendCommand}
             onSelectPosition={onSelectPosition}
             onGoToPathfinding={onGoToPathfinding}
+            onInspectEntity={onInspectEntity}
           />
         )}
       </>

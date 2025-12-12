@@ -24,3 +24,11 @@ export {
   createInventoryWindowConfig,
 } from "./InventoryWindowConfig";
 export { LOGIN_WINDOW_ID, createLoginWindowConfig } from "./LoginWindowConfig";
+export {
+  JSON_VIEWER_WINDOW_ID,
+  createJSONViewerWindowConfig,
+} from "./JSONViewerWindowConfig";
+export {
+  ENTITY_INSPECTOR_WINDOW_ID,
+  createEntityInspectorWindowConfig,
+} from "./EntityInspectorWindowConfig";

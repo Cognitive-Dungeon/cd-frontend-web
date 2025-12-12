@@ -20,9 +20,15 @@ interface HUDProps {
   onGoToEntity: (entityId: string) => void;
   onSendCommand: (text: string, type: "SAY" | "WHISPER" | "YELL") => void;
   onContextMenu: (data: any) => void;
+  onInspectEntity?: (handler: (entity: Entity) => void) => void;
   splashNotificationsEnabled: boolean;
   onToggleSplashNotifications: (enabled: boolean) => void;
   playerInventory: Item[];
+  playerInventoryData?: {
+    maxSlots?: number;
+    currentWeight?: number;
+    maxWeight?: number;
+  } | null;
   onUseItem: (item: Item, targetEntityId?: string) => void;
   onDropItem: (item: Item) => void;
   onLogin: (entityId: string) => void;
@@ -47,9 +53,11 @@ export const HUD: FC<HUDProps> = ({
   onGoToEntity,
   onSendCommand,
   onContextMenu,
+  onInspectEntity,
   splashNotificationsEnabled,
   onToggleSplashNotifications,
   playerInventory,
+  playerInventoryData,
   onUseItem,
   onDropItem,
   onLogin,
@@ -83,9 +91,11 @@ export const HUD: FC<HUDProps> = ({
         onGoToEntity={onGoToEntity}
         onSendCommand={onSendCommand}
         onContextMenu={onContextMenu}
+        onInspectEntity={onInspectEntity}
         splashNotificationsEnabled={splashNotificationsEnabled}
         onToggleSplashNotifications={onToggleSplashNotifications}
         playerInventory={playerInventory}
+        playerInventoryData={playerInventoryData}
         onUseItem={onUseItem}
         onDropItem={onDropItem}
         onLogin={onLogin}

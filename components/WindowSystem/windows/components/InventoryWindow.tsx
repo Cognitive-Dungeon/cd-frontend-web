@@ -39,6 +39,11 @@ interface InventoryWindowProps {
   items: Item[];
   onUseItem?: (item: Item, targetEntityId?: string) => void;
   onDropItem?: (item: Item) => void;
+  inventoryData?: {
+    maxSlots?: number;
+    currentWeight?: number;
+    maxWeight?: number;
+  } | null;
 }
 
 interface ContextMenuState {
@@ -51,6 +56,7 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
   items,
   onUseItem,
   onDropItem,
+  inventoryData,
 }) => {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [draggedItem, setDraggedItem] = useState<Item | null>(null);
@@ -142,9 +148,35 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
         )}
       </div>
 
-      {/* Item Count */}
-      <div className="absolute bottom-2 right-2 text-gray-400 text-xs px-2 py-1 pointer-events-none">
-        {items.length} item{items.length !== 1 ? "s" : ""}
+      {/* Inventory Stats Footer */}
+      <div className="border-t border-neutral-700 px-4 py-2 bg-neutral-900">
+        <div className="flex items-center justify-between text-xs text-gray-400">
+          <div className="flex items-center gap-4">
+            <span>
+              Items: {items.length}
+              {inventoryData?.maxSlots && ` / ${inventoryData.maxSlots}`}
+            </span>
+            {inventoryData?.currentWeight !== undefined && (
+              <span>
+                Weight: {inventoryData.currentWeight}
+                {inventoryData?.maxWeight && ` / ${inventoryData.maxWeight}`}
+              </span>
+            )}
+          </div>
+          {inventoryData?.maxWeight !== undefined &&
+            inventoryData?.currentWeight !== undefined && (
+              <div className="flex items-center gap-2">
+                <div className="w-24 h-2 bg-neutral-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-green-500 to-yellow-500 transition-all"
+                    style={{
+                      width: `${Math.min((inventoryData.currentWeight / inventoryData.maxWeight) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+        </div>
       </div>
 
       {/* Context Menu */}

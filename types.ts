@@ -93,6 +93,8 @@ export interface Entity {
   pos: Position;
   stats: Stats;
   inventory: Item[];
+  inventoryData?: ServerToClientInventoryView | null;
+  equipment?: ServerToClientEquipmentView | null;
   itemData?: Item;
   name: string;
   isHostile: boolean;
