@@ -52,6 +52,7 @@ export interface WindowState {
   beforeDockedState?: { position: WindowPosition; size: WindowSize };
   magneticSnap?: MagneticSnap;
   icon?: React.ReactNode;
+  badge?: string | number; // Badge to display on dock icon
   content: React.ReactNode;
 }
 
@@ -71,6 +72,7 @@ export interface WindowConfig {
   lockHeight?: boolean;
   dockable?: boolean;
   icon?: React.ReactNode;
+  badge?: string | number; // Badge to display on dock icon
   defaultPosition?: WindowPosition;
   defaultSize?: WindowSize;
   minSize?: WindowSize;

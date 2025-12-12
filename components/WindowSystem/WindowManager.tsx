@@ -34,6 +34,7 @@ interface WindowManagerContextType {
   updateWindowPosition: (id: string, position: WindowPosition) => void;
   updateWindowSize: (id: string, size: WindowSize) => void;
   updateWindowContent: (id: string, content: ReactNode) => void;
+  updateWindowBadge: (id: string, badge: string | number | undefined) => void;
   dockWindow: (id: string, position: DockedPosition) => void;
   undockWindow: (id: string) => void;
   getDockedBounds: (position: DockedPosition) => WindowBounds;
@@ -444,6 +445,7 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
           beforeDockedState: undefined,
           magneticSnap: restoredMagneticSnap,
           icon: config.icon,
+          badge: config.badge,
           content: config.content,
         };
 
@@ -587,6 +589,20 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
     );
   }, []);
 
+  const updateWindowBadge = useCallback(
+    (id: string, badge: string | number | undefined) => {
+      setWindows((prev) =>
+        prev.map((w) => {
+          if (w.id === id) {
+            return { ...w, badge };
+          }
+          return w;
+        }),
+      );
+    },
+    [],
+  );
+
   const undockWindow = useCallback((id: string) => {
     setWindows((prev) =>
       prev.map((w) => {
@@ -682,6 +698,7 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
     updateWindowPosition,
     updateWindowSize,
     updateWindowContent,
+    updateWindowBadge,
     dockWindow,
     undockWindow,
     getDockedBounds,

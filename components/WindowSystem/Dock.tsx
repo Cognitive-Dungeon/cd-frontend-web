@@ -45,6 +45,13 @@ const Dock: FC = () => {
           className="absolute -bottom-0.5 -right-0.5 text-gray-400"
         />
       )}
+      {window.badge !== undefined &&
+        window.badge !== null &&
+        window.badge !== "" && (
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-600 text-white text-[10px] font-bold rounded-full border border-neutral-900 shadow-sm">
+            {window.badge}
+          </span>
+        )}
     </button>
   );
 

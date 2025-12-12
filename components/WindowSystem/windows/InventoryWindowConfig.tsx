@@ -24,10 +24,13 @@ export const createInventoryWindowConfig = ({
   onUseItem,
   onDropItem,
 }: CreateInventoryWindowConfigProps): WindowConfig => {
+  const itemCount = items.length;
+
   return {
     id: INVENTORY_WINDOW_ID,
     title: "Inventory",
     icon: <Package size={16} />,
+    badge: itemCount > 0 ? itemCount : undefined,
     defaultPosition: { x: 500, y: 100 },
     defaultSize: { width: 400, height: 500 },
     minSize: { width: 300, height: 300 },

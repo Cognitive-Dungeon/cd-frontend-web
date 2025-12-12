@@ -98,17 +98,20 @@ const WindowSystem: FC<WindowSystemProps> = ({
     minimizeWindow,
     restoreWindow,
     updateWindowContent,
+    updateWindowBadge,
     resetWindowLayout,
   } = useWindowManager();
   const turnOrderBarInitializedRef = useRef(false);
   const loginWindowClosedRef = useRef(false);
   const windowsRef = useRef(windows);
   const prevEntitiesRef = useRef<Entity[]>([]);
-  const handleInspectEntityRef = useRef<(entity: Entity) => void>();
+  const handleInspectEntityRef = useRef<(entity: Entity) => void>(() => {});
 
   // Handle opening entity inspector - update ref on every render
   handleInspectEntityRef.current = (entity: Entity) => {
-    openWindow(createEntityInspectorWindowConfig({ entity, entities }));
+    openWindow(
+      createEntityInspectorWindowConfig({ entity, entities: entities || [] }),
+    );
   };
 
   // Expose stable wrapper through onInspectEntity prop (only once on mount)
@@ -332,12 +335,14 @@ const WindowSystem: FC<WindowSystemProps> = ({
       onDropItem,
     });
     updateWindowContent(INVENTORY_WINDOW_ID, inventoryConfig.content);
+    updateWindowBadge(INVENTORY_WINDOW_ID, inventoryConfig.badge);
   }, [
     playerInventory,
     playerInventoryData,
     onUseItem,
     onDropItem,
     updateWindowContent,
+    updateWindowBadge,
   ]);
 
   // Update EntityInspectorWindow content when entities change
