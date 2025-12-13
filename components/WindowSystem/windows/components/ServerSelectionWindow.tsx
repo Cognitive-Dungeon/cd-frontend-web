@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { Server, Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, Server } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { ServerInfo, ServerStatus } from "../../../../types/server";
 import { ServerManager } from "../../../../types/server";
@@ -73,6 +73,12 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
     await Promise.all(servers.map((server) => checkServer(server)));
     setIsCheckingAll(false);
   }, [servers, checkServer]);
+
+  // Check all servers on mount
+  useEffect(() => {
+    checkAllServers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Add new server
   const handleAddServer = useCallback(() => {
