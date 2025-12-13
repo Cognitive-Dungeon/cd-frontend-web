@@ -12,7 +12,8 @@ import {
   WindowState,
   DockedPosition,
   MinimizeBehavior,
-  MagneticSnap,
+  findClosestSnap,
+  getViewportSnapPointPx,
 } from "./types";
 import { useWindowManager } from "./WindowManager";
 
@@ -62,7 +63,7 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
   const [snapZone, setSnapZone] = useState<DockedPosition>("none");
 
   const SNAP_THRESHOLD = 20;
-  const MAGNETIC_THRESHOLD = 10;
+  const MAGNETIC_THRESHOLD = 30; // Threshold for 9-point snap system
 
   // Get current pixel position
   const pixelPosition = getWindowPixelPosition(windowState);
@@ -125,49 +126,48 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
         return { x, y };
       }
 
-      let newX = x;
-      let newY = y;
       const viewportWidth = globalThis.innerWidth;
       const viewportHeight = globalThis.innerHeight;
 
-      const magneticSnap: MagneticSnap = {};
+      // Find closest snap using 9-point system
+      const snap = findClosestSnap(
+        { x, y },
+        windowState.size,
+        viewportWidth,
+        viewportHeight,
+        MAGNETIC_THRESHOLD,
+      );
 
-      // Snap to viewport edges only
-      if (Math.abs(x) < MAGNETIC_THRESHOLD) {
-        newX = 0;
-        magneticSnap.left = true;
-      } else if (
-        Math.abs(x + windowState.size.width - viewportWidth) <
-        MAGNETIC_THRESHOLD
-      ) {
-        newX = viewportWidth - windowState.size.width;
-        magneticSnap.right = true;
+      if (snap) {
+        // Calculate the new position that aligns the snap points
+        const viewportSnapPx = getViewportSnapPointPx(
+          viewportWidth,
+          viewportHeight,
+          snap.viewportPoint,
+        );
+
+        // New top-left = viewport_snap_point - window_snap_offset
+        const newX =
+          viewportSnapPx.x - windowState.size.width * snap.windowPoint.x;
+        const newY =
+          viewportSnapPx.y - windowState.size.height * snap.windowPoint.y;
+
+        // Update magnetic snap state with the snap points
+        updateMagneticSnap(windowState.id, {
+          windowPoint: snap.windowPoint,
+          viewportPoint: snap.viewportPoint,
+        });
+
+        return { x: newX, y: newY };
       }
 
-      if (Math.abs(y) < MAGNETIC_THRESHOLD) {
-        newY = 0;
-        magneticSnap.top = true;
-      } else if (
-        Math.abs(y + windowState.size.height - viewportHeight) <
-        MAGNETIC_THRESHOLD
-      ) {
-        newY = viewportHeight - windowState.size.height;
-        magneticSnap.bottom = true;
-      }
-
-      // Update magnetic snap state
-      if (Object.keys(magneticSnap).length > 0) {
-        updateMagneticSnap(windowState.id, magneticSnap);
-      } else {
-        updateMagneticSnap(windowState.id, {});
-      }
-
-      return { x: newX, y: newY };
+      // No snap - clear magnetic snap state
+      updateMagneticSnap(windowState.id, {});
+      return { x, y };
     },
     [
       windowState.dockable,
-      windowState.size.width,
-      windowState.size.height,
+      windowState.size,
       windowState.id,
       updateMagneticSnap,
     ],

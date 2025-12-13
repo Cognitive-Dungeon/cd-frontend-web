@@ -15,7 +15,10 @@
       "size": { "width": 450, "height": 600 },
       "isMinimized": true,
       "docked": "none",
-      "magneticSnap": { "right": true, "top": true }
+      "magneticSnap": {
+        "windowPoint": { "x": 1, "y": 0 },
+        "viewportPoint": { "x": 1, "y": 0 }
+      }
     },
     "system-dock": {
       "origin": { "x": 0, "y": 1 },
@@ -23,15 +26,21 @@
       "size": { "width": 400, "height": 54 },
       "isMinimized": false,
       "docked": "none",
-      "magneticSnap": { "left": true, "bottom": true }
+      "magneticSnap": {
+        "windowPoint": { "x": 0, "y": 1 },
+        "viewportPoint": { "x": 0, "y": 1 }
+      }
     },
     "turn-order-bar": {
-      "origin": { "x": 0, "y": 1 },
-      "position": { "x": 0, "y": 0.9 },
+      "origin": { "x": 0.5, "y": 0 },
+      "position": { "x": 0.5, "y": 0 },
       "size": { "width": 402, "height": 60 },
       "isMinimized": false,
       "docked": "none",
-      "magneticSnap": { "left": true }
+      "magneticSnap": {
+        "windowPoint": { "x": 0.5, "y": 0 },
+        "viewportPoint": { "x": 0.5, "y": 0 }
+      }
     }
   }
 }

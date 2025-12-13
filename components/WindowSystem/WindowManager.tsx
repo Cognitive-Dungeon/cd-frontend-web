@@ -383,13 +383,33 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
               w.size.height,
             );
 
-            // Get origin based on magnetic snap
-            const newOrigin = getOriginFromMagneticSnap(
-              w.magneticSnap,
-              w.origin,
-            );
+            // Check if we have a snap - if so, use snap points directly
+            if (w.magneticSnap?.windowPoint && w.magneticSnap?.viewportPoint) {
+              // When snapped, origin = windowPoint, position = viewportPoint
+              const newOrigin: WindowOrigin = {
+                x: w.magneticSnap.windowPoint.x,
+                y: w.magneticSnap.windowPoint.y,
+              };
+              const newPosition: WindowPosition = {
+                x: w.magneticSnap.viewportPoint.x,
+                y: w.magneticSnap.viewportPoint.y,
+              };
 
-            // Convert to normalized position
+              saveWindowState(
+                id,
+                newOrigin,
+                newPosition,
+                w.size,
+                w.isMinimized,
+                w.docked,
+                w.magneticSnap,
+              );
+
+              return { ...w, origin: newOrigin, position: newPosition };
+            }
+
+            // No snap - calculate position normally
+            const newOrigin = w.origin;
             const newPosition = calculateNormalizedPosition(
               clampedPx,
               newOrigin,

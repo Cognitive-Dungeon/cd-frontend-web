@@ -17,13 +17,33 @@ export type DockedPosition = "none" | "left" | "right";
 
 export type MinimizeBehavior = "hide" | "collapse";
 
+// 9-point snap system
+// Each point is defined by normalized coordinates (0, 0.5, or 1)
+export type SnapPointValue = 0 | 0.5 | 1;
+
+export interface SnapPoint {
+  x: SnapPointValue;
+  y: SnapPointValue;
+}
+
+// All 9 snap points
+export const SNAP_POINTS: SnapPoint[] = [
+  { x: 0, y: 0 }, // top-left
+  { x: 0.5, y: 0 }, // top-center
+  { x: 1, y: 0 }, // top-right
+  { x: 0, y: 0.5 }, // middle-left
+  { x: 0.5, y: 0.5 }, // center
+  { x: 1, y: 0.5 }, // middle-right
+  { x: 0, y: 1 }, // bottom-left
+  { x: 0.5, y: 1 }, // bottom-center
+  { x: 1, y: 1 }, // bottom-right
+];
+
 export interface MagneticSnap {
-  left?: boolean;
-  right?: boolean;
-  top?: boolean;
-  bottom?: boolean;
-  windowId?: string; // ID of window this is snapped to
-  windowEdge?: "left" | "right" | "top" | "bottom"; // Which edge of target window we're snapped to
+  // Which snap point of the window is snapped
+  windowPoint?: SnapPoint;
+  // Which snap point of the viewport it's snapped to
+  viewportPoint?: SnapPoint;
 }
 
 export interface WindowBounds {
@@ -138,24 +158,98 @@ export function getOriginFromMagneticSnap(
   magneticSnap: MagneticSnap | undefined,
   currentOrigin: WindowOrigin,
 ): WindowOrigin {
-  if (!magneticSnap) {
+  if (!magneticSnap || !magneticSnap.windowPoint) {
     return currentOrigin;
   }
 
-  let originX = currentOrigin.x;
-  let originY = currentOrigin.y;
+  return {
+    x: magneticSnap.windowPoint.x,
+    y: magneticSnap.windowPoint.y,
+  };
+}
 
-  if (magneticSnap.left) {
-    originX = 0;
-  } else if (magneticSnap.right) {
-    originX = 1;
+// Helper to get position from magnetic snap
+export function getPositionFromMagneticSnap(
+  magneticSnap: MagneticSnap | undefined,
+  currentPosition: WindowPosition,
+): WindowPosition {
+  if (!magneticSnap || !magneticSnap.viewportPoint) {
+    return currentPosition;
   }
 
-  if (magneticSnap.top) {
-    originY = 0;
-  } else if (magneticSnap.bottom) {
-    originY = 1;
+  return {
+    x: magneticSnap.viewportPoint.x,
+    y: magneticSnap.viewportPoint.y,
+  };
+}
+
+// Calculate pixel position of a snap point on a window
+export function getWindowSnapPointPx(
+  windowTopLeftPx: { x: number; y: number },
+  windowSize: WindowSize,
+  snapPoint: SnapPoint,
+): { x: number; y: number } {
+  return {
+    x: windowTopLeftPx.x + windowSize.width * snapPoint.x,
+    y: windowTopLeftPx.y + windowSize.height * snapPoint.y,
+  };
+}
+
+// Calculate pixel position of a snap point on the viewport
+export function getViewportSnapPointPx(
+  viewportWidth: number,
+  viewportHeight: number,
+  snapPoint: SnapPoint,
+): { x: number; y: number } {
+  return {
+    x: viewportWidth * snapPoint.x,
+    y: viewportHeight * snapPoint.y,
+  };
+}
+
+// Find the closest snap between window and viewport points
+export function findClosestSnap(
+  windowTopLeftPx: { x: number; y: number },
+  windowSize: WindowSize,
+  viewportWidth: number,
+  viewportHeight: number,
+  threshold: number,
+): {
+  windowPoint: SnapPoint;
+  viewportPoint: SnapPoint;
+  distance: number;
+} | null {
+  let closestSnap: {
+    windowPoint: SnapPoint;
+    viewportPoint: SnapPoint;
+    distance: number;
+  } | null = null;
+
+  for (const windowPoint of SNAP_POINTS) {
+    const windowPx = getWindowSnapPointPx(
+      windowTopLeftPx,
+      windowSize,
+      windowPoint,
+    );
+
+    for (const viewportPoint of SNAP_POINTS) {
+      const viewportPx = getViewportSnapPointPx(
+        viewportWidth,
+        viewportHeight,
+        viewportPoint,
+      );
+
+      const dx = windowPx.x - viewportPx.x;
+      const dy = windowPx.y - viewportPx.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < threshold) {
+        if (!closestSnap || distance < closestSnap.distance) {
+          closestSnap = { windowPoint, viewportPoint, distance };
+        }
+      }
+    }
   }
 
-  return { x: originX, y: originY };
+  return closestSnap;
 }
