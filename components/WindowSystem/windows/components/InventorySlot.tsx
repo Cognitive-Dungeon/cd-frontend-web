@@ -44,6 +44,8 @@ interface InventorySlotProps {
   onDrop?: (item: Item) => void;
 
   className?: string;
+
+  unavailable?: boolean;
 }
 
 export const InventorySlot: FC<InventorySlotProps> = ({
@@ -58,6 +60,8 @@ export const InventorySlot: FC<InventorySlotProps> = ({
   onDrop,
 
   className,
+
+  unavailable = false,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isOver, setIsOver] = useState(false);
@@ -115,7 +119,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
 
   return (
     <div
-      draggable={!!item}
+      draggable={!!item && !unavailable}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
@@ -132,7 +136,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
 
         ${isOver ? "border-cyan-500 bg-cyan-900/20" : ""}
 
-        hover:border-neutral-500
+        ${unavailable ? "opacity-40 cursor-not-allowed" : "hover:border-neutral-500"}
 
         transition-all duration-100
 
@@ -144,13 +148,16 @@ export const InventorySlot: FC<InventorySlotProps> = ({
       `}
       title={
         item
-          ? `${item.name}${item.description ? ` - ${item.description}` : ""}`
+          ? `${item.name}${item.description ? ` - ${item.description}` : ""}${unavailable ? " (Not in inventory)" : ""}`
           : "Empty Slot"
       }
     >
       {item ? (
         <>
-          <div className="text-3xl" style={{ color: getItemColor(item) }}>
+          <div
+            className={`text-3xl ${unavailable ? "grayscale" : ""}`}
+            style={{ color: getItemColor(item) }}
+          >
             {getItemIcon(item)}
           </div>
           <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-[8px] text-center px-1 py-0.5 truncate">

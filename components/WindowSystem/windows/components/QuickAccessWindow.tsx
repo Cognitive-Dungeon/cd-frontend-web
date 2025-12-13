@@ -122,6 +122,11 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
             <InventorySlot
               item={item}
               className="w-[45px] h-[45px]"
+              unavailable={
+                item
+                  ? !inventoryItems.some((invItem) => invItem.id === item.id)
+                  : false
+              }
               onContextMenu={(itm) => {
                 if (itm) {
                   onUsePinnedItem?.(itm);
