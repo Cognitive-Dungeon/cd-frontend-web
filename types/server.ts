@@ -161,7 +161,7 @@ export class ServerManager {
   static getSelectedServerId(): string | null {
     try {
       return localStorage.getItem("cd_selected_server");
-    } catch (error) {
+    } catch {
       return null;
     }
   }

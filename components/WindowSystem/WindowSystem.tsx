@@ -30,7 +30,6 @@ import {
   createInventoryWindowConfig,
   LOGIN_WINDOW_ID,
   createLoginWindowConfig,
-  createJSONViewerWindowConfig,
   ENTITY_INSPECTOR_WINDOW_ID,
   createEntityInspectorWindowConfig,
 } from "./windows";
@@ -46,7 +45,6 @@ interface WindowSystemProps {
   onGoToEntity?: (entityId: string) => void;
   onSendCommand?: (text: string, type: "SAY" | "WHISPER" | "YELL") => void;
   onContextMenu?: (data: ContextMenuData) => void;
-  onOpenJSONViewer?: (data: any, title?: string) => void;
   onInspectEntity?: (handler: (entity: Entity) => void) => void;
   splashNotificationsEnabled: boolean;
   onToggleSplashNotifications: (enabled: boolean) => void;
@@ -80,7 +78,6 @@ const WindowSystem: FC<WindowSystemProps> = ({
   onGoToEntity,
   onSendCommand,
   onContextMenu,
-  onOpenJSONViewer,
   onInspectEntity,
   splashNotificationsEnabled,
   onToggleSplashNotifications,
@@ -143,13 +140,6 @@ const WindowSystem: FC<WindowSystemProps> = ({
       }),
     );
   }, [openWindow, closeWindow]);
-
-  const handleOpenJSONViewer = useCallback(
-    (data: any, title?: string) => {
-      openWindow(createJSONViewerWindowConfig({ data, title }));
-    },
-    [openWindow],
-  );
 
   // Автоматически открываем Dock и Settings при монтировании
   useEffect(() => {

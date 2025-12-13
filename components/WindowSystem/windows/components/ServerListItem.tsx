@@ -1,5 +1,5 @@
-import type { FC } from "react";
 import { Check, RefreshCw, Trash2 } from "lucide-react";
+import type { FC } from "react";
 
 import type { ServerInfo, ServerStatus } from "../../../../types/server";
 

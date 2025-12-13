@@ -1,11 +1,5 @@
-import { FC, useState, useMemo } from "react";
-import {
-  ChevronDown,
-  ChevronRight,
-  Copy,
-  Check,
-  Braces,
-} from "lucide-react";
+import { Braces, Check, ChevronDown, ChevronRight, Copy } from "lucide-react";
+import { FC, useMemo, useState } from "react";
 
 interface JSONViewerProps {
   data: any;
@@ -25,8 +19,12 @@ const JSONNode: FC<JSONNodeProps> = ({ data, keyName, level, isLast }) => {
   const indent = level * 16;
 
   const dataType = useMemo(() => {
-    if (data === null) return "null";
-    if (Array.isArray(data)) return "array";
+    if (data === null) {
+      return "null";
+    }
+    if (Array.isArray(data)) {
+      return "array";
+    }
     return typeof data;
   }, [data]);
 
@@ -38,11 +36,7 @@ const JSONNode: FC<JSONNodeProps> = ({ data, keyName, level, isLast }) => {
   const renderValue = () => {
     switch (dataType) {
       case "string":
-        return (
-          <span className="text-green-400">
-            &quot;{data}&quot;
-          </span>
-        );
+        return <span className="text-green-400">&quot;{data}&quot;</span>;
       case "number":
         return <span className="text-cyan-400">{data}</span>;
       case "boolean":
@@ -141,7 +135,7 @@ export const JSONViewer: FC<JSONViewerProps> = ({ data, title }) => {
   const jsonString = useMemo(() => {
     try {
       return JSON.stringify(data, null, 2);
-    } catch (error) {
+    } catch {
       return "Error serializing data";
     }
   }, [data]);
