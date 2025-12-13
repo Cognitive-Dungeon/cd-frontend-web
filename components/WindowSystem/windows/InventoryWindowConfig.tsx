@@ -39,7 +39,8 @@ export const createInventoryWindowConfig = ({
     title: "Inventory",
     icon: <Package size={16} />,
     badge: itemCount > 0 ? itemCount : undefined,
-    defaultPosition: { x: 500, y: 100 },
+    defaultOrigin: { x: 1, y: 0 }, // top-right corner of window
+    defaultPosition: { x: 0.9, y: 0.1 }, // near top-right of viewport
     defaultSize: { width: 400, height: 500 },
     minSize: { width: 300, height: 300 },
     closeable: false,

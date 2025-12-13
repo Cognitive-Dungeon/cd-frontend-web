@@ -24,7 +24,8 @@ export const createGameLogWindowConfig = ({
     id: GAME_LOG_WINDOW_ID,
     title: "Game Log",
     icon: <MessageSquare size={16} />,
-    defaultPosition: { x: 20, y: 400 },
+    defaultOrigin: { x: 0, y: 0 }, // top-left corner of window
+    defaultPosition: { x: 0.02, y: 0.4 }, // left side, slightly below middle of viewport
     defaultSize: { width: 450, height: 300 },
     minSize: { width: 300, height: 200 },
     closeable: false,

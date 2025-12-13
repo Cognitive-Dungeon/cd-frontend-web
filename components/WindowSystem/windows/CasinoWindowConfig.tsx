@@ -18,10 +18,8 @@ export const createCasinoWindowConfig = ({
   resizable: false,
   showInDock: true,
   lockSize: true,
-  defaultPosition: {
-    x: window.innerWidth / 2 - 250,
-    y: window.innerHeight / 2 - 200,
-  },
+  defaultOrigin: { x: 0.5, y: 0.5 }, // center of window
+  defaultPosition: { x: 0.5, y: 0.5 }, // center of viewport
   defaultSize: { width: 500, height: 400 },
   content: <CasinoWindow onClose={onClose} />,
 });

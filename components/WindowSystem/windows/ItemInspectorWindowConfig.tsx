@@ -18,7 +18,8 @@ export const createItemInspectorWindowConfig = ({
     id: `${ITEM_INSPECTOR_WINDOW_ID}-${item.id}`,
     title: `Inspector: ${item.name}`,
     icon: <FileJson size={16} />,
-    defaultPosition: { x: 100, y: 100 },
+    defaultOrigin: { x: 0, y: 0 }, // top-left corner of window
+    defaultPosition: { x: 0.1, y: 0.1 }, // slightly offset from top-left of viewport
     defaultSize: { width: 500, height: 600 },
     minSize: { width: 400, height: 400 },
     resizable: true,

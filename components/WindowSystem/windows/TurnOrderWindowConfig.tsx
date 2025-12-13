@@ -25,7 +25,8 @@ export const createTurnOrderWindowConfig = ({
   resizable: true,
   showInDock: true,
   icon: <Users size={20} />,
-  defaultPosition: { x: 100, y: 100 },
+  defaultOrigin: { x: 0, y: 0 }, // top-left corner of window
+  defaultPosition: { x: 0.1, y: 0.1 }, // slightly offset from top-left of viewport
   defaultSize: { width: 400, height: 600 },
   content: (
     <TurnOrderWindow

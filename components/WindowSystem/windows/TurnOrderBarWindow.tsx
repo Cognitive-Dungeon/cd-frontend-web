@@ -30,7 +30,8 @@ export const createTurnOrderBarWindowConfig = ({
   showInDock: false,
   decorated: false,
   lockHeight: true,
-  defaultPosition: { x: 450, y: 10 },
+  defaultOrigin: { x: 0.5, y: 0 }, // top-center of window
+  defaultPosition: { x: 0.5, y: 0 }, // top-center of viewport
   defaultSize: { width: window.innerWidth - 900, height: 60 },
   content: (
     <TurnOrderBar

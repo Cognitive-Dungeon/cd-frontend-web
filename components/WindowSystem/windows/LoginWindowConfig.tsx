@@ -27,7 +27,8 @@ export const createLoginWindowConfig = ({
     id: LOGIN_WINDOW_ID,
     title: "Login",
     icon: <LogIn size={16} />,
-    defaultPosition: { x: 350, y: 150 },
+    defaultOrigin: { x: 0.5, y: 0.5 }, // center of window
+    defaultPosition: { x: 0.5, y: 0.4 }, // slightly above center of viewport
     defaultSize: { width: 500, height },
     closeable: isConnected,
     minimizable: isConnected,

@@ -2,9 +2,12 @@ import {
   WindowsStorage,
   StoredWindowState,
   WindowPosition,
+  WindowOrigin,
   WindowSize,
   DockedPosition,
   MagneticSnap,
+  calculateWindowTopLeftPx,
+  calculateNormalizedPosition,
 } from "./types";
 
 const STORAGE_KEY = "cd-window-system";
@@ -32,6 +35,7 @@ export const saveWindowsState = (state: WindowsStorage): void => {
 
 export const saveWindowState = (
   windowId: string,
+  origin: WindowOrigin,
   position: WindowPosition,
   size: WindowSize,
   isMinimized: boolean,
@@ -40,6 +44,7 @@ export const saveWindowState = (
 ): void => {
   const currentState = loadWindowsState();
   currentState[windowId] = {
+    origin,
     position,
     size,
     isMinimized,
@@ -119,29 +124,99 @@ export const resetToDefaultLayout = async (): Promise<boolean> => {
   return true;
 };
 
-export const clampPosition = (
-  position: WindowPosition,
+// Clamp position in pixel coordinates to keep window within viewport
+export const clampPositionPx = (
+  topLeftPx: { x: number; y: number },
   windowWidth: number,
   windowHeight: number,
-): WindowPosition => {
-  // Получаем размеры вьюпорта
+): { x: number; y: number } => {
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
-  // Вычисляем границы для позиции окна
-  // Окно должно полностью оставаться в пределах вьюпорта
   const minX = 0;
   const maxX = Math.max(0, viewportWidth - windowWidth);
-
   const minY = 0;
   const maxY = Math.max(0, viewportHeight - windowHeight);
 
-  // Ограничиваем позицию окна в этих пределах
-  const clampedX = Math.max(minX, Math.min(position.x, maxX));
-  const clampedY = Math.max(minY, Math.min(position.y, maxY));
+  const clampedX = Math.max(minX, Math.min(topLeftPx.x, maxX));
+  const clampedY = Math.max(minY, Math.min(topLeftPx.y, maxY));
 
   return {
     x: clampedX,
     y: clampedY,
   };
+};
+
+// Calculate pixel position from origin/position and clamp it
+export const getClampedPixelPosition = (
+  origin: WindowOrigin,
+  position: WindowPosition,
+  windowSize: WindowSize,
+): { x: number; y: number } => {
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  const topLeftPx = calculateWindowTopLeftPx(
+    origin,
+    position,
+    windowSize,
+    viewportWidth,
+    viewportHeight,
+  );
+
+  return clampPositionPx(topLeftPx, windowSize.width, windowSize.height);
+};
+
+// Update normalized position after clamping to keep consistency
+export const clampAndUpdatePosition = (
+  origin: WindowOrigin,
+  position: WindowPosition,
+  windowSize: WindowSize,
+): { clampedPx: { x: number; y: number }; updatedPosition: WindowPosition } => {
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  const clampedPx = getClampedPixelPosition(origin, position, windowSize);
+
+  const updatedPosition = calculateNormalizedPosition(
+    clampedPx,
+    origin,
+    windowSize,
+    viewportWidth,
+    viewportHeight,
+  );
+
+  return { clampedPx, updatedPosition };
+};
+
+// Convert pixel position to normalized position with given origin
+export const pixelToNormalizedPosition = (
+  topLeftPx: { x: number; y: number },
+  origin: WindowOrigin,
+  windowSize: WindowSize,
+): WindowPosition => {
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  return calculateNormalizedPosition(
+    topLeftPx,
+    origin,
+    windowSize,
+    viewportWidth,
+    viewportHeight,
+  );
+};
+
+// Legacy compatibility: clampPosition that works with the new system
+export const clampPosition = (
+  origin: WindowOrigin,
+  position: WindowPosition,
+  windowWidth: number,
+  windowHeight: number,
+): { origin: WindowOrigin; position: WindowPosition } => {
+  const { updatedPosition } = clampAndUpdatePosition(origin, position, {
+    width: windowWidth,
+    height: windowHeight,
+  });
+  return { origin, position: updatedPosition };
 };

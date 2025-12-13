@@ -43,7 +43,8 @@ export const createQuickAccessWindowConfig = ({
     title: "",
     icon: <Pin size={16} />,
     badge: pinnedCount > 0 ? pinnedCount : undefined,
-    defaultPosition: { x: 920, y: 100 },
+    defaultOrigin: { x: 0.5, y: 0 }, // top-center of window
+    defaultPosition: { x: 0.5, y: 0.1 }, // top-center of viewport, slightly below edge
     defaultSize: { width: 350, height: 55 },
     minSize: { width: 350, height: 55 },
     closeable: false,

@@ -8,7 +8,12 @@ import {
   useContext,
 } from "react";
 
-import { WindowState, DockedPosition, MinimizeBehavior } from "./types";
+import {
+  WindowState,
+  DockedPosition,
+  MinimizeBehavior,
+  MagneticSnap,
+} from "./types";
 import { useWindowManager } from "./WindowManager";
 
 interface WindowProps {
@@ -30,19 +35,20 @@ export const WindowContext = createContext<WindowContextType>({
 
 export const useWindowContext = () => useContext(WindowContext);
 
-const Window: FC<WindowProps> = ({ window }) => {
+const Window: FC<WindowProps> = ({ window: windowState }) => {
   const {
     closeWindow,
     focusWindow,
     minimizeWindow,
     restoreWindow,
-    updateWindowPosition,
+    updateWindowPositionPx,
     updateWindowSize,
-    windows,
     dockWindow,
     undockWindow,
     updateMagneticSnap,
+    getWindowPixelPosition,
   } = useWindowManager();
+
   const windowRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -57,6 +63,9 @@ const Window: FC<WindowProps> = ({ window }) => {
 
   const SNAP_THRESHOLD = 20;
   const MAGNETIC_THRESHOLD = 10;
+
+  // Get current pixel position
+  const pixelPosition = getWindowPixelPosition(windowState);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -78,22 +87,22 @@ const Window: FC<WindowProps> = ({ window }) => {
       return;
     }
 
-    focusWindow(window.id);
+    focusWindow(windowState.id);
 
-    if (window.docked !== "none" && window.dockable !== false) {
-      undockWindow(window.id);
+    if (windowState.docked !== "none" && windowState.dockable !== false) {
+      undockWindow(windowState.id);
     }
 
     setIsDragging(true);
     setDragOffset({
-      x: e.clientX - window.position.x,
-      y: e.clientY - window.position.y,
+      x: e.clientX - pixelPosition.x,
+      y: e.clientY - pixelPosition.y,
     });
   };
 
   const detectSnapZone = useCallback(
     (mouseX: number): DockedPosition => {
-      if (!window.dockable) {
+      if (!windowState.dockable) {
         return "none";
       }
 
@@ -107,12 +116,12 @@ const Window: FC<WindowProps> = ({ window }) => {
 
       return "none";
     },
-    [window.dockable],
+    [windowState.dockable],
   );
 
   const applyMagneticSnap = useCallback(
     (x: number, y: number): { x: number; y: number } => {
-      if (!window.dockable) {
+      if (!windowState.dockable) {
         return { x, y };
       }
 
@@ -121,17 +130,17 @@ const Window: FC<WindowProps> = ({ window }) => {
       const viewportWidth = globalThis.innerWidth;
       const viewportHeight = globalThis.innerHeight;
 
-      const magneticSnap: any = {};
-      let snappedToWindow: string | undefined;
+      const magneticSnap: MagneticSnap = {};
 
-      // Snap to screen edges
+      // Snap to viewport edges only
       if (Math.abs(x) < MAGNETIC_THRESHOLD) {
         newX = 0;
         magneticSnap.left = true;
       } else if (
-        Math.abs(x + window.size.width - viewportWidth) < MAGNETIC_THRESHOLD
+        Math.abs(x + windowState.size.width - viewportWidth) <
+        MAGNETIC_THRESHOLD
       ) {
-        newX = viewportWidth - window.size.width;
+        newX = viewportWidth - windowState.size.width;
         magneticSnap.right = true;
       }
 
@@ -139,78 +148,27 @@ const Window: FC<WindowProps> = ({ window }) => {
         newY = 0;
         magneticSnap.top = true;
       } else if (
-        Math.abs(y + window.size.height - viewportHeight) < MAGNETIC_THRESHOLD
+        Math.abs(y + windowState.size.height - viewportHeight) <
+        MAGNETIC_THRESHOLD
       ) {
-        newY = viewportHeight - window.size.height;
+        newY = viewportHeight - windowState.size.height;
         magneticSnap.bottom = true;
       }
 
-      // Snap to other windows
-      windows.forEach((otherWindow) => {
-        if (otherWindow.id === window.id || otherWindow.isMinimized) {
-          return;
-        }
-
-        const otherRight = otherWindow.position.x + otherWindow.size.width;
-        const otherBottom = otherWindow.position.y + otherWindow.size.height;
-        const thisRight = x + window.size.width;
-        const thisBottom = y + window.size.height;
-
-        const verticalOverlap = !(
-          y > otherBottom || thisBottom < otherWindow.position.y
-        );
-        if (verticalOverlap) {
-          if (
-            Math.abs(thisRight - otherWindow.position.x) < MAGNETIC_THRESHOLD
-          ) {
-            newX = otherWindow.position.x - window.size.width;
-            snappedToWindow = otherWindow.id;
-            magneticSnap.windowEdge = "left";
-          }
-          if (Math.abs(x - otherRight) < MAGNETIC_THRESHOLD) {
-            newX = otherRight;
-            snappedToWindow = otherWindow.id;
-            magneticSnap.windowEdge = "right";
-          }
-        }
-
-        const horizontalOverlap = !(
-          x > otherRight || thisRight < otherWindow.position.x
-        );
-        if (horizontalOverlap) {
-          if (
-            Math.abs(thisBottom - otherWindow.position.y) < MAGNETIC_THRESHOLD
-          ) {
-            newY = otherWindow.position.y - window.size.height;
-            snappedToWindow = otherWindow.id;
-            magneticSnap.windowEdge = "top";
-          }
-          if (Math.abs(y - otherBottom) < MAGNETIC_THRESHOLD) {
-            newY = otherBottom;
-            snappedToWindow = otherWindow.id;
-            magneticSnap.windowEdge = "bottom";
-          }
-        }
-      });
-
       // Update magnetic snap state
-      if (Object.keys(magneticSnap).length > 0 || snappedToWindow) {
-        if (snappedToWindow) {
-          magneticSnap.windowId = snappedToWindow;
-        }
-        updateMagneticSnap(window.id, magneticSnap);
+      if (Object.keys(magneticSnap).length > 0) {
+        updateMagneticSnap(windowState.id, magneticSnap);
       } else {
-        updateMagneticSnap(window.id, {});
+        updateMagneticSnap(windowState.id, {});
       }
 
       return { x: newX, y: newY };
     },
     [
-      window.dockable,
-      window.size.width,
-      window.size.height,
-      window.id,
-      windows,
+      windowState.dockable,
+      windowState.size.width,
+      windowState.size.height,
+      windowState.id,
       updateMagneticSnap,
     ],
   );
@@ -228,15 +186,15 @@ const Window: FC<WindowProps> = ({ window }) => {
       setSnapZone(zone);
 
       const snapped = applyMagneticSnap(newX, newY);
-      updateWindowPosition(window.id, { x: snapped.x, y: snapped.y });
+      updateWindowPositionPx(windowState.id, { x: snapped.x, y: snapped.y });
     };
 
     const handleMouseUp = (e: MouseEvent) => {
       setIsDragging(false);
 
       const zone = detectSnapZone(e.clientX);
-      if (zone !== "none" && window.dockable !== false) {
-        dockWindow(window.id, zone);
+      if (zone !== "none" && windowState.dockable !== false) {
+        dockWindow(windowState.id, zone);
       }
 
       setSnapZone("none");
@@ -252,16 +210,20 @@ const Window: FC<WindowProps> = ({ window }) => {
   }, [
     isDragging,
     dragOffset,
-    window.id,
-    window.dockable,
-    updateWindowPosition,
+    windowState.id,
+    windowState.dockable,
+    updateWindowPositionPx,
     dockWindow,
     applyMagneticSnap,
     detectSnapZone,
   ]);
 
   const handleResizeMouseDown = (e: React.MouseEvent) => {
-    if (!window.resizable && !window.resizableX && !window.resizableY) {
+    if (
+      !windowState.resizable &&
+      !windowState.resizableX &&
+      !windowState.resizableY
+    ) {
       return;
     }
 
@@ -269,8 +231,8 @@ const Window: FC<WindowProps> = ({ window }) => {
     e.stopPropagation();
     setIsResizing(true);
     setResizeStart({
-      width: window.size.width,
-      height: window.size.height,
+      width: windowState.size.width,
+      height: windowState.size.height,
       mouseX: e.clientX,
       mouseY: e.clientY,
     });
@@ -286,15 +248,15 @@ const Window: FC<WindowProps> = ({ window }) => {
       const deltaY = e.clientY - resizeStart.mouseY;
 
       const newWidth =
-        window.resizableX !== false
+        windowState.resizableX !== false
           ? Math.max(200, resizeStart.width + deltaX)
           : resizeStart.width;
       const newHeight =
-        window.resizableY !== false
+        windowState.resizableY !== false
           ? Math.max(150, resizeStart.height + deltaY)
           : resizeStart.height;
 
-      updateWindowSize(window.id, { width: newWidth, height: newHeight });
+      updateWindowSize(windowState.id, { width: newWidth, height: newHeight });
     };
 
     const handleMouseUp = () => {
@@ -311,23 +273,23 @@ const Window: FC<WindowProps> = ({ window }) => {
   }, [
     isResizing,
     resizeStart,
-    window.id,
+    windowState.id,
     updateWindowSize,
-    window.resizableX,
-    window.resizableY,
+    windowState.resizableX,
+    windowState.resizableY,
   ]);
 
-  if (window.isMinimized && window.minimizeBehavior !== "collapse") {
+  if (windowState.isMinimized && windowState.minimizeBehavior !== "collapse") {
     return null;
   }
 
   return (
     <WindowContext.Provider
       value={{
-        isMinimized: window.isMinimized,
-        minimizeBehavior: window.minimizeBehavior,
-        windowId: window.id,
-        restoreWindow: () => restoreWindow(window.id),
+        isMinimized: windowState.isMinimized,
+        minimizeBehavior: windowState.minimizeBehavior,
+        windowId: windowState.id,
+        restoreWindow: () => restoreWindow(windowState.id),
       }}
     >
       {isDragging && snapZone !== "none" && (
@@ -377,59 +339,67 @@ const Window: FC<WindowProps> = ({ window }) => {
         ref={windowRef}
         data-window
         className={`absolute overflow-hidden transition-all ${
-          window.docked !== "none" ? "duration-300" : "duration-0"
+          windowState.docked !== "none" ? "duration-300" : "duration-0"
         } ${
-          window.isMinimized && window.minimizeBehavior === "collapse"
+          windowState.isMinimized && windowState.minimizeBehavior === "collapse"
             ? "bg-black/40 rounded-lg backdrop-blur-sm border border-neutral-700/50"
-            : window.decorated
+            : windowState.decorated
               ? `bg-neutral-900 border rounded-lg ${
-                  window.isFocused ? "border-gray-500" : "border-neutral-700"
+                  windowState.isFocused
+                    ? "border-gray-500"
+                    : "border-neutral-700"
                 }`
               : "bg-transparent"
         }`}
         style={{
-          left: `${window.position.x}px`,
+          left: `${pixelPosition.x}px`,
           top:
-            window.isMinimized && window.minimizeBehavior === "collapse"
+            windowState.isMinimized &&
+            windowState.minimizeBehavior === "collapse"
               ? "auto"
-              : `${window.position.y}px`,
+              : `${pixelPosition.y}px`,
           bottom:
-            window.isMinimized && window.minimizeBehavior === "collapse"
-              ? `${globalThis.innerHeight - (window.position.y + window.size.height)}px`
+            windowState.isMinimized &&
+            windowState.minimizeBehavior === "collapse"
+              ? `${globalThis.innerHeight - (pixelPosition.y + windowState.size.height)}px`
               : "auto",
-          width: `${window.size.width}px`,
+          width: `${windowState.size.width}px`,
           height:
-            window.isMinimized && window.minimizeBehavior === "collapse"
+            windowState.isMinimized &&
+            windowState.minimizeBehavior === "collapse"
               ? "auto"
-              : `${window.size.height}px`,
-          zIndex: window.zIndex,
+              : `${windowState.size.height}px`,
+          zIndex: windowState.zIndex,
           cursor: isDragging
             ? "grabbing"
-            : window.decorated
+            : windowState.decorated
               ? "default"
               : "grab",
           boxShadow:
-            window.decorated && !window.isMinimized
-              ? window.isFocused
+            windowState.decorated && !windowState.isMinimized
+              ? windowState.isFocused
                 ? "0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 20px rgba(0, 0, 0, 0.5), 0 8px 40px rgba(0, 0, 0, 0.4), 0 20px 60px rgba(0, 0, 0, 0.3)"
                 : "0 0 0 1px rgba(255, 255, 255, 0.04), 0 4px 15px rgba(0, 0, 0, 0.4), 0 8px 30px rgba(0, 0, 0, 0.3)"
               : undefined,
         }}
         onMouseDown={(e) => {
-          if (!window.decorated) {
+          if (!windowState.decorated) {
             handleMouseDown(e);
           } else {
-            focusWindow(window.id);
+            focusWindow(windowState.id);
           }
         }}
       >
         {/* Заголовок окна (только если decorated === true) */}
-        {window.decorated &&
-          !(window.isMinimized && window.minimizeBehavior === "collapse") && (
+        {windowState.decorated &&
+          !(
+            windowState.isMinimized &&
+            windowState.minimizeBehavior === "collapse"
+          ) && (
             <div
               data-window-header
               className={`flex items-center justify-between px-3 py-2 border-b select-none ${
-                window.isFocused
+                windowState.isFocused
                   ? "bg-neutral-800 border-neutral-700"
                   : "bg-neutral-850 border-neutral-750"
               }`}
@@ -437,13 +407,13 @@ const Window: FC<WindowProps> = ({ window }) => {
               style={{ cursor: isDragging ? "grabbing" : "grab" }}
             >
               <span className="text-sm font-medium text-gray-300">
-                {window.title}
+                {windowState.title}
               </span>
               <div className="flex items-center gap-1">
                 {/* Кнопка свернуть (только если minimizable === true) */}
-                {window.minimizable && (
+                {windowState.minimizable && (
                   <button
-                    onClick={() => minimizeWindow(window.id)}
+                    onClick={() => minimizeWindow(windowState.id)}
                     className="w-6 h-6 flex items-center justify-center rounded hover:bg-neutral-700 transition-colors"
                     title="Minimize"
                   >
@@ -463,9 +433,9 @@ const Window: FC<WindowProps> = ({ window }) => {
                   </button>
                 )}
                 {/* Кнопка закрыть (только если closeable === true) */}
-                {window.closeable && (
+                {windowState.closeable && (
                   <button
-                    onClick={() => closeWindow(window.id)}
+                    onClick={() => closeWindow(windowState.id)}
                     className="w-6 h-6 flex items-center justify-center rounded hover:bg-red-600 transition-colors"
                     title="Close"
                   >
@@ -491,25 +461,28 @@ const Window: FC<WindowProps> = ({ window }) => {
         {/* Содержимое окна */}
         <div
           className={`w-full overflow-auto ${
-            window.isMinimized && window.minimizeBehavior === "collapse"
+            windowState.isMinimized &&
+            windowState.minimizeBehavior === "collapse"
               ? "h-auto bg-transparent"
-              : window.decorated
+              : windowState.decorated
                 ? "h-[calc(100%-40px)] bg-neutral-900"
                 : "h-full"
           }`}
         >
-          {window.content}
+          {windowState.content}
         </div>
 
         {/* Resize handle (только если resizable или resizableX/resizableY === true) */}
-        {!window.isMinimized &&
-          (window.resizable || window.resizableX || window.resizableY) && (
+        {!windowState.isMinimized &&
+          (windowState.resizable ||
+            windowState.resizableX ||
+            windowState.resizableY) && (
             <div
               onMouseDown={handleResizeMouseDown}
               className={`absolute bottom-0 right-0 w-5 h-5 group ${
-                window.resizableX && window.resizableY
+                windowState.resizableX && windowState.resizableY
                   ? "cursor-nwse-resize"
-                  : window.resizableX
+                  : windowState.resizableX
                     ? "cursor-ew-resize"
                     : "cursor-ns-resize"
               }`}

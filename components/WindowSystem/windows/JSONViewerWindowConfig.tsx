@@ -19,7 +19,8 @@ export const createJSONViewerWindowConfig = ({
     id: `${JSON_VIEWER_WINDOW_ID}-${Date.now()}`,
     title: title || "JSON Viewer",
     icon: <Code size={16} />,
-    defaultPosition: { x: 600, y: 200 },
+    defaultOrigin: { x: 0.5, y: 0.5 }, // center of window
+    defaultPosition: { x: 0.5, y: 0.5 }, // center of viewport
     defaultSize: { width: 500, height: 600 },
     minSize: { width: 400, height: 400 },
     content: <JSONViewer data={data} title={title} />,

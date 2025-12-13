@@ -12,7 +12,8 @@ export const createDockWindowConfig = (): WindowConfig => ({
   showInDock: false,
   decorated: false,
   lockSize: true,
-  defaultPosition: { x: 20, y: window.innerHeight - 80 },
+  defaultOrigin: { x: 0, y: 1 }, // bottom-left corner of window
+  defaultPosition: { x: 0, y: 1 }, // bottom-left of viewport
   defaultSize: { width: 400, height: 54 },
   content: <Dock />,
 });

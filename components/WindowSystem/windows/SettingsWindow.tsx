@@ -29,7 +29,8 @@ export const createSettingsWindowConfig = ({
   resizable: true,
   pinned: true,
   icon: <Settings size={20} />,
-  defaultPosition: { x: 400, y: 100 },
+  defaultOrigin: { x: 0, y: 0 }, // top-left corner of window
+  defaultPosition: { x: 0.1, y: 0.1 }, // slightly offset from top-left of viewport
   defaultSize: { width: 600, height: 500 },
   content: (
     <KeybindingsSettings
