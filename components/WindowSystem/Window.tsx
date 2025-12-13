@@ -12,8 +12,11 @@ import {
   WindowState,
   DockedPosition,
   MinimizeBehavior,
+  SnapPoint,
+  SNAP_POINTS,
   findClosestSnap,
   getViewportSnapPointPx,
+  getWindowSnapPointPx,
 } from "./types";
 import { useWindowManager } from "./WindowManager";
 
@@ -53,6 +56,10 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
   const windowRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragPosition, setDragPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeStart, setResizeStart] = useState({
     width: 0,
@@ -61,12 +68,18 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
     mouseY: 0,
   });
   const [snapZone, setSnapZone] = useState<DockedPosition>("none");
+  const [activeSnap, setActiveSnap] = useState<{
+    windowPoint: SnapPoint;
+    viewportPoint: SnapPoint;
+  } | null>(null);
 
   const SNAP_THRESHOLD = 20;
   const MAGNETIC_THRESHOLD = 30; // Threshold for 9-point snap system
 
-  // Get current pixel position
-  const pixelPosition = getWindowPixelPosition(windowState);
+  // Get current pixel position - use drag position during drag for immediate feedback
+  const basePixelPosition = getWindowPixelPosition(windowState);
+  const pixelPosition =
+    isDragging && dragPosition ? dragPosition : basePixelPosition;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -158,11 +171,18 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
           viewportPoint: snap.viewportPoint,
         });
 
+        // Update visual snap indicator
+        setActiveSnap({
+          windowPoint: snap.windowPoint,
+          viewportPoint: snap.viewportPoint,
+        });
+
         return { x: newX, y: newY };
       }
 
-      // No snap - clear magnetic snap state
+      // No snap - clear magnetic snap state and visual indicator
       updateMagneticSnap(windowState.id, {});
+      setActiveSnap(null);
       return { x, y };
     },
     [
@@ -186,11 +206,14 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
       setSnapZone(zone);
 
       const snapped = applyMagneticSnap(newX, newY);
+      setDragPosition(snapped);
       updateWindowPositionPx(windowState.id, { x: snapped.x, y: snapped.y });
     };
 
     const handleMouseUp = (e: MouseEvent) => {
       setIsDragging(false);
+      setDragPosition(null);
+      setActiveSnap(null);
 
       const zone = detectSnapZone(e.clientX);
       if (zone !== "none" && windowState.dockable !== false) {
@@ -292,6 +315,7 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
         restoreWindow: () => restoreWindow(windowState.id),
       }}
     >
+      {/* Dock zone visualization */}
       {isDragging && snapZone !== "none" && (
         <div className="fixed inset-0 pointer-events-none z-[9998]">
           {snapZone === "left" && (
@@ -331,6 +355,104 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
                 </div>
               </div>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* 9-point snap visualization */}
+      {isDragging && (
+        <div className="fixed inset-0 pointer-events-none z-[9997]">
+          {/* Viewport snap points */}
+          {SNAP_POINTS.map((point, index) => {
+            const vpPoint = getViewportSnapPointPx(
+              globalThis.innerWidth,
+              globalThis.innerHeight,
+              point,
+            );
+            const isActive =
+              activeSnap?.viewportPoint.x === point.x &&
+              activeSnap?.viewportPoint.y === point.y;
+
+            return (
+              <div
+                key={`vp-${index}`}
+                className={`absolute transition-all duration-150 ${
+                  isActive
+                    ? "w-4 h-4 bg-emerald-400 border-2 border-white shadow-lg shadow-emerald-400/50"
+                    : "w-2 h-2 bg-white/40 border border-white/60"
+                }`}
+                style={{
+                  left: vpPoint.x,
+                  top: vpPoint.y,
+                  transform: "translate(-50%, -50%)",
+                  borderRadius: "50%",
+                }}
+              />
+            );
+          })}
+
+          {/* Window snap points */}
+          {SNAP_POINTS.map((point, index) => {
+            const winPoint = getWindowSnapPointPx(
+              pixelPosition,
+              windowState.size,
+              point,
+            );
+            const isActive =
+              activeSnap?.windowPoint.x === point.x &&
+              activeSnap?.windowPoint.y === point.y;
+
+            return (
+              <div
+                key={`win-${index}`}
+                className={`absolute transition-all duration-150 ${
+                  isActive
+                    ? "w-4 h-4 bg-amber-400 border-2 border-white shadow-lg shadow-amber-400/50"
+                    : "w-2 h-2 bg-amber-500/40 border border-amber-300/60"
+                }`}
+                style={{
+                  left: winPoint.x,
+                  top: winPoint.y,
+                  transform: "translate(-50%, -50%)",
+                  borderRadius: "50%",
+                }}
+              />
+            );
+          })}
+
+          {/* Connection line when snapped */}
+          {activeSnap && (
+            <>
+              {(() => {
+                const vpPoint = getViewportSnapPointPx(
+                  globalThis.innerWidth,
+                  globalThis.innerHeight,
+                  activeSnap.viewportPoint,
+                );
+                const winPoint = getWindowSnapPointPx(
+                  pixelPosition,
+                  windowState.size,
+                  activeSnap.windowPoint,
+                );
+                return (
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    style={{ overflow: "visible" }}
+                  >
+                    <line
+                      x1={winPoint.x}
+                      y1={winPoint.y}
+                      x2={vpPoint.x}
+                      y2={vpPoint.y}
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeDasharray="4 4"
+                      opacity="0.6"
+                    />
+                  </svg>
+                );
+              })()}
+            </>
           )}
         </div>
       )}
