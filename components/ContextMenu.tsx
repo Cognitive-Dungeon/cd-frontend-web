@@ -8,9 +8,10 @@ import {
   Hand,
   FileJson,
 } from "lucide-react";
-import { FC, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
+import { useContextMenuPosition } from "../hooks";
 import { ContextMenuData, Position, Entity } from "../types";
 
 interface ContextMenuProps {
@@ -35,44 +36,13 @@ export const ContextMenu: FC<ContextMenuProps> = ({
   onInspectEntity,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ left: data.x, top: data.y });
 
-  // Adjust position to keep menu within viewport bounds
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useLayoutEffect(() => {
-    if (!menuRef.current) {
-      return;
-    }
-
-    const menuRect = menuRef.current.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    let left = data.x;
-    let top = data.y;
-
-    // Check if menu goes beyond right edge
-    if (left + menuRect.width > viewportWidth) {
-      left = viewportWidth - menuRect.width - 10; // 10px padding from edge
-    }
-
-    // Check if menu goes beyond bottom edge
-    if (top + menuRect.height > viewportHeight) {
-      top = viewportHeight - menuRect.height - 10; // 10px padding from edge
-    }
-
-    // Check if menu goes beyond left edge
-    if (left < 0) {
-      left = 10; // 10px padding from edge
-    }
-
-    // Check if menu goes beyond top edge
-    if (top < 0) {
-      top = 10; // 10px padding from edge
-    }
-
-    setPosition({ left, top });
-  }, [data.x, data.y]);
+  const position = useContextMenuPosition({
+    initialPosition: { x: data.x, y: data.y },
+    menuRef,
+    isOpen: true,
+    approximateSize: { width: 200, height: 400 },
+  });
 
   // Close on click outside
   useEffect(() => {
@@ -91,7 +61,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({
       ref={menuRef}
       data-context-menu
       className="fixed bg-neutral-800 border border-neutral-600 rounded shadow-xl z-[9999] min-w-48"
-      style={{ left: position.left, top: position.top }}
+      style={{ left: `${position.x}px`, top: `${position.y}px` }}
     >
       <div className="p-2 border-b border-neutral-700 text-xs text-gray-400">
         Клетка ({data.cellX}, {data.cellY})

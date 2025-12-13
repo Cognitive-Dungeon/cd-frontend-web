@@ -215,6 +215,18 @@ const WindowSystem: FC<WindowSystemProps> = ({
           totalSlots: 6,
 
           onUsePinnedItem: (item) => onUseItem?.(item),
+          onDropItem: (item) => onDropItem?.(item),
+          onEquipItem: (item) => onEquipItem?.(item),
+          onUnequipItem: (item) => onUnequipItem?.(item),
+          onInspectItem: (item) => {
+            // TODO: Open item in inspector window
+            console.log("Inspect item:", item);
+          },
+          equipment: playerEquipment
+            ? ([playerEquipment.weapon, playerEquipment.armor].filter(
+                Boolean,
+              ) as Item[])
+            : [],
         }),
       );
     }
@@ -399,9 +411,29 @@ const WindowSystem: FC<WindowSystemProps> = ({
       inventoryItems: playerInventory,
       totalSlots: 6,
       onUsePinnedItem: (item) => onUseItem?.(item),
+      onDropItem: (item) => onDropItem?.(item),
+      onEquipItem: (item) => onEquipItem?.(item),
+      onUnequipItem: (item) => onUnequipItem?.(item),
+      onInspectItem: (item) => {
+        // TODO: Open item in inspector window
+        console.log("Inspect item:", item);
+      },
+      equipment: playerEquipment
+        ? ([playerEquipment.weapon, playerEquipment.armor].filter(
+            Boolean,
+          ) as Item[])
+        : [],
     });
     updateWindowContent(QUICK_ACCESS_WINDOW_ID, quickAccessConfig.content);
-  }, [playerInventory, onUseItem, updateWindowContent]);
+  }, [
+    playerInventory,
+    playerEquipment,
+    onUseItem,
+    onDropItem,
+    onEquipItem,
+    onUnequipItem,
+    updateWindowContent,
+  ]);
 
   // Update EntityInspectorWindow content when entities change
   useEffect(() => {

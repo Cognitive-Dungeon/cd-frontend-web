@@ -6,7 +6,7 @@
  * Features:
  * - Visual item display with icon, name, and quantity
  * - Drag-and-drop support (LMB)
- * - Context menu on right-click
+ * - Inline context menu on right-click
  * - Visual states: normal, hover, dragging, drop target
  * - Server-driven item symbols and colors
  * - Tooltip with item info
@@ -20,28 +20,40 @@
  * ```tsx
  * <InventorySlot
  *   item={item}
- *   onContextMenu={(item, e) => showContextMenu(item, e)}
+ *   onUse={(item) => handleUse(item)}
+ *   onEquip={(item) => handleEquip(item)}
+ *   onDrop={(item) => handleDrop(item)}
+ *   onInspect={(item) => handleInspect(item)}
+ *   isEquipped={true}
  *   onDragStart={(item) => setDraggedItem(item)}
  *   onDragEnd={() => setDraggedItem(null)}
- *   onDrop={(item) => handleItemSwap(item)}
  * />
  * ```
  */
 
-import { FC, useState, DragEvent } from "react";
+import { Sparkles, Shield, ShieldOff, Trash2, Search } from "lucide-react";
+import { FC, useState, DragEvent, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 
+import { useContextMenuPosition } from "../../../../hooks";
 import { Item } from "../../../../types";
 
 interface InventorySlotProps {
   item: Item | null;
 
-  onContextMenu?: (item: Item, event: React.MouseEvent) => void;
+  onUse?: (item: Item) => void;
+  onEquip?: (item: Item) => void;
+  onUnequip?: (item: Item) => void;
+  onDrop?: (item: Item) => void;
+  onInspect?: (item: Item) => void;
+
+  isEquipped?: boolean;
 
   onDragStart?: (item: Item) => void;
 
   onDragEnd?: () => void;
 
-  onDrop?: (item: Item) => void;
+  onDropOnSlot?: (item: Item) => void;
 
   className?: string;
 
@@ -51,13 +63,19 @@ interface InventorySlotProps {
 export const InventorySlot: FC<InventorySlotProps> = ({
   item,
 
-  onContextMenu,
+  onUse,
+  onEquip,
+  onUnequip,
+  onDrop,
+  onInspect,
+
+  isEquipped = false,
 
   onDragStart,
 
   onDragEnd,
 
-  onDrop,
+  onDropOnSlot,
 
   className,
 
@@ -65,6 +83,37 @@ export const InventorySlot: FC<InventorySlotProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isOver, setIsOver] = useState(false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [initialMenuPosition, setInitialMenuPosition] = useState({
+    x: 0,
+    y: 0,
+  });
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+  const slotRef = useRef<HTMLDivElement>(null);
+
+  const menuPosition = useContextMenuPosition({
+    initialPosition: initialMenuPosition,
+    menuRef: contextMenuRef,
+    isOpen: showContextMenu,
+    approximateSize: { width: 160, height: 200 },
+  });
+
+  // Close context menu on click outside
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(e.target as Node)
+      ) {
+        setShowContextMenu(false);
+      }
+    };
+
+    if (showContextMenu) {
+      document.addEventListener("mousedown", handleClick);
+      return () => document.removeEventListener("mousedown", handleClick);
+    }
+  }, [showContextMenu]);
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>) => {
     if (!item) {
@@ -96,14 +145,57 @@ export const InventorySlot: FC<InventorySlotProps> = ({
     setIsOver(false);
     const itemId = e.dataTransfer.getData("itemId");
     if (item && itemId !== item.id) {
-      onDrop?.(item);
+      onDropOnSlot?.(item);
     }
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    if (item && !unavailable) {
+      if (!showContextMenu && slotRef.current) {
+        const rect = slotRef.current.getBoundingClientRect();
+        setInitialMenuPosition({
+          x: rect.right + 8,
+          y: rect.top,
+        });
+      }
+      setShowContextMenu(!showContextMenu);
+    }
+  };
+
+  const handleUse = () => {
     if (item) {
-      onContextMenu?.(item, e);
+      onUse?.(item);
+      setShowContextMenu(false);
+    }
+  };
+
+  const handleEquip = () => {
+    if (item) {
+      onEquip?.(item);
+      setShowContextMenu(false);
+    }
+  };
+
+  const handleUnequip = () => {
+    if (item) {
+      onUnequip?.(item);
+      setShowContextMenu(false);
+    }
+  };
+
+  const handleDropItem = () => {
+    if (item) {
+      onDrop?.(item);
+      setShowContextMenu(false);
+    }
+  };
+
+  const handleInspect = () => {
+    if (item) {
+      onInspect?.(item);
+      setShowContextMenu(false);
     }
   };
 
@@ -117,16 +209,27 @@ export const InventorySlot: FC<InventorySlotProps> = ({
     return item.color || "#9CA3AF";
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (item && !unavailable && onUse) {
+      e.preventDefault();
+      e.stopPropagation();
+      onUse(item);
+    }
+  };
+
   return (
-    <div
-      draggable={!!item && !unavailable}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onContextMenu={handleContextMenu}
-      className={`
+    <>
+      <div
+        ref={slotRef}
+        draggable={!!item && !unavailable}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={handleClick}
+        onContextMenu={handleContextMenu}
+        className={`
 
         relative w-16 h-16 border-2 rounded
 
@@ -146,33 +249,103 @@ export const InventorySlot: FC<InventorySlotProps> = ({
 
         ${className ?? ""}
       `}
-      title={
-        item
-          ? `${item.name}${item.description ? ` - ${item.description}` : ""}${unavailable ? " (Not in inventory)" : ""}`
-          : "Empty Slot"
-      }
-    >
-      {item ? (
-        <>
-          <div
-            className={`text-3xl ${unavailable ? "grayscale" : ""}`}
-            style={{ color: getItemColor(item) }}
-          >
-            {getItemIcon(item)}
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-[8px] text-center px-1 py-0.5 truncate">
-            {item.name}
-          </div>
-          {item.value > 1 && item.type === "GOLD" && (
-            <div className="absolute top-1 right-1 bg-yellow-600 text-white text-[10px] font-bold px-1 rounded">
-              {item.value}
+        title={
+          item
+            ? `${item.name}${item.description ? ` - ${item.description}` : ""}${unavailable ? " (Not in inventory)" : ""}`
+            : "Empty Slot"
+        }
+      >
+        {item ? (
+          <>
+            <div
+              className={`text-3xl ${unavailable ? "grayscale" : ""}`}
+              style={{ color: getItemColor(item) }}
+            >
+              {getItemIcon(item)}
             </div>
-          )}
-          <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 transition-colors rounded pointer-events-none" />
-        </>
-      ) : (
-        <div className="text-neutral-700 text-2xl">+</div>
-      )}
-    </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-[8px] text-center px-1 py-0.5 truncate">
+              {item.name}
+            </div>
+            {item.value > 1 && item.type === "GOLD" && (
+              <div className="absolute top-1 right-1 bg-yellow-600 text-white text-[10px] font-bold px-1 rounded">
+                {item.value}
+              </div>
+            )}
+            <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 transition-colors rounded pointer-events-none" />
+          </>
+        ) : (
+          <div className="text-neutral-700 text-2xl">+</div>
+        )}
+      </div>
+
+      {/* Context Menu via Portal */}
+      {showContextMenu &&
+        item &&
+        createPortal(
+          <div
+            ref={contextMenuRef}
+            className="fixed bg-neutral-800 border border-neutral-600 rounded shadow-xl z-[10000] min-w-40"
+            style={{
+              left: `${menuPosition.x}px`,
+              top: `${menuPosition.y}px`,
+            }}
+            onClick={(e) => e.stopPropagation()}
+            data-interactive="true"
+          >
+            <div className="p-1.5 border-b border-neutral-700 text-[10px] text-gray-400 truncate">
+              {item.name}
+            </div>
+            <div className="py-1">
+              {onUse && (
+                <button
+                  onClick={handleUse}
+                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-green-400 flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>Use</span>
+                </button>
+              )}
+              {isEquipped
+                ? onUnequip && (
+                    <button
+                      onClick={handleUnequip}
+                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-yellow-400 flex items-center gap-1.5"
+                    >
+                      <ShieldOff className="w-3 h-3" />
+                      <span>Unequip</span>
+                    </button>
+                  )
+                : onEquip && (
+                    <button
+                      onClick={handleEquip}
+                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-cyan-400 flex items-center gap-1.5"
+                    >
+                      <Shield className="w-3 h-3" />
+                      <span>Equip</span>
+                    </button>
+                  )}
+              {onDrop && (
+                <button
+                  onClick={handleDropItem}
+                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-red-400 flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  <span>Drop</span>
+                </button>
+              )}
+              {onInspect && (
+                <button
+                  onClick={handleInspect}
+                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-purple-400 flex items-center gap-1.5"
+                >
+                  <Search className="w-3 h-3" />
+                  <span>Open in Inspector</span>
+                </button>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 };

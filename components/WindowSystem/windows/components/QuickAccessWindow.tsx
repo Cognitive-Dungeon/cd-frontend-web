@@ -36,6 +36,11 @@ interface QuickAccessWindowProps {
   totalSlots?: number;
 
   onUsePinnedItem?: (item: Item) => void;
+  onDropItem?: (item: Item) => void;
+  onEquipItem?: (item: Item) => void;
+  onUnequipItem?: (item: Item) => void;
+  onInspectItem?: (item: Item) => void;
+  equipment?: Array<Item>;
 }
 
 export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
@@ -43,6 +48,11 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
   inventoryItems,
   totalSlots,
   onUsePinnedItem,
+  onDropItem,
+  onEquipItem,
+  onUnequipItem,
+  onInspectItem,
+  equipment,
 }) => {
   const count = useMemo(() => {
     const base = Array.isArray(slots) ? slots.length : 0;
@@ -127,11 +137,18 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
                   ? !inventoryItems.some((invItem) => invItem.id === item.id)
                   : false
               }
-              onContextMenu={(itm) => {
+              onUse={(itm) => {
                 if (itm) {
                   onUsePinnedItem?.(itm);
                 }
               }}
+              onDrop={onDropItem}
+              onEquip={onEquipItem}
+              onUnequip={onUnequipItem}
+              onInspect={onInspectItem}
+              isEquipped={
+                item ? equipment?.some((eq) => eq.id === item.id) : false
+              }
             />
           </div>
         );

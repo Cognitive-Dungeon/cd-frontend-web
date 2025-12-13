@@ -12,6 +12,11 @@ interface CreateQuickAccessWindowConfigProps {
   totalSlots?: number;
   inventoryItems: Item[];
   onUsePinnedItem?: (item: Item) => void;
+  onDropItem?: (item: Item) => void;
+  onEquipItem?: (item: Item) => void;
+  onUnequipItem?: (item: Item) => void;
+  onInspectItem?: (item: Item) => void;
+  equipment?: Array<Item>;
 }
 
 /**
@@ -25,6 +30,11 @@ export const createQuickAccessWindowConfig = ({
   totalSlots,
   inventoryItems,
   onUsePinnedItem,
+  onDropItem,
+  onEquipItem,
+  onUnequipItem,
+  onInspectItem,
+  equipment,
 }: CreateQuickAccessWindowConfigProps): WindowConfig => {
   const pinnedCount = slots.filter(Boolean).length;
 
@@ -49,6 +59,11 @@ export const createQuickAccessWindowConfig = ({
         totalSlots={totalSlots}
         inventoryItems={inventoryItems}
         onUsePinnedItem={onUsePinnedItem}
+        onDropItem={onDropItem}
+        onEquipItem={onEquipItem}
+        onUnequipItem={onUnequipItem}
+        onInspectItem={onInspectItem}
+        equipment={equipment}
       />
     ),
   };

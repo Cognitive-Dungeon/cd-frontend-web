@@ -138,6 +138,7 @@ export const TurnOrderBar: React.FC<TurnOrderBarProps> = ({
               key={entity.id}
               className={getEntityClassName(entity)}
               data-turn-index={index}
+              data-interactive="true"
               title={getTooltipText(entity)}
               onClick={() => onEntityClick?.(entity.id)}
               onContextMenu={(e) => handleContextMenu(e, entity)}

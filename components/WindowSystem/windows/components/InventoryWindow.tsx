@@ -29,8 +29,8 @@
  * ```
  */
 
-import { Package, Trash2, Sparkles, Shield, ShieldOff } from "lucide-react";
-import { FC, useState, useRef, useEffect } from "react";
+import { Package } from "lucide-react";
+import { FC, useState } from "react";
 
 import { Item, ServerToClientEquipmentView } from "../../../../types";
 
@@ -50,12 +50,6 @@ interface InventoryWindowProps {
   equipment?: ServerToClientEquipmentView | null;
 }
 
-interface ContextMenuState {
-  item: Item;
-  x: number;
-  y: number;
-}
-
 export const InventoryWindow: FC<InventoryWindowProps> = ({
   items,
   onUseItem,
@@ -65,39 +59,9 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
   inventoryData,
   equipment,
 }) => {
-  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [draggedItem, setDraggedItem] = useState<Item | null>(null);
-  const contextMenuRef = useRef<HTMLDivElement>(null);
-
-  // Close context menu on click outside
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (
-        contextMenuRef.current &&
-        !contextMenuRef.current.contains(e.target as Node)
-      ) {
-        setContextMenu(null);
-      }
-    };
-
-    if (contextMenu) {
-      document.addEventListener("mousedown", handleClick);
-      return () => document.removeEventListener("mousedown", handleClick);
-    }
-  }, [contextMenu]);
-
-  const handleContextMenu = (item: Item, event: React.MouseEvent) => {
-    event.preventDefault();
-    setContextMenu({
-      item,
-      x: event.clientX,
-      y: event.clientY,
-    });
-  };
 
   const handleUseItem = (item: Item) => {
-    setContextMenu(null);
-
     // TODO: Server sync required - check item action type to determine if target is needed
     // For now, just call the handler
     if (item.action?.requiresTarget) {
@@ -110,17 +74,14 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
   };
 
   const handleDropItem = (item: Item) => {
-    setContextMenu(null);
     onDropItem?.(item);
   };
 
   const handleEquipItem = (item: Item) => {
-    setContextMenu(null);
     onEquipItem?.(item);
   };
 
   const handleUnequipItem = (item: Item) => {
-    setContextMenu(null);
     onUnequipItem?.(item);
   };
 
@@ -162,10 +123,18 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
               <InventorySlot
                 key={item.id}
                 item={item}
-                onContextMenu={handleContextMenu}
+                onUse={handleUseItem}
+                onEquip={handleEquipItem}
+                onUnequip={handleUnequipItem}
+                onDrop={handleDropItem}
+                onInspect={(item) => {
+                  // TODO: Open item in inspector window
+                  console.log("Inspect item:", item);
+                }}
+                isEquipped={isItemEquipped(item)}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
-                onDrop={handleDrop}
+                onDropOnSlot={handleDrop}
               />
             ))}
           </div>
@@ -202,65 +171,6 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
             )}
         </div>
       </div>
-
-      {/* Context Menu */}
-      {contextMenu && (
-        <div
-          ref={contextMenuRef}
-          className="fixed bg-neutral-800 border border-neutral-600 rounded shadow-xl z-[10000] min-w-48"
-          style={{
-            left: `${contextMenu.x}px`,
-            top: `${contextMenu.y}px`,
-          }}
-        >
-          <div className="p-2 border-b border-neutral-700 text-xs text-gray-400">
-            {contextMenu.item.name}
-          </div>
-          <div className="py-1">
-            <button
-              onClick={() => handleUseItem(contextMenu.item)}
-              className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-green-400 flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Use</span>
-              {contextMenu.item.action?.requiresTarget && (
-                <span className="ml-auto text-xs text-gray-500">
-                  (needs target)
-                </span>
-              )}
-            </button>
-            {isItemEquipped(contextMenu.item) ? (
-              <button
-                onClick={() => handleUnequipItem(contextMenu.item)}
-                className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-yellow-400 flex items-center gap-2"
-              >
-                <ShieldOff className="w-4 h-4" />
-                <span>Unequip</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => handleEquipItem(contextMenu.item)}
-                className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-cyan-400 flex items-center gap-2"
-              >
-                <Shield className="w-4 h-4" />
-                <span>Equip</span>
-              </button>
-            )}
-            <button
-              onClick={() => handleDropItem(contextMenu.item)}
-              className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-700 text-red-400 flex items-center gap-2"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span>Drop</span>
-            </button>
-          </div>
-          {contextMenu.item.description && (
-            <div className="p-2 border-t border-neutral-700 text-xs text-gray-500 italic">
-              {contextMenu.item.description}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };

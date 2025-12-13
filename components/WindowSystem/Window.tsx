@@ -59,15 +59,22 @@ const Window: FC<WindowProps> = ({ window }) => {
   const MAGNETIC_THRESHOLD = 10;
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Для неоформленных окон - перетаскивание работает везде
-    // Для оформленных - игнорируем клики по кнопкам
-    if (window.decorated && (e.target as HTMLElement).closest("button")) {
-      return;
-    }
-
-    // Игнорируем клики по draggable элементам (слотам инвентаря)
     const target = e.target as HTMLElement;
-    if (target.closest("[draggable='true']")) {
+
+    // Игнорируем клики по любым интерактивным элементам
+    const interactiveSelector = [
+      "button",
+      "input",
+      "textarea",
+      "select",
+      "a",
+      "[draggable='true']",
+      "[contenteditable='true']",
+      "[role='button']",
+      "[data-interactive='true']",
+    ].join(", ");
+
+    if (target.closest(interactiveSelector)) {
       return;
     }
 
