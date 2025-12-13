@@ -130,7 +130,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
 
         relative w-16 h-16 border-2 rounded
 
-        ${item ? "bg-neutral-800 border-neutral-600 cursor-move" : "bg-neutral-900/50 border-neutral-800"}
+        ${item ? "bg-neutral-800 border-neutral-600 cursor-move" : "bg-transparent border-neutral-800/50"}
 
         ${isDragging ? "opacity-50" : ""}
 
