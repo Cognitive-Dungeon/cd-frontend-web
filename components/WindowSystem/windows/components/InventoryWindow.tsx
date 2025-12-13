@@ -61,13 +61,15 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
 }) => {
   const [draggedItem, setDraggedItem] = useState<Item | null>(null);
 
-  // Global drop listener to handle drops outside slots
+  // Global drop listener to handle drops on game grid
   useEffect(() => {
     const handleGlobalDrop = (e: globalThis.DragEvent) => {
       const target = e.target as HTMLElement;
       const isOnSlot = target.closest("[data-inventory-slot]");
+      const isOnGameGrid = target.closest("[data-game-grid]");
+      console.log(e.target, isOnSlot);
 
-      if (!isOnSlot && draggedItem) {
+      if (!isOnSlot && isOnGameGrid && draggedItem) {
         onDropItem?.(draggedItem);
         setDraggedItem(null);
       }
@@ -88,10 +90,6 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
     } else {
       onUseItem?.(item);
     }
-  };
-
-  const handleDropItem = (item: Item) => {
-    onDropItem?.(item);
   };
 
   const handleEquipItem = (item: Item) => {
@@ -137,9 +135,9 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
     const target = e.target as HTMLElement;
     const isOnSlot = target.closest("[data-inventory-slot]");
 
-    if (!isOnSlot && draggedItem) {
-      handleDropItem(draggedItem);
-    }
+    // if (!isOnSlot && draggedItem) {
+    //   handleDropItem(draggedItem);
+    // }
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -170,7 +168,6 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
                 onUse={handleUseItem}
                 onEquip={handleEquipItem}
                 onUnequip={handleUnequipItem}
-                onDrop={handleDropItem}
                 onInspect={(item) => {
                   // TODO: Open item in inspector window
                 }}

@@ -697,6 +697,7 @@ const GameGrid: FC<GameGridProps> = ({
       {/* Сетка */}
       <div
         ref={gridRef}
+        data-game-grid="true"
         className="relative bg-black select-none shadow-2xl shadow-black border-neutral-800 box-content"
         style={{
           width: world.width * CELL_SIZE,

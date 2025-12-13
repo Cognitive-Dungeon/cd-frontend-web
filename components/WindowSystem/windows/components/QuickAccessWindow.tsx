@@ -56,13 +56,14 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
 }) => {
   const [draggedItem, setDraggedItem] = useState<Item | null>(null);
 
-  // Global drop listener to handle drops outside slots
+  // Global drop listener to handle drops on game grid
   useEffect(() => {
     const handleGlobalDrop = (e: globalThis.DragEvent) => {
       const target = e.target as HTMLElement;
       const isOnSlot = target.closest("[data-inventory-slot]");
+      const isOnGameGrid = target.closest("[data-game-grid]");
 
-      if (!isOnSlot && draggedItem) {
+      if (!isOnSlot && isOnGameGrid && draggedItem) {
         onDropItem?.(draggedItem);
         setDraggedItem(null);
       }
