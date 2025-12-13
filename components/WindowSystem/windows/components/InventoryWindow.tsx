@@ -67,7 +67,6 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
       const target = e.target as HTMLElement;
       const isOnSlot = target.closest("[data-inventory-slot]");
       const isOnGameGrid = target.closest("[data-game-grid]");
-      console.log(e.target, isOnSlot);
 
       if (!isOnSlot && isOnGameGrid && draggedItem) {
         onDropItem?.(draggedItem);
