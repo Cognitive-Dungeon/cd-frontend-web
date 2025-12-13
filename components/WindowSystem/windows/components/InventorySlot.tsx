@@ -34,18 +34,30 @@ import { Item } from "../../../../types";
 
 interface InventorySlotProps {
   item: Item | null;
+
   onContextMenu?: (item: Item, event: React.MouseEvent) => void;
+
   onDragStart?: (item: Item) => void;
+
   onDragEnd?: () => void;
+
   onDrop?: (item: Item) => void;
+
+  className?: string;
 }
 
 export const InventorySlot: FC<InventorySlotProps> = ({
   item,
+
   onContextMenu,
+
   onDragStart,
+
   onDragEnd,
+
   onDrop,
+
+  className,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isOver, setIsOver] = useState(false);
@@ -111,14 +123,24 @@ export const InventorySlot: FC<InventorySlotProps> = ({
       onDrop={handleDrop}
       onContextMenu={handleContextMenu}
       className={`
+
         relative w-16 h-16 border-2 rounded
+
         ${item ? "bg-neutral-800 border-neutral-600 cursor-move" : "bg-neutral-900/50 border-neutral-800"}
+
         ${isDragging ? "opacity-50" : ""}
+
         ${isOver ? "border-cyan-500 bg-cyan-900/20" : ""}
+
         hover:border-neutral-500
+
         transition-all duration-100
+
         flex items-center justify-center
+
         group
+
+        ${className ?? ""}
       `}
       title={
         item

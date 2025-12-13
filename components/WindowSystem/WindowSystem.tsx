@@ -1,6 +1,7 @@
 import { FC, useEffect, useRef, useCallback } from "react";
 
 import { KeyBindingManager } from "../../commands";
+
 import {
   Entity,
   LogMessage,
@@ -11,8 +12,11 @@ import {
 } from "../../types";
 
 import { getStoredWindowState } from "./utils";
+
 import Window from "./Window";
+
 import { useWindowManager } from "./WindowManager";
+
 import {
   DOCK_WINDOW_ID,
   createDockWindowConfig,
@@ -32,6 +36,8 @@ import {
   createLoginWindowConfig,
   ENTITY_INSPECTOR_WINDOW_ID,
   createEntityInspectorWindowConfig,
+  QUICK_ACCESS_WINDOW_ID,
+  createQuickAccessWindowConfig,
 } from "./windows";
 
 interface WindowSystemProps {
@@ -181,16 +187,34 @@ const WindowSystem: FC<WindowSystemProps> = ({
     }
 
     const inventoryExists = windows.some((w) => w.id === INVENTORY_WINDOW_ID);
+
     if (!inventoryExists) {
       openWindow(
         createInventoryWindowConfig({
           items: playerInventory,
+
           inventoryData: playerInventoryData,
-          equipment: playerEquipment,
+
           onUseItem,
           onDropItem,
           onEquipItem,
-          onUnequipItem,
+        }),
+      );
+    }
+
+    const quickAccessExists = windows.some(
+      (w) => w.id === QUICK_ACCESS_WINDOW_ID,
+    );
+
+    if (!quickAccessExists) {
+      openWindow(
+        createQuickAccessWindowConfig({
+          slots: playerInventory,
+
+          inventoryItems: playerInventory,
+          totalSlots: 6,
+
+          onUsePinnedItem: (item) => onUseItem?.(item),
         }),
       );
     }
@@ -327,29 +351,57 @@ const WindowSystem: FC<WindowSystemProps> = ({
   }, [logs, onGoToPosition, onGoToEntity, onSendCommand, updateWindowContent]);
 
   // Update InventoryWindow content when player inventory changes
+
   useEffect(() => {
     const inventoryConfig = createInventoryWindowConfig({
       items: playerInventory,
+
       inventoryData: playerInventoryData,
+
       equipment: playerEquipment,
+
       onUseItem,
+
       onDropItem,
+
       onEquipItem,
+
       onUnequipItem,
     });
+
     updateWindowContent(INVENTORY_WINDOW_ID, inventoryConfig.content);
+
     updateWindowBadge(INVENTORY_WINDOW_ID, inventoryConfig.badge);
   }, [
     playerInventory,
+
     playerInventoryData,
+
     playerEquipment,
+
     onUseItem,
+
     onDropItem,
+
     onEquipItem,
+
     onUnequipItem,
+
     updateWindowContent,
+
     updateWindowBadge,
   ]);
+
+  // Update QuickAccessWindow content when player inventory or use handler changes
+  useEffect(() => {
+    const quickAccessConfig = createQuickAccessWindowConfig({
+      slots: playerInventory,
+      inventoryItems: playerInventory,
+      totalSlots: 6,
+      onUsePinnedItem: (item) => onUseItem?.(item),
+    });
+    updateWindowContent(QUICK_ACCESS_WINDOW_ID, quickAccessConfig.content);
+  }, [playerInventory, onUseItem, updateWindowContent]);
 
   // Update EntityInspectorWindow content when entities change
   useEffect(() => {
