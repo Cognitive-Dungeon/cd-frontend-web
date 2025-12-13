@@ -42,6 +42,7 @@ interface InventoryWindowProps {
   onDropItem?: (item: Item) => void;
   onEquipItem?: (item: Item) => void;
   onUnequipItem?: (item: Item) => void;
+  onInspectItem?: (item: Item) => void;
   inventoryData?: {
     maxSlots?: number;
     currentWeight?: number;
@@ -56,6 +57,7 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
   onDropItem,
   onEquipItem,
   onUnequipItem,
+  onInspectItem,
   inventoryData,
   equipment,
 }) => {
@@ -167,9 +169,7 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
                 onUse={handleUseItem}
                 onEquip={handleEquipItem}
                 onUnequip={handleUnequipItem}
-                onInspect={(item) => {
-                  // TODO: Open item in inspector window
-                }}
+                onInspect={onInspectItem}
                 isEquipped={isItemEquipped(item)}
                 onDragStart={(itm) => handleDragStart(itm)}
                 onDragEnd={() => handleDragEnd()}

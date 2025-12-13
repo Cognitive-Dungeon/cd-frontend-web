@@ -19,6 +19,7 @@ interface CreateInventoryWindowConfigProps {
   onDropItem?: (item: Item) => void;
   onEquipItem?: (item: Item) => void;
   onUnequipItem?: (item: Item) => void;
+  onInspectItem?: (item: Item) => void;
 }
 
 export const createInventoryWindowConfig = ({
@@ -29,6 +30,7 @@ export const createInventoryWindowConfig = ({
   onDropItem,
   onEquipItem,
   onUnequipItem,
+  onInspectItem,
 }: CreateInventoryWindowConfigProps): WindowConfig => {
   const itemCount = items.length;
 
@@ -55,6 +57,7 @@ export const createInventoryWindowConfig = ({
         onDropItem={onDropItem}
         onEquipItem={onEquipItem}
         onUnequipItem={onUnequipItem}
+        onInspectItem={onInspectItem}
       />
     ),
   };

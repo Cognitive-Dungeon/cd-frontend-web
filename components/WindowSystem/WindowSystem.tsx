@@ -36,6 +36,8 @@ import {
   createLoginWindowConfig,
   ENTITY_INSPECTOR_WINDOW_ID,
   createEntityInspectorWindowConfig,
+  ITEM_INSPECTOR_WINDOW_ID,
+  createItemInspectorWindowConfig,
   QUICK_ACCESS_WINDOW_ID,
   createQuickAccessWindowConfig,
 } from "./windows";
@@ -116,12 +118,18 @@ const WindowSystem: FC<WindowSystemProps> = ({
   const windowsRef = useRef(windows);
   const prevEntitiesRef = useRef<Entity[]>([]);
   const handleInspectEntityRef = useRef<(entity: Entity) => void>(() => {});
+  const handleInspectItemRef = useRef<(item: Item) => void>(() => {});
 
   // Handle opening entity inspector - update ref on every render
   handleInspectEntityRef.current = (entity: Entity) => {
     openWindow(
       createEntityInspectorWindowConfig({ entity, entities: entities || [] }),
     );
+  };
+
+  // Handle opening item inspector - update ref on every render
+  handleInspectItemRef.current = (item: Item) => {
+    openWindow(createItemInspectorWindowConfig({ item }));
   };
 
   // Expose stable wrapper through onInspectEntity prop (only once on mount)
@@ -198,6 +206,7 @@ const WindowSystem: FC<WindowSystemProps> = ({
           onUseItem,
           onDropItem,
           onEquipItem,
+          onInspectItem: (item) => handleInspectItemRef.current?.(item),
         }),
       );
     }
@@ -218,10 +227,7 @@ const WindowSystem: FC<WindowSystemProps> = ({
           onDropItem: (item) => onDropItem?.(item),
           onEquipItem: (item) => onEquipItem?.(item),
           onUnequipItem: (item) => onUnequipItem?.(item),
-          onInspectItem: (item) => {
-            // TODO: Open item in inspector window
-            console.log("Inspect item:", item);
-          },
+          onInspectItem: (item) => handleInspectItemRef.current?.(item),
           equipment: playerEquipment
             ? ([playerEquipment.weapon, playerEquipment.armor].filter(
                 Boolean,
@@ -379,6 +385,8 @@ const WindowSystem: FC<WindowSystemProps> = ({
       onEquipItem,
 
       onUnequipItem,
+
+      onInspectItem: (item) => handleInspectItemRef.current?.(item),
     });
 
     updateWindowContent(INVENTORY_WINDOW_ID, inventoryConfig.content);
@@ -414,10 +422,7 @@ const WindowSystem: FC<WindowSystemProps> = ({
       onDropItem: (item) => onDropItem?.(item),
       onEquipItem: (item) => onEquipItem?.(item),
       onUnequipItem: (item) => onUnequipItem?.(item),
-      onInspectItem: (item) => {
-        // TODO: Open item in inspector window
-        console.log("Inspect item:", item);
-      },
+      onInspectItem: (item) => handleInspectItemRef.current?.(item),
       equipment: playerEquipment
         ? ([playerEquipment.weapon, playerEquipment.armor].filter(
             Boolean,

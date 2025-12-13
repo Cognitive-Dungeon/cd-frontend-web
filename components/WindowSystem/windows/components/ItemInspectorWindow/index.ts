@@ -1,0 +1,1 @@
+export { ItemInspectorWindow } from "./ItemInspectorWindow";
