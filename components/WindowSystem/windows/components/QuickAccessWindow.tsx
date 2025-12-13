@@ -54,25 +54,6 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
   onInspectItem,
   equipment,
 }) => {
-  const [draggedItem, setDraggedItem] = useState<Item | null>(null);
-
-  // Global drop listener to handle drops on game grid
-  useEffect(() => {
-    const handleGlobalDrop = (e: globalThis.DragEvent) => {
-      const target = e.target as HTMLElement;
-      const isOnSlot = target.closest("[data-inventory-slot]");
-      const isOnGameGrid = target.closest("[data-game-grid]");
-
-      if (!isOnSlot && isOnGameGrid && draggedItem) {
-        onDropItem?.(draggedItem);
-        setDraggedItem(null);
-      }
-    };
-
-    window.addEventListener("drop", handleGlobalDrop as EventListener);
-    return () =>
-      window.removeEventListener("drop", handleGlobalDrop as EventListener);
-  }, [draggedItem, onDropItem]);
   const count = useMemo(() => {
     const base = Array.isArray(slots) ? slots.length : 0;
     const requested = totalSlots ?? base;
@@ -87,6 +68,43 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
     }
     return next;
   });
+
+  const [draggedItem, setDraggedItem] = useState<{
+    item: Item;
+    slotIndex: number;
+  } | null>(null);
+
+  // Global drop listener to handle drops on game grid
+  useEffect(() => {
+    const handleGlobalDrop = (e: globalThis.DragEvent) => {
+      const target = e.target as HTMLElement;
+      const isOnSlot = target.closest("[data-inventory-slot]");
+      const isOnGameGrid = target.closest("[data-game-grid]");
+      const dragSource = e.dataTransfer?.getData("dragSource");
+
+      if (!isOnSlot && isOnGameGrid && draggedItem?.item) {
+        // If dragged from QuickAccess, just unpin (remove from slot)
+        // Don't call onDropItem - item stays in inventory
+        if (dragSource === "quickaccess") {
+          // Clear the slot
+          setSlotItems((prev) => {
+            const next = [...prev];
+            next[draggedItem.slotIndex] = null;
+            return next;
+          });
+          setDraggedItem(null);
+        } else {
+          // If dragged from inventory, drop item to ground
+          onDropItem?.(draggedItem.item);
+          setDraggedItem(null);
+        }
+      }
+    };
+
+    window.addEventListener("drop", handleGlobalDrop as EventListener);
+    return () =>
+      window.removeEventListener("drop", handleGlobalDrop as EventListener);
+  }, [draggedItem, onDropItem]);
 
   const handleSlotDrop = useCallback(
     (event: DragEvent<HTMLDivElement>, slotIndex: number) => {
@@ -145,8 +163,8 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
       const target = e.target as HTMLElement;
       const isOnSlot = target.closest("[data-inventory-slot]");
 
-      if (!isOnSlot && draggedItem) {
-        onDropItem?.(draggedItem);
+      if (!isOnSlot && draggedItem?.item) {
+        onDropItem?.(draggedItem.item);
         setDraggedItem(null);
       }
     },
@@ -206,7 +224,7 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
                 item ? equipment?.some((eq) => eq.id === item.id) : false
               }
               onDragStart={(itm) => {
-                setDraggedItem(itm);
+                setDraggedItem({ item: itm, slotIndex: i });
               }}
               onDragEnd={() => {
                 setDraggedItem(null);

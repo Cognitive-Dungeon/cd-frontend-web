@@ -122,6 +122,11 @@ export const InventorySlot: FC<InventorySlotProps> = ({
     setIsDragging(true);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("itemId", item.id);
+    // Store source information for drop handling
+    e.dataTransfer.setData(
+      "dragSource",
+      onDropOnSlot ? "inventory" : "quickaccess",
+    );
     onDragStart?.(item);
   };
 
