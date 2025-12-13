@@ -65,6 +65,12 @@ const Window: FC<WindowProps> = ({ window }) => {
       return;
     }
 
+    // Игнорируем клики по draggable элементам (слотам инвентаря)
+    const target = e.target as HTMLElement;
+    if (target.closest("[draggable='true']")) {
+      return;
+    }
+
     focusWindow(window.id);
 
     if (window.docked !== "none" && window.dockable !== false) {
