@@ -132,6 +132,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    // Don't stopPropagation - allow parent wrappers to handle drag events
     e.dataTransfer.dropEffect = "move";
     setIsOver(true);
   };
@@ -144,7 +145,11 @@ export const InventorySlot: FC<InventorySlotProps> = ({
     e.preventDefault();
     setIsOver(false);
     const itemId = e.dataTransfer.getData("itemId");
-    if (item && itemId !== item.id) {
+
+    // Allow drop if:
+    // 1. Dropping on empty slot (item is null/undefined) OR
+    // 2. Dropping on different item (item exists and IDs don't match)
+    if (!item || (item && itemId !== item.id)) {
       onDropOnSlot?.(item);
     }
   };
@@ -221,6 +226,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
     <>
       <div
         ref={slotRef}
+        data-inventory-slot="true"
         draggable={!!item && !unavailable}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}

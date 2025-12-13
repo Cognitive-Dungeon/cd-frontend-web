@@ -1,6 +1,6 @@
 import type { FC, DragEvent } from "react";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Item } from "../../../../types";
 
@@ -54,6 +54,24 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
   onInspectItem,
   equipment,
 }) => {
+  const [draggedItem, setDraggedItem] = useState<Item | null>(null);
+
+  // Global drop listener to handle drops outside slots
+  useEffect(() => {
+    const handleGlobalDrop = (e: globalThis.DragEvent) => {
+      const target = e.target as HTMLElement;
+      const isOnSlot = target.closest("[data-inventory-slot]");
+
+      if (!isOnSlot && draggedItem) {
+        onDropItem?.(draggedItem);
+        setDraggedItem(null);
+      }
+    };
+
+    window.addEventListener("drop", handleGlobalDrop as EventListener);
+    return () =>
+      window.removeEventListener("drop", handleGlobalDrop as EventListener);
+  }, [draggedItem, onDropItem]);
   const count = useMemo(() => {
     const base = Array.isArray(slots) ? slots.length : 0;
     const requested = totalSlots ?? base;
@@ -72,7 +90,7 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
   const handleSlotDrop = useCallback(
     (event: DragEvent<HTMLDivElement>, slotIndex: number) => {
       event.preventDefault();
-      event.stopPropagation();
+      event.stopPropagation(); // Prevent event from bubbling to container
 
       const itemId = event.dataTransfer.getData("itemId");
 
@@ -114,11 +132,48 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
 
   const handleSlotDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    event.stopPropagation(); // Prevent event from bubbling to container
     event.dataTransfer.dropEffect = "move";
   }, []);
 
+  // Handle drop outside of slots (to drop item)
+  const handleDropOutsideSlots = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+
+      const target = e.target as HTMLElement;
+      const isOnSlot = target.closest("[data-inventory-slot]");
+
+      if (!isOnSlot && draggedItem) {
+        onDropItem?.(draggedItem);
+        setDraggedItem(null);
+      }
+    },
+    [draggedItem, onDropItem],
+  );
+
+  const handleContainerDragOver = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    },
+    [],
+  );
+
+  const handleContainerDragEnter = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+    },
+    [],
+  );
+
   return (
-    <div className="flex items-center gap-2 px-1 py-0.5">
+    <div
+      className="flex items-center gap-2 px-1 py-0.5"
+      onDrop={handleDropOutsideSlots}
+      onDragOver={handleContainerDragOver}
+      onDragEnter={handleContainerDragEnter}
+    >
       {Array.from({ length: count }).map((_, i) => {
         const item = slotItems[i] ?? null;
 
@@ -149,6 +204,12 @@ export const QuickAccessWindow: FC<QuickAccessWindowProps> = ({
               isEquipped={
                 item ? equipment?.some((eq) => eq.id === item.id) : false
               }
+              onDragStart={(itm) => {
+                setDraggedItem(itm);
+              }}
+              onDragEnd={() => {
+                setDraggedItem(null);
+              }}
             />
           </div>
         );

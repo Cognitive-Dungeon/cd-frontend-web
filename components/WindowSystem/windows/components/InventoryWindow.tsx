@@ -30,7 +30,7 @@
  */
 
 import { Package } from "lucide-react";
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 
 import { Item, ServerToClientEquipmentView } from "../../../../types";
 
@@ -60,6 +60,23 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
   equipment,
 }) => {
   const [draggedItem, setDraggedItem] = useState<Item | null>(null);
+
+  // Global drop listener to handle drops outside slots
+  useEffect(() => {
+    const handleGlobalDrop = (e: globalThis.DragEvent) => {
+      const target = e.target as HTMLElement;
+      const isOnSlot = target.closest("[data-inventory-slot]");
+
+      if (!isOnSlot && draggedItem) {
+        onDropItem?.(draggedItem);
+        setDraggedItem(null);
+      }
+    };
+
+    window.addEventListener("drop", handleGlobalDrop as EventListener);
+    return () =>
+      window.removeEventListener("drop", handleGlobalDrop as EventListener);
+  }, [draggedItem, onDropItem]);
 
   const handleUseItem = (item: Item) => {
     // TODO: Server sync required - check item action type to determine if target is needed
@@ -101,14 +118,41 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
   };
 
   // TODO: Implement drag to entity list window (when it's created)
-  const handleDrop = (targetItem: Item) => {
+  const handleDropOnSlot = (targetItem: Item) => {
     if (draggedItem && draggedItem.id !== targetItem.id) {
       // TODO: Implement item swap logic
     }
   };
 
+  // Handle drop outside of slots (to drop item)
+  const handleDropOutsideSlots = (e: React.DragEvent<HTMLDivElement>) => {
+    // Check if event was already handled by slot (stopPropagation was called)
+    if (e.isPropagationStopped?.()) {
+      return;
+    }
+
+    e.preventDefault();
+
+    // Check if drop target is not a slot or inside a slot
+    const target = e.target as HTMLElement;
+    const isOnSlot = target.closest("[data-inventory-slot]");
+
+    if (!isOnSlot && draggedItem) {
+      handleDropItem(draggedItem);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
   return (
-    <div className="flex flex-col h-full bg-neutral-950 text-gray-300 font-mono relative">
+    <div
+      className="flex flex-col h-full bg-neutral-950 text-gray-300 font-mono relative"
+      onDrop={handleDropOutsideSlots}
+      onDragOver={handleDragOver}
+    >
       {/* Grid Container */}
       <div className="flex-1 overflow-y-auto p-4">
         {items.length === 0 ? (
@@ -129,12 +173,11 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
                 onDrop={handleDropItem}
                 onInspect={(item) => {
                   // TODO: Open item in inspector window
-                  console.log("Inspect item:", item);
                 }}
                 isEquipped={isItemEquipped(item)}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDropOnSlot={handleDrop}
+                onDragStart={(itm) => handleDragStart(itm)}
+                onDragEnd={() => handleDragEnd()}
+                onDropOnSlot={handleDropOnSlot}
               />
             ))}
           </div>
