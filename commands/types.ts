@@ -21,9 +21,9 @@ export type {
   ClientToServerTextPayload,
   CommandAction,
   CommandPayloadMap,
-} from "../types/protocol/client-to-server";
+} from "../types/protocol";
 
-export { serializeClientCommand } from "../types/protocol/client-to-server";
+export { serializeClientCommand } from "../types/protocol";
 
 // ============================================================================
 // Game Command Types (for UI/Key Bindings)
@@ -91,7 +91,7 @@ import type {
   CommandAction as CA,
   CommandPayloadMap as CPM,
   ClientToServerCommand as CTSC,
-} from "../types/protocol/client-to-server";
+} from "../types/protocol";
 
 /**
  * Типизированная функция создания команды

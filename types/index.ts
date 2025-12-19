@@ -55,4 +55,4 @@ export { getCommandMetadata, COMMAND_METADATA } from "../commands/metadata";
 export type {
   CommandPayloadMap as LegacyCommandPayloadMap,
   CommandAction as LegacyCommandAction,
-} from "./protocol/client-to-server";
+} from "./protocol";

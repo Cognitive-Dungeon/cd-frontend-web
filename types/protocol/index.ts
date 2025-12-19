@@ -7,7 +7,7 @@
 // Common types
 export type { Position } from "./common";
 
-// Client → Server
+// Client → Server (re-exported from @cd/agent-sdk)
 export type {
   ClientToServerMovePayload,
   ClientToServerEntityTargetPayload,
@@ -21,9 +21,9 @@ export type {
   ClientToServerCommand,
   CommandAction,
   CommandPayloadMap,
-} from "./client-to-server";
+} from "@cd/agent-sdk";
 
-export { serializeClientCommand } from "./client-to-server";
+export { serializeClientCommand } from "@cd/agent-sdk";
 
 // Server → Client
 export type {
