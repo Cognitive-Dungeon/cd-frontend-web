@@ -1,14 +1,15 @@
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
-  WebSocketService,
-  WebSocketEvent,
-  WebSocketConfig,
-  MessageEventData,
   DisconnectedEventData,
-  ReconnectAttemptEventData,
   ErrorEventData,
-} from "../services";
+  MessageEventData,
+  ReconnectAttemptEventData,
+  WebSocketConfig,
+  WebSocketEvent,
+  WebSocketService,
+} from "@cd/agent-sdk";
+
 import { ClientToServerCommand, LogType } from "../types";
 
 interface UseWebSocketProps {

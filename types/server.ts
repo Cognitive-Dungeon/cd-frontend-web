@@ -1,10 +1,10 @@
 /**
- * Server Types - Re-export from services
+ * Server Types - Re-export from network package
  *
- * @deprecated Import from "../services/ServerManager" instead
+ * @deprecated Import from "@cd/network" instead
  *
  * Этот файл оставлен для обратной совместимости.
- * ServerManager и связанные типы перенесены в services/ServerManager.ts
+ * ServerManager и связанные типы перенесены в @cd/network пакет.
  */
 
 export {
@@ -12,4 +12,4 @@ export {
   DEFAULT_SERVERS,
   type ServerInfo,
   type ServerStatus,
-} from "../services/ServerManager";
+} from "@cd/agent-sdk";

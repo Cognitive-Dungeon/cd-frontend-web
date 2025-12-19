@@ -13,10 +13,12 @@
     "allowJs": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@cd/network": ["./packages/network/src"],
+      "@cd/network/*": ["./packages/network/src/*"],
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
   },
-  "exclude": ["node_modules", "dist", "build", "engine_archive_20251205"]
+  "exclude": ["node_modules", "dist", "build"],
 }

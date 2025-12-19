@@ -1,21 +1,36 @@
 /**
  * Services - Barrel Export
  *
- * Экспортирует все сервисы приложения
+ * Этот файл реэкспортирует сервисы для обратной совместимости.
+ * Новый код должен импортировать напрямую из @cd/network.
+ *
+ * @deprecated Import from "@cd/network" instead
  */
 
-// WebSocket Service
-export { WebSocketService } from "./WebSocketService";
+// ============================================================================
+// Network Services - Re-exported from @cd/network package
+// ============================================================================
 
-// WebSocket Types
+export { WebSocketService, ServerManager, DEFAULT_SERVERS } from "@cd/network";
+
+// ============================================================================
+// Network Types - Re-exported from @cd/network package
+// ============================================================================
+
+// Enums
+export { WebSocketState, WebSocketEvent, DisconnectReason } from "@cd/network";
+
+// WebSocket Configuration & State
 export type {
   WebSocketConfig,
   WebSocketEventListener,
   WebSocketEventDataMap,
-  QueuedMessage,
-  WebSocketMetrics,
   SendOptions,
   SendResult,
+} from "@cd/network";
+
+// WebSocket Event Data
+export type {
   ConnectedEventData,
   DisconnectedEventData,
   MessageEventData,
@@ -24,31 +39,28 @@ export type {
   StateChangeEventData,
   MessageSentEventData,
   AuthChangeEventData,
-} from "./types";
+} from "@cd/network";
 
-export { WebSocketState, WebSocketEvent, DisconnectReason } from "./types";
+// Internal Types (for advanced usage)
+export type { QueuedMessage, WebSocketMetrics } from "@cd/network";
 
-// WebSocket Modules (for direct access if needed)
+// Server Management Types
+export type { ServerInfo, ServerStatus } from "@cd/network";
+
+// ============================================================================
+// WebSocket Internal Modules (for direct access if needed)
+// ============================================================================
+
 export {
   MessageQueue,
   ConnectionMetrics,
   HeartbeatManager,
   ReconnectionManager,
-} from "./websocket";
+} from "@cd/network";
 
-export type {
-  MessageQueueConfig,
-  EnqueueOptions,
-  ConnectionMetricsConfig,
-  HeartbeatConfig,
-  ReconnectionConfig,
-  ReconnectionState,
-} from "./websocket";
+// ============================================================================
+// Other Services (not part of network layer)
+// ============================================================================
 
-// Server Manager
-export {
-  ServerManager,
-  DEFAULT_SERVERS,
-  type ServerInfo,
-  type ServerStatus,
-} from "./ServerManager";
+// Gemini AI Service remains here as it's not part of the network layer
+export * from "./geminiService";

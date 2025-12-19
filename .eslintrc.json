@@ -30,10 +30,11 @@
     "import/resolver": {
       "typescript": {
         "alwaysTryTypes": true,
-        "project": ["./tsconfig.json"]
+        "project": ["./tsconfig.json", "./packages/*/tsconfig.json"]
       },
       "node": {
-        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+        "paths": ["packages"]
       }
     }
   },
@@ -57,6 +58,14 @@
           "sibling",
           "index"
         ],
+        "pathGroups": [
+          {
+            "pattern": "@cd/**",
+            "group": "internal",
+            "position": "before"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["builtin"],
         "newlines-between": "always",
         "alphabetize": { "order": "asc", "caseInsensitive": true }
       }
