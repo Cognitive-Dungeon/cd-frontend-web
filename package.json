@@ -3,9 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -14,6 +11,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix --format compact"
   },
   "dependencies": {
+    "@cd/agent-sdk": "github:Cognitive-Dungeon/cd-agent-sdk-ts",
     "@google/genai": "^1.30.0",
     "@microlink/react-json-view": "^1.27.0",
     "eslint": "^8.57.1",

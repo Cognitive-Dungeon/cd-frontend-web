@@ -2,13 +2,13 @@
  * Services - Barrel Export
  *
  * Этот файл реэкспортирует сервисы для обратной совместимости.
- * Новый код должен импортировать напрямую из @cd/network.
+ * Новый код должен импортировать напрямую из @cd/agent-sdk.
  *
- * @deprecated Import from "@cd/network" instead
+ * @deprecated Import from "@cd/agent-sdk" instead
  */
 
 // ============================================================================
-// Network Services - Re-exported from @cd/network package
+// Network Services - Re-exported from @cd/agent-sdk package
 // ============================================================================
 
 export {
@@ -18,7 +18,7 @@ export {
 } from "@cd/agent-sdk";
 
 // ============================================================================
-// Network Types - Re-exported from @cd/network package
+// Network Types - Re-exported from @cd/agent-sdk package
 // ============================================================================
 
 // Enums
@@ -35,7 +35,7 @@ export type {
   WebSocketEventDataMap,
   SendOptions,
   SendResult,
-} from "@cd/network";
+} from "@cd/agent-sdk";
 
 // WebSocket Event Data
 export type {
@@ -47,13 +47,13 @@ export type {
   StateChangeEventData,
   MessageSentEventData,
   AuthChangeEventData,
-} from "@cd/network";
+} from "@cd/agent-sdk";
 
 // Internal Types (for advanced usage)
-export type { QueuedMessage, WebSocketMetrics } from "@cd/network";
+export type { QueuedMessage, WebSocketMetrics } from "@cd/agent-sdk";
 
 // Server Management Types
-export type { ServerInfo, ServerStatus } from "@cd/network";
+export type { ServerInfo, ServerStatus } from "@cd/agent-sdk";
 
 // ============================================================================
 // WebSocket Internal Modules (for direct access if needed)

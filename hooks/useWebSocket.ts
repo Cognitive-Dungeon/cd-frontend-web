@@ -122,7 +122,12 @@ export const useWebSocket = ({
         const msg = data.data;
 
         // Handle error responses from server
-        if (msg?.error) {
+        if (
+          msg &&
+          typeof msg === "object" &&
+          "error" in msg &&
+          typeof msg.error === "string"
+        ) {
           addLogRef.current(`Server error: ${msg.error}`, LogType.ERROR);
 
           // If error during login (like "Entity not found"), reset authentication
@@ -138,8 +143,13 @@ export const useWebSocket = ({
         // Pass message to handler
         onMessageRef.current(msg);
       } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         console.error("Error processing message:", error);
-        addLogRef.current(`Error processing message: ${error}`, LogType.ERROR);
+        addLogRef.current(
+          `Error processing message: ${errorMessage}`,
+          LogType.ERROR,
+        );
       }
     });
 

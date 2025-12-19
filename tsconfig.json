@@ -14,8 +14,6 @@
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./*"],
-      "@cd/network": ["./packages/network/src"],
-      "@cd/network/*": ["./packages/network/src/*"],
     },
     "allowImportingTsExtensions": true,
     "noEmit": true,
