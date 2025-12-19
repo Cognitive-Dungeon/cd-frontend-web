@@ -46,7 +46,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "."),
-        "@cd/agent-sdk": path.resolve(__dirname, "./packages/network/src"),
+        "@cd/agent-sdk": path.resolve(__dirname, "./packages/agent-sdk/src"),
       },
     },
   };
