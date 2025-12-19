@@ -24,8 +24,8 @@ export * from "./game";
 export * from "./ui";
 
 // ============================================================================
-// Command Types (from types/commands.ts - no circular dependency)
-// Note: CommandAction and CommandPayloadMap are already exported from ./protocol
+// Command Types (re-exported from commands/ module for convenience)
+// Note: Primary source is ../commands/, these are for backward compatibility
 // ============================================================================
 
 export type {
@@ -36,14 +36,16 @@ export type {
   PayloadForAction,
   LoginPayload,
   WaitPayload,
-} from "./commands";
+  GameCommand,
+  KeyBinding,
+} from "../commands/types";
 
 export {
   isValidCommandAction,
   validateCommandPayload,
-  getCommandMetadata,
-  COMMAND_METADATA,
-} from "./commands";
+} from "../commands/validators";
+
+export { getCommandMetadata, COMMAND_METADATA } from "../commands/metadata";
 
 // ============================================================================
 // Legacy Aliases (for backward compatibility)

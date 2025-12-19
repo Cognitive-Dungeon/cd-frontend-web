@@ -76,19 +76,3 @@ export const PRICES = {
   POTION: 50,
   HEAL: 20,
 };
-
-// Action types
-export const ACTION_TYPES = {
-  LOGIN: "LOGIN" as const,
-  MOVE: "MOVE" as const,
-  ATTACK: "ATTACK" as const,
-  TALK: "TALK" as const,
-  INTERACT: "INTERACT" as const,
-  WAIT: "WAIT" as const,
-  PICKUP: "PICKUP" as const,
-  DROP: "DROP" as const,
-  USE: "USE" as const,
-  EQUIP: "EQUIP" as const,
-  UNEQUIP: "UNEQUIP" as const,
-  CUSTOM: "CUSTOM" as const,
-};

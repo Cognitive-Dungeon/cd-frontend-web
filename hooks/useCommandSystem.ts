@@ -10,8 +10,13 @@ import {
   CommandEquip,
   CommandUnequip,
   GameCommand,
+  CommandPayloadMap,
+  CommandAction,
+  CreateClientCommandFn,
+  CommandHandlersMap,
+  LoginPayload,
+  getCommandMetadata,
 } from "../commands";
-import { ACTION_TYPES } from "../constants";
 import {
   ClientToServerCommand,
   LogType,
@@ -23,14 +28,6 @@ import {
   ClientToServerCustomPayload,
   ClientToServerItemPayload,
 } from "../types";
-import {
-  CommandPayloadMap,
-  CommandAction,
-  CreateClientCommandFn,
-  CommandHandlersMap,
-  LoginPayload,
-  getCommandMetadata,
-} from "../types/commands";
 
 interface UseCommandSystemProps {
   player: Entity | null;
@@ -56,87 +53,59 @@ export const useCommandSystem = ({
   // Маппинг обработчиков команд с улучшенной типизацией
   const commandHandlers: CommandHandlersMap = useMemo(
     () => ({
-      [ACTION_TYPES.LOGIN]: (p: LoginPayload): ClientToServerCommand | null =>
-        p.token ? { action: ACTION_TYPES.LOGIN, token: p.token } : null,
+      LOGIN: (p: LoginPayload): ClientToServerCommand | null =>
+        p.token ? { action: "LOGIN", token: p.token } : null,
 
-      [ACTION_TYPES.MOVE]: (
-        p: ClientToServerMovePayload,
-      ): ClientToServerCommand => ({
-        action: ACTION_TYPES.MOVE,
+      MOVE: (p: ClientToServerMovePayload): ClientToServerCommand => ({
+        action: "MOVE",
         payload: { dx: p.dx, dy: p.dy, x: p.x, y: p.y },
       }),
 
-      [ACTION_TYPES.ATTACK]: (
+      ATTACK: (
         p: ClientToServerEntityTargetPayload,
       ): ClientToServerCommand | null =>
         p.targetId
-          ? { action: ACTION_TYPES.ATTACK, payload: { targetId: p.targetId } }
+          ? { action: "ATTACK", payload: { targetId: p.targetId } }
           : null,
 
-      [ACTION_TYPES.TALK]: (
+      TALK: (
         p: ClientToServerEntityTargetPayload,
       ): ClientToServerCommand | null =>
         p.targetId
-          ? { action: ACTION_TYPES.TALK, payload: { targetId: p.targetId } }
+          ? { action: "TALK", payload: { targetId: p.targetId } }
           : null,
 
-      [ACTION_TYPES.INTERACT]: (
+      INTERACT: (
         p: ClientToServerEntityTargetPayload,
       ): ClientToServerCommand | null =>
         p.targetId
-          ? {
-              action: ACTION_TYPES.INTERACT,
-              payload: { targetId: p.targetId },
-            }
+          ? { action: "INTERACT", payload: { targetId: p.targetId } }
           : null,
 
-      [ACTION_TYPES.WAIT]: (): ClientToServerCommand => ({
-        action: ACTION_TYPES.WAIT,
+      WAIT: (): ClientToServerCommand => ({
+        action: "WAIT",
         payload: {},
       }),
 
-      [ACTION_TYPES.PICKUP]: (
-        p: ClientToServerItemPayload,
-      ): ClientToServerCommand | null =>
+      PICKUP: (p: ClientToServerItemPayload): ClientToServerCommand | null =>
+        p.itemId ? { action: "PICKUP", payload: { itemId: p.itemId } } : null,
+
+      DROP: (p: ClientToServerItemPayload): ClientToServerCommand | null =>
         p.itemId
-          ? { action: ACTION_TYPES.PICKUP, payload: { itemId: p.itemId } }
+          ? { action: "DROP", payload: { itemId: p.itemId, count: p.count } }
           : null,
 
-      [ACTION_TYPES.DROP]: (
-        p: ClientToServerItemPayload,
-      ): ClientToServerCommand | null =>
-        p.itemId
-          ? {
-              action: ACTION_TYPES.DROP,
-              payload: { itemId: p.itemId, count: p.count },
-            }
-          : null,
+      USE: (p: ClientToServerItemPayload): ClientToServerCommand | null =>
+        p.itemId ? { action: "USE", payload: { itemId: p.itemId } } : null,
 
-      [ACTION_TYPES.USE]: (
-        p: ClientToServerItemPayload,
-      ): ClientToServerCommand | null =>
-        p.itemId
-          ? { action: ACTION_TYPES.USE, payload: { itemId: p.itemId } }
-          : null,
+      EQUIP: (p: ClientToServerItemPayload): ClientToServerCommand | null =>
+        p.itemId ? { action: "EQUIP", payload: { itemId: p.itemId } } : null,
 
-      [ACTION_TYPES.EQUIP]: (
-        p: ClientToServerItemPayload,
-      ): ClientToServerCommand | null =>
-        p.itemId
-          ? { action: ACTION_TYPES.EQUIP, payload: { itemId: p.itemId } }
-          : null,
+      UNEQUIP: (p: ClientToServerItemPayload): ClientToServerCommand | null =>
+        p.itemId ? { action: "UNEQUIP", payload: { itemId: p.itemId } } : null,
 
-      [ACTION_TYPES.UNEQUIP]: (
-        p: ClientToServerItemPayload,
-      ): ClientToServerCommand | null =>
-        p.itemId
-          ? { action: ACTION_TYPES.UNEQUIP, payload: { itemId: p.itemId } }
-          : null,
-
-      [ACTION_TYPES.CUSTOM]: (
-        p: ClientToServerCustomPayload,
-      ): ClientToServerCommand => ({
-        action: ACTION_TYPES.CUSTOM,
+      CUSTOM: (p: ClientToServerCustomPayload): ClientToServerCommand => ({
+        action: "CUSTOM",
         payload: p,
       }),
     }),

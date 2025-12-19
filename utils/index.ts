@@ -10,7 +10,7 @@ export {
 // Экспорт утилит для поиска пути
 export { findPath } from "./pathfinding";
 
-// Экспорт типизированных билдеров команд
+// Экспорт типизированных билдеров команд (из commands/ модуля)
 export {
   createLoginCommand,
   createMoveCommand,
@@ -29,4 +29,4 @@ export {
   extractMoveCoordinates,
   validateCommand,
   safeSerializeCommand,
-} from "./commandBuilders";
+} from "../commands";
