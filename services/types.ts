@@ -3,9 +3,15 @@
  *
  * Этот файл содержит все типы, используемые WebSocketService
  * для типобезопасной работы с WebSocket соединением.
+ *
+ * Некоторые типы теперь определены в модулях websocket/ и реэкспортируются здесь
+ * для обратной совместимости.
  */
 
 import { ClientToServerCommand } from "../types";
+
+// Re-export from websocket modules for backward compatibility
+export type { QueuedMessage, WebSocketMetrics } from "./websocket";
 
 /**
  * Состояние WebSocket соединения
@@ -220,49 +226,8 @@ export interface WebSocketEventDataMap {
   [WebSocketEvent.AUTH_CHANGE]: AuthChangeEventData;
 }
 
-/**
- * Сообщение в очереди отправки
- */
-export interface QueuedMessage {
-  /** Команда для отправки */
-  command: ClientToServerCommand;
-  /** Время добавления в очередь */
-  timestamp: number;
-  /** Количество попыток отправки */
-  attempts: number;
-  /** Callback успешной отправки */
-  onSuccess?: () => void;
-  /** Callback ошибки отправки */
-  onError?: (error: Error) => void;
-}
-
-/**
- * Метрики WebSocket соединения
- */
-export interface WebSocketMetrics {
-  /** Время установки текущего соединения */
-  connectedAt: number | null;
-  /** Время последнего отключения */
-  disconnectedAt: number | null;
-  /** Общее количество отправленных сообщений */
-  messagesSent: number;
-  /** Общее количество полученных сообщений */
-  messagesReceived: number;
-  /** Количество попыток переподключения */
-  reconnectAttempts: number;
-  /** Количество успешных переподключений */
-  reconnectSuccesses: number;
-  /** Количество ошибок */
-  errors: number;
-  /** Текущая задержка переподключения (мс) */
-  currentReconnectDelay: number;
-  /** Размер очереди отправки */
-  queueSize: number;
-  /** Среднее время roundtrip (мс) */
-  averageLatency: number;
-  /** Последнее время roundtrip (мс) */
-  lastLatency: number;
-}
+// QueuedMessage and WebSocketMetrics are now defined in websocket/ modules
+// and re-exported at the top of this file
 
 /**
  * Опции для отправки команды

@@ -1,17 +1,36 @@
 /**
- * Улучшенная типизация для командной системы
+ * Types - Commands (Backward Compatibility)
  *
- * Этот файл содержит строгую типизацию для всех команд клиент-сервер,
- * обеспечивая полную проверку типов на этапе компиляции.
+ * Этот файл сохранён для обратной совместимости.
+ * Все типы и функции теперь находятся в модуле `commands/`.
+ *
+ * @deprecated Импортируйте напрямую из "../commands/" для новых файлов
+ *
+ * @example
+ * ```typescript
+ * // Legacy (этот файл)
+ * import { CommandMetadata, COMMAND_METADATA } from "./types/commands";
+ *
+ * // Рекомендуемый способ
+ * import { CommandMetadata, COMMAND_METADATA } from "./commands/";
+ * ```
  */
 
 import {
   ClientToServerCommand,
-  ClientToServerMovePayload,
-  ClientToServerEntityTargetPayload,
-  ClientToServerCustomPayload,
-  ClientToServerItemPayload,
-} from "../types";
+  CommandAction,
+  CommandPayloadMap,
+} from "./protocol/client-to-server";
+
+// ============================================================================
+// Re-export Protocol Types
+// ============================================================================
+
+export type { CommandAction, CommandPayloadMap };
+
+// ============================================================================
+// Payload Types
+// ============================================================================
 
 /**
  * Payload для команды LOGIN
@@ -25,63 +44,36 @@ export interface LoginPayload {
  */
 export type WaitPayload = Record<string, never> | null | undefined;
 
-/**
- * Маппинг типов действий на соответствующие payload типы
- *
- * Этот тип связывает каждое действие команды с точным типом его payload,
- * обеспечивая type-safety при создании команд.
- *
- * @example
- * ```typescript
- * // Правильно: TypeScript знает, что MOVE требует ClientToServerMovePayload
- * const payload: CommandPayloadMap["MOVE"] = { dx: 1, dy: 0 };
- *
- * // Ошибка: TypeScript не позволит использовать неправильный тип
- * const payload: CommandPayloadMap["ATTACK"] = { dx: 1, dy: 0 }; // Type error!
- * ```
- */
-export type CommandPayloadMap = {
-  LOGIN: LoginPayload;
-  MOVE: ClientToServerMovePayload;
-  ATTACK: ClientToServerEntityTargetPayload;
-  TALK: ClientToServerEntityTargetPayload;
-  INTERACT: ClientToServerEntityTargetPayload;
-  WAIT: WaitPayload;
-  PICKUP: ClientToServerItemPayload;
-  DROP: ClientToServerItemPayload;
-  USE: ClientToServerItemPayload;
-  EQUIP: ClientToServerItemPayload;
-  UNEQUIP: ClientToServerItemPayload;
-  CUSTOM: ClientToServerCustomPayload;
-};
+// ============================================================================
+// Command Metadata Types
+// ============================================================================
 
 /**
- * Извлекает тип action из ClientToServerCommand
+ * Расширенная информация о команде для UI
  */
-export type CommandAction = ClientToServerCommand["action"];
+export interface CommandMetadata {
+  /** Тип команды */
+  action: string;
+  /** Человекочитаемое название */
+  displayName: string;
+  /** Описание команды */
+  description: string;
+  /** Требуется ли цель-сущность */
+  requiresTarget: boolean;
+  /** Требуется ли позиция */
+  requiresPosition: boolean;
+  /** Доступна ли команда вне хода игрока */
+  availableOutOfTurn: boolean;
+}
+
+// ============================================================================
+// Command Handler Types
+// ============================================================================
 
 /**
  * Типизированная функция создания команды
  *
- * Эта сигнатура функции обеспечивает, что payload соответствует типу action:
- * - Если action = "MOVE", payload должен быть ClientToServerMovePayload
- * - Если action = "ATTACK", payload должен быть ClientToServerEntityTargetPayload
- * - И так далее для всех типов команд
- *
  * @template T - Тип action, должен быть одним из CommandAction
- * @param action - Тип команды
- * @param payload - Payload, соответствующий типу команды
- * @returns Типизированная команда или null если команда невалидна
- *
- * @example
- * ```typescript
- * // TypeScript автоматически выводит тип payload из action
- * createClientCommand("MOVE", { dx: 1, dy: 0 }); // ✅ Правильно
- * createClientCommand("MOVE", { targetId: "123" }); // ❌ Ошибка типа!
- *
- * createClientCommand("ATTACK", { targetId: "123" }); // ✅ Правильно
- * createClientCommand("ATTACK", { dx: 1 }); // ❌ Ошибка типа!
- * ```
  */
 export type CreateClientCommandFn = <T extends CommandAction>(
   action: T,
@@ -93,12 +85,12 @@ export type CreateClientCommandFn = <T extends CommandAction>(
  *
  * @template T - Тип action
  */
-export type TypedCommandHandler<T extends CommandAction> = (
+export type TypedCommandHandler<T extends CommandAction = CommandAction> = (
   payload: CommandPayloadMap[T],
 ) => ClientToServerCommand | null;
 
 /**
- * Маппинг всех обработчиков команд с правильной типизацией
+ * Маппинг обработчиков команд с правильной типизацией
  */
 export type CommandHandlersMap = {
   [K in CommandAction]: TypedCommandHandler<K>;
@@ -106,28 +98,15 @@ export type CommandHandlersMap = {
 
 /**
  * Helper type: извлекает тип payload для конкретного action
- *
- * @example
- * ```typescript
- * type MovePayload = PayloadForAction<"MOVE">; // ClientToServerMovePayload
- * type AttackPayload = PayloadForAction<"ATTACK">; // ClientToServerEntityTargetPayload
- * ```
  */
 export type PayloadForAction<T extends CommandAction> = CommandPayloadMap[T];
 
+// ============================================================================
+// Validation Functions
+// ============================================================================
+
 /**
  * Type guard: проверяет, является ли строка валидным типом команды
- *
- * @param action - Строка для проверки
- * @returns true если action является валидным CommandAction
- *
- * @example
- * ```typescript
- * if (isValidCommandAction(userInput)) {
- *   // TypeScript знает, что userInput это CommandAction
- *   createClientCommand(userInput, payload);
- * }
- * ```
  */
 export function isValidCommandAction(action: string): action is CommandAction {
   const validActions: CommandAction[] = [
@@ -149,73 +128,59 @@ export function isValidCommandAction(action: string): action is CommandAction {
 
 /**
  * Валидирует payload для конкретного типа команды
- *
- * @param action - Тип команды
- * @param payload - Payload для проверки
- * @returns true если payload валиден для данного action
- *
- * @example
- * ```typescript
- * const isValid = validateCommandPayload("MOVE", { dx: 1, dy: 0 }); // true
- * const isInvalid = validateCommandPayload("MOVE", { targetId: "123" }); // false
- * ```
  */
 export function validateCommandPayload(
   action: CommandAction,
-  payload: any,
-): payload is CommandPayloadMap[typeof action] {
+  payload: unknown,
+): boolean {
+  if (payload === null || payload === undefined) {
+    return action === "WAIT";
+  }
+
+  if (typeof payload !== "object") {
+    return false;
+  }
+
+  const p = payload as Record<string, unknown>;
+
   switch (action) {
     case "LOGIN":
-      return typeof payload === "object" && typeof payload.token === "string";
+      return typeof p.token === "string" && (p.token as string).length > 0;
 
     case "MOVE":
       return (
-        typeof payload === "object" &&
-        (typeof payload.dx === "number" || typeof payload.x === "number")
+        (typeof p.dx === "number" && typeof p.dy === "number") ||
+        (typeof p.x === "number" && typeof p.y === "number")
       );
 
     case "ATTACK":
     case "TALK":
     case "INTERACT":
       return (
-        typeof payload === "object" && typeof payload.targetId === "string"
+        typeof p.targetId === "string" && (p.targetId as string).length > 0
       );
 
     case "WAIT":
-      return payload == null || Object.keys(payload).length === 0;
+      return Object.keys(p).length === 0;
 
     case "PICKUP":
     case "DROP":
     case "USE":
     case "EQUIP":
     case "UNEQUIP":
-      return typeof payload === "object" && typeof payload.itemId === "string";
+      return typeof p.itemId === "string" && (p.itemId as string).length > 0;
 
     case "CUSTOM":
-      return typeof payload === "object";
+      return true;
 
     default:
       return false;
   }
 }
 
-/**
- * Расширенная информация о команде для UI
- */
-export interface CommandMetadata {
-  /** Тип команды */
-  action: CommandAction;
-  /** Человекочитаемое название */
-  displayName: string;
-  /** Описание команды */
-  description: string;
-  /** Требуется ли цель-сущность */
-  requiresTarget: boolean;
-  /** Требуется ли позиция */
-  requiresPosition: boolean;
-  /** Доступна ли команда вне хода игрока */
-  availableOutOfTurn: boolean;
-}
+// ============================================================================
+// Command Metadata
+// ============================================================================
 
 /**
  * Метаданные всех команд для UI и валидации
@@ -321,15 +286,6 @@ export const COMMAND_METADATA: Record<CommandAction, CommandMetadata> = {
 
 /**
  * Получает метаданные команды
- *
- * @param action - Тип команды
- * @returns Метаданные команды
- *
- * @example
- * ```typescript
- * const metadata = getCommandMetadata("ATTACK");
- * console.log(metadata.requiresTarget); // true
- * ```
  */
 export function getCommandMetadata(action: CommandAction): CommandMetadata {
   return COMMAND_METADATA[action];

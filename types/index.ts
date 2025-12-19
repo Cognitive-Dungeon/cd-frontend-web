@@ -24,20 +24,18 @@ export * from "./game";
 export * from "./ui";
 
 // ============================================================================
-// Legacy Exports (for backward compatibility)
+// Command Types (from types/commands.ts - no circular dependency)
+// Note: CommandAction and CommandPayloadMap are already exported from ./protocol
 // ============================================================================
 
-// Commands types (will be moved to commands/ module later)
 export type {
-  LoginPayload,
-  WaitPayload,
-  CommandPayloadMap as LegacyCommandPayloadMap,
-  CommandAction as LegacyCommandAction,
+  CommandMetadata,
   CreateClientCommandFn,
   TypedCommandHandler,
   CommandHandlersMap,
   PayloadForAction,
-  CommandMetadata,
+  LoginPayload,
+  WaitPayload,
 } from "./commands";
 
 export {
@@ -46,3 +44,13 @@ export {
   getCommandMetadata,
   COMMAND_METADATA,
 } from "./commands";
+
+// ============================================================================
+// Legacy Aliases (for backward compatibility)
+// ============================================================================
+
+// Re-export with aliases for code that uses old names
+export type {
+  CommandPayloadMap as LegacyCommandPayloadMap,
+  CommandAction as LegacyCommandAction,
+} from "./protocol/client-to-server";

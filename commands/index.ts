@@ -1,18 +1,37 @@
 /**
- * Commands - Backward Compatibility Re-exports
+ * Commands - Barrel Export
  *
- * Этот файл сохранён для обратной совместимости.
- * Все экспорты теперь находятся в модуле `commands/`.
- *
- * @deprecated Импортируйте напрямую из "./commands/" для новых файлов
+ * Унифицированный модуль командной системы.
+ * Объединяет типы, определения, билдеры, валидаторы и метаданные.
  *
  * @example
  * ```typescript
- * // Legacy (этот файл)
- * import { CommandUp, KeyBindingManager } from "./commands";
+ * import {
+ *   // Types
+ *   GameCommand,
+ *   KeyBinding,
+ *   ClientToServerCommand,
  *
- * // Рекомендуемый способ
- * import { CommandUp, KeyBindingManager } from "./commands/";
+ *   // Predefined commands
+ *   CommandUp,
+ *   CommandAttack,
+ *
+ *   // Builders
+ *   createMoveCommand,
+ *   createAttackCommand,
+ *
+ *   // Validators
+ *   validateCommand,
+ *   isMoveCommand,
+ *
+ *   // Metadata
+ *   COMMAND_METADATA,
+ *   getCommandMetadata,
+ *
+ *   // Key Bindings
+ *   KeyBindingManager,
+ *   DEFAULT_KEY_BINDINGS,
+ * } from "./commands";
  * ```
  */
 
@@ -21,7 +40,7 @@
 // ============================================================================
 
 export type {
-  // Protocol types
+  // Protocol types (re-exported from types/protocol)
   ClientToServerCommand,
   ClientToServerAction,
   ClientToServerMovePayload,
@@ -44,9 +63,9 @@ export type {
   LoginPayload,
   WaitPayload,
   PayloadForAction,
-} from "./commands/types";
+} from "./types";
 
-export { serializeClientCommand } from "./commands/types";
+export { serializeClientCommand } from "./types";
 
 // ============================================================================
 // Predefined Command Definitions
@@ -83,7 +102,7 @@ export {
   // Collections
   ALL_PREDEFINED_COMMANDS,
   COMMAND_BY_ACTION,
-} from "./commands/definitions";
+} from "./definitions";
 
 // ============================================================================
 // Command Builders
@@ -111,7 +130,7 @@ export {
   // Other
   createWaitCommand,
   createCustomCommand,
-} from "./commands/builders";
+} from "./builders";
 
 // ============================================================================
 // Validators & Type Guards
@@ -135,7 +154,7 @@ export {
   extractItemId,
   // Serialization
   safeSerializeCommand,
-} from "./commands/validators";
+} from "./validators";
 
 // ============================================================================
 // Command Metadata
@@ -154,7 +173,7 @@ export {
   getPositionRequiringCommands,
   getOutOfTurnCommands,
   getInTurnCommands,
-} from "./commands/metadata";
+} from "./metadata";
 
 // ============================================================================
 // Key Binding Management
@@ -165,4 +184,4 @@ export {
   KeyBindingManager,
   getKeyBindingManager,
   resetKeyBindingManager,
-} from "./commands/KeyBindingManager";
+} from "./KeyBindingManager";

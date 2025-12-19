@@ -28,6 +28,23 @@ export type {
 
 export { WebSocketState, WebSocketEvent, DisconnectReason } from "./types";
 
+// WebSocket Modules (for direct access if needed)
+export {
+  MessageQueue,
+  ConnectionMetrics,
+  HeartbeatManager,
+  ReconnectionManager,
+} from "./websocket";
+
+export type {
+  MessageQueueConfig,
+  EnqueueOptions,
+  ConnectionMetricsConfig,
+  HeartbeatConfig,
+  ReconnectionConfig,
+  ReconnectionState,
+} from "./websocket";
+
 // Server Manager
 export {
   ServerManager,

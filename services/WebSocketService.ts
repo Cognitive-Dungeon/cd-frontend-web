@@ -1,18 +1,14 @@
 /**
- * WebSocketService - Профессиональный сервис для управления WebSocket соединением
+ * WebSocketService - Сервис для управления WebSocket соединением
  *
- * Основные возможности:
- * - Автоматическое переподключение с экспоненциальной задержкой
- * - Очередь сообщений для отправки при восстановлении соединения
- * - Система событий для уведомлений о состоянии
- * - Heartbeat для проверки живости соединения
- * - Метрики и статистика соединения
- * - Graceful shutdown
- * - Сериализация/десериализация сообщений
+ * Рефакторенная версия с использованием модульных компонентов:
+ * - MessageQueue - очередь сообщений
+ * - ConnectionMetrics - сбор метрик
+ * - HeartbeatManager - heartbeat пинги
+ * - ReconnectionManager - переподключение
  */
 
 import { ClientToServerCommand, serializeClientCommand } from "../types";
-
 import {
   WebSocketConfig,
   WebSocketState,
@@ -20,8 +16,6 @@ import {
   WebSocketEventListener,
   WebSocketEventDataMap,
   DisconnectReason,
-  QueuedMessage,
-  WebSocketMetrics,
   SendOptions,
   SendResult,
   ConnectedEventData,
@@ -33,10 +27,17 @@ import {
   MessageSentEventData,
   AuthChangeEventData,
 } from "./types";
+import {
+  MessageQueue,
+  ConnectionMetrics,
+  HeartbeatManager,
+  ReconnectionManager,
+} from "./websocket";
 
-/**
- * Конфигурация по умолчанию
- */
+// ============================================================================
+// Default Configuration
+// ============================================================================
+
 const DEFAULT_CONFIG: Required<WebSocketConfig> = {
   url: "",
   maxReconnectAttempts: 10,
@@ -51,50 +52,28 @@ const DEFAULT_CONFIG: Required<WebSocketConfig> = {
   debug: false,
 };
 
+// ============================================================================
+// WebSocketService Class
+// ============================================================================
+
 export class WebSocketService {
   private config: Required<WebSocketConfig>;
   private socket: WebSocket | null = null;
   private state: WebSocketState = WebSocketState.CLOSED;
   private isAuthenticated: boolean = false;
 
-  // Reconnection state
-  private reconnectAttempts: number = 0;
-  private reconnectTimeout: number | null = null;
-  private currentReconnectDelay: number;
+  // Modular components
+  private messageQueue: MessageQueue;
+  private metrics: ConnectionMetrics;
+  private heartbeat: HeartbeatManager;
+  private reconnection: ReconnectionManager;
 
   // Connection timeout
   private connectionTimeoutId: number | null = null;
 
-  // Heartbeat state
-  private heartbeatInterval: number | null = null;
-  private heartbeatTimeout: number | null = null;
-  private lastHeartbeatTime: number = 0;
-
-  // Message queue
-  private messageQueue: QueuedMessage[] = [];
-
   // Event listeners
   private listeners: Map<WebSocketEvent, Set<WebSocketEventListener<any>>> =
     new Map();
-
-  // Metrics
-  private metrics: WebSocketMetrics = {
-    connectedAt: null,
-    disconnectedAt: null,
-    messagesSent: 0,
-    messagesReceived: 0,
-    reconnectAttempts: 0,
-    reconnectSuccesses: 0,
-    errors: 0,
-    currentReconnectDelay: 0,
-    queueSize: 0,
-    averageLatency: 0,
-    lastLatency: 0,
-  };
-
-  // Latency tracking
-  private latencyMeasurements: number[] = [];
-  private maxLatencyMeasurements: number = 10;
 
   // Flags
   private isManualDisconnect: boolean = false;
@@ -102,12 +81,37 @@ export class WebSocketService {
 
   constructor(config: WebSocketConfig = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.currentReconnectDelay = this.config.reconnectDelay;
 
-    if (this.config.debug) {
-      this.log("WebSocketService initialized with config:", this.config);
-    }
+    // Initialize modular components
+    this.messageQueue = new MessageQueue({
+      maxSize: this.config.maxQueueSize,
+      debug: this.config.debug,
+    });
+
+    this.metrics = new ConnectionMetrics({
+      debug: this.config.debug,
+    });
+
+    this.heartbeat = new HeartbeatManager({
+      interval: this.config.heartbeatInterval,
+      timeout: this.config.heartbeatTimeout,
+      debug: this.config.debug,
+    });
+
+    this.reconnection = new ReconnectionManager({
+      maxAttempts: this.config.maxReconnectAttempts,
+      initialDelay: this.config.reconnectDelay,
+      maxDelay: this.config.maxReconnectDelay,
+      delayMultiplier: this.config.reconnectDelayMultiplier,
+      debug: this.config.debug,
+    });
+
+    this.log("WebSocketService initialized with config:", this.config);
   }
+
+  // ============================================================================
+  // Public Methods - Connection
+  // ============================================================================
 
   /**
    * Подключение к WebSocket серверу
@@ -135,10 +139,14 @@ export class WebSocketService {
    */
   public disconnect(): void {
     this.isManualDisconnect = true;
-    this.clearReconnectTimeout();
-    this.stopHeartbeat();
+    this.reconnection.cancel();
+    this.heartbeat.stop();
     this.closeConnection(DisconnectReason.MANUAL);
   }
+
+  // ============================================================================
+  // Public Methods - Messaging
+  // ============================================================================
 
   /**
    * Отправка команды на сервер
@@ -151,12 +159,13 @@ export class WebSocketService {
 
     // Проверка состояния соединения
     if (this.state !== WebSocketState.CONNECTED) {
-      if (
-        options.queue !== false &&
-        this.messageQueue.length < this.config.maxQueueSize
-      ) {
+      if (options.queue !== false && !this.messageQueue.isFull) {
         // Добавляем в очередь
-        this.addToQueue(command, options);
+        this.messageQueue.enqueue(command, {
+          onSuccess: options.onSuccess,
+          onError: options.onError,
+        });
+
         return {
           success: false,
           queued: true,
@@ -181,7 +190,7 @@ export class WebSocketService {
       this.socket!.send(serialized);
 
       // Обновляем метрики
-      this.metrics.messagesSent++;
+      this.metrics.recordMessageSent();
 
       // Вызываем события
       this.emit(WebSocketEvent.MESSAGE_SENT, {
@@ -202,7 +211,7 @@ export class WebSocketService {
         timestamp,
       };
     } catch (error) {
-      this.metrics.errors++;
+      this.metrics.recordError();
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
@@ -227,6 +236,10 @@ export class WebSocketService {
       };
     }
   }
+
+  // ============================================================================
+  // Public Methods - Event System
+  // ============================================================================
 
   /**
    * Подписка на событие
@@ -268,6 +281,10 @@ export class WebSocketService {
     this.on(event, onceWrapper as any);
   }
 
+  // ============================================================================
+  // Public Methods - Authentication
+  // ============================================================================
+
   /**
    * Установка статуса аутентификации
    */
@@ -281,6 +298,10 @@ export class WebSocketService {
       this.log(`Authentication status changed: ${isAuthenticated}`);
     }
   }
+
+  // ============================================================================
+  // Public Methods - State & Metrics
+  // ============================================================================
 
   /**
    * Получение текущего состояния
@@ -306,19 +327,19 @@ export class WebSocketService {
   /**
    * Получение метрик
    */
-  public getMetrics(): Readonly<WebSocketMetrics> {
-    return {
-      ...this.metrics,
-      queueSize: this.messageQueue.length,
-      currentReconnectDelay: this.currentReconnectDelay,
-    };
+  public getMetrics() {
+    // Обновляем внешние данные в метриках
+    this.metrics.setQueueSize(this.messageQueue.size);
+    this.metrics.setReconnectDelay(this.reconnection.delay);
+
+    return this.metrics.getMetrics();
   }
 
   /**
    * Очистка очереди сообщений
    */
   public clearQueue(): void {
-    this.messageQueue = [];
+    this.messageQueue.clear();
     this.log("Message queue cleared");
   }
 
@@ -329,11 +350,13 @@ export class WebSocketService {
     this.isDestroyed = true;
     this.disconnect();
     this.listeners.clear();
-    this.messageQueue = [];
+    this.messageQueue.clear();
     this.log("WebSocketService destroyed");
   }
 
-  // ==================== Private Methods ====================
+  // ============================================================================
+  // Private Methods - Connection
+  // ============================================================================
 
   /**
    * Создание WebSocket соединения
@@ -358,7 +381,7 @@ export class WebSocketService {
       this.socket.onerror = this.handleError.bind(this);
       this.socket.onclose = this.handleClose.bind(this);
     } catch (error) {
-      this.metrics.errors++;
+      this.metrics.recordError();
       this.log("Failed to create WebSocket:", error);
       this.handleConnectionError(DisconnectReason.NETWORK_ERROR);
     }
@@ -372,15 +395,17 @@ export class WebSocketService {
     this.setState(WebSocketState.CONNECTED);
 
     const timestamp = Date.now();
-    this.metrics.connectedAt = timestamp;
+    this.metrics.recordConnect();
 
-    if (this.reconnectAttempts > 0) {
-      this.metrics.reconnectSuccesses++;
+    // Записываем успешное переподключение
+    if (this.reconnection.attemptCount > 0) {
+      this.metrics.recordReconnectSuccess();
     }
 
-    const attempts = this.reconnectAttempts;
-    this.reconnectAttempts = 0;
-    this.currentReconnectDelay = this.config.reconnectDelay;
+    const attempts = this.reconnection.attemptCount;
+
+    // Сбрасываем состояние переподключения
+    this.reconnection.reset();
 
     this.emit(WebSocketEvent.CONNECTED, {
       timestamp,
@@ -390,9 +415,7 @@ export class WebSocketService {
     this.log(`Connected (attempts: ${attempts})`);
 
     // Запуск heartbeat
-    if (this.config.heartbeatInterval > 0) {
-      this.startHeartbeat();
-    }
+    this.startHeartbeat();
 
     // Отправка сообщений из очереди
     this.flushQueue();
@@ -403,14 +426,14 @@ export class WebSocketService {
    */
   private handleMessage(event: MessageEvent): void {
     const timestamp = Date.now();
-    this.metrics.messagesReceived++;
+    this.metrics.recordMessageReceived();
 
     try {
       const data = JSON.parse(event.data);
 
       // Обработка heartbeat ответа
       if (data.type === "PONG") {
-        this.handleHeartbeatResponse();
+        this.heartbeat.handlePong();
         return;
       }
 
@@ -422,7 +445,7 @@ export class WebSocketService {
 
       this.log("Message received:", data.type || "unknown");
     } catch (error) {
-      this.metrics.errors++;
+      this.metrics.recordError();
       this.emit(WebSocketEvent.ERROR, {
         type: "parse",
         message: `Failed to parse message: ${error}`,
@@ -446,10 +469,10 @@ export class WebSocketService {
    */
   private handleClose(event: CloseEvent): void {
     this.clearConnectionTimeout();
-    this.stopHeartbeat();
+    this.heartbeat.stop();
 
     const timestamp = Date.now();
-    this.metrics.disconnectedAt = timestamp;
+    this.metrics.recordDisconnect();
 
     const wasAuthenticated = this.isAuthenticated;
     this.isAuthenticated = false;
@@ -482,50 +505,6 @@ export class WebSocketService {
   }
 
   /**
-   * Планирование попытки переподключения
-   */
-  private scheduleReconnect(): void {
-    if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
-      this.log("Max reconnect attempts reached");
-      this.emit(WebSocketEvent.ERROR, {
-        type: "connection",
-        message: "Maximum reconnection attempts exceeded",
-        timestamp: Date.now(),
-      } as ErrorEventData);
-      return;
-    }
-
-    this.setState(WebSocketState.RECONNECTING);
-    this.reconnectAttempts++;
-    this.metrics.reconnectAttempts++;
-
-    const delay = Math.min(
-      this.currentReconnectDelay,
-      this.config.maxReconnectDelay,
-    );
-
-    this.emit(WebSocketEvent.RECONNECT_ATTEMPT, {
-      attempt: this.reconnectAttempts,
-      maxAttempts: this.config.maxReconnectAttempts,
-      delay,
-      timestamp: Date.now(),
-    } as ReconnectAttemptEventData);
-
-    this.log(
-      `Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.config.maxReconnectAttempts})`,
-    );
-
-    this.reconnectTimeout = window.setTimeout(() => {
-      this.connect();
-    }, delay);
-
-    // Экспоненциальное увеличение задержки
-    this.currentReconnectDelay = Math.floor(
-      this.currentReconnectDelay * this.config.reconnectDelayMultiplier,
-    );
-  }
-
-  /**
    * Обработка ошибки подключения
    */
   private handleConnectionError(reason: DisconnectReason): void {
@@ -537,7 +516,7 @@ export class WebSocketService {
    */
   private closeConnection(reason: DisconnectReason): void {
     this.clearConnectionTimeout();
-    this.stopHeartbeat();
+    this.heartbeat.stop();
 
     if (this.socket) {
       try {
@@ -553,150 +532,122 @@ export class WebSocketService {
     }
   }
 
+  // ============================================================================
+  // Private Methods - Reconnection
+  // ============================================================================
+
+  /**
+   * Планирование попытки переподключения
+   */
+  private scheduleReconnect(): void {
+    this.setState(WebSocketState.RECONNECTING);
+
+    this.reconnection.schedule(
+      // Функция переподключения
+      () => this.connect(),
+
+      // Callback при попытке
+      (attempt, maxAttempts, delay) => {
+        this.metrics.recordReconnectAttempt();
+
+        this.emit(WebSocketEvent.RECONNECT_ATTEMPT, {
+          attempt,
+          maxAttempts,
+          delay,
+          timestamp: Date.now(),
+        } as ReconnectAttemptEventData);
+
+        this.log(
+          `Reconnecting in ${delay}ms (attempt ${attempt}/${maxAttempts})`,
+        );
+      },
+
+      // Callback при исчерпании попыток
+      () => {
+        this.log("Max reconnect attempts reached");
+        this.emit(WebSocketEvent.ERROR, {
+          type: "connection",
+          message: "Maximum reconnection attempts exceeded",
+          timestamp: Date.now(),
+        } as ErrorEventData);
+      },
+    );
+  }
+
+  // ============================================================================
+  // Private Methods - Heartbeat
+  // ============================================================================
+
   /**
    * Запуск heartbeat
    */
   private startHeartbeat(): void {
-    this.stopHeartbeat();
-
-    // Skip if heartbeat disabled (interval = 0)
-    if (this.config.heartbeatInterval === 0) {
+    if (!this.heartbeat.enabled) {
       this.log("Heartbeat disabled");
       return;
     }
 
-    this.heartbeatInterval = window.setInterval(() => {
-      this.sendHeartbeat();
-    }, this.config.heartbeatInterval);
+    this.heartbeat.start(
+      // Функция отправки ping
+      () => {
+        if (!this.isConnected() || !this.socket) {
+          return false;
+        }
+        try {
+          this.socket.send(JSON.stringify({ type: "PING" }));
+          return true;
+        } catch {
+          return false;
+        }
+      },
+
+      // Callback при таймауте
+      () => {
+        this.log("Heartbeat timeout - connection may be dead");
+        this.handleConnectionError(DisconnectReason.TIMEOUT);
+      },
+
+      // Callback при получении pong
+      (latency) => {
+        this.metrics.recordLatency(latency);
+        this.log(`Heartbeat received (latency: ${latency}ms)`);
+      },
+    );
 
     this.log("Heartbeat started");
   }
 
-  /**
-   * Остановка heartbeat
-   */
-  private stopHeartbeat(): void {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-      this.heartbeatInterval = null;
-    }
-
-    if (this.heartbeatTimeout) {
-      clearTimeout(this.heartbeatTimeout);
-      this.heartbeatTimeout = null;
-    }
-  }
-
-  /**
-   * Отправка heartbeat пинга
-   */
-  private sendHeartbeat(): void {
-    if (!this.isConnected()) {
-      return;
-    }
-
-    this.lastHeartbeatTime = Date.now();
-
-    try {
-      this.socket!.send(JSON.stringify({ type: "PING" }));
-
-      // Установка таймаута ожидания ответа
-      this.heartbeatTimeout = window.setTimeout(() => {
-        this.log("Heartbeat timeout - connection may be dead");
-        this.handleConnectionError(DisconnectReason.TIMEOUT);
-      }, this.config.heartbeatTimeout);
-    } catch (error) {
-      this.log("Failed to send heartbeat:", error);
-    }
-  }
-
-  /**
-   * Обработка ответа на heartbeat
-   */
-  private handleHeartbeatResponse(): void {
-    if (this.heartbeatTimeout) {
-      clearTimeout(this.heartbeatTimeout);
-      this.heartbeatTimeout = null;
-    }
-
-    const latency = Date.now() - this.lastHeartbeatTime;
-    this.updateLatency(latency);
-    this.log(`Heartbeat received (latency: ${latency}ms)`);
-  }
-
-  /**
-   * Обновление статистики latency
-   */
-  private updateLatency(latency: number): void {
-    this.metrics.lastLatency = latency;
-    this.latencyMeasurements.push(latency);
-
-    if (this.latencyMeasurements.length > this.maxLatencyMeasurements) {
-      this.latencyMeasurements.shift();
-    }
-
-    this.metrics.averageLatency =
-      this.latencyMeasurements.reduce((a, b) => a + b, 0) /
-      this.latencyMeasurements.length;
-  }
-
-  /**
-   * Добавление сообщения в очередь
-   */
-  private addToQueue(
-    command: ClientToServerCommand,
-    options: SendOptions,
-  ): void {
-    if (this.messageQueue.length >= this.config.maxQueueSize) {
-      this.log("Message queue is full, dropping oldest message");
-      this.messageQueue.shift();
-    }
-
-    this.messageQueue.push({
-      command,
-      timestamp: Date.now(),
-      attempts: 0,
-      onSuccess: options.onSuccess,
-      onError: options.onError,
-    });
-
-    this.log(`Message queued (queue size: ${this.messageQueue.length})`);
-  }
+  // ============================================================================
+  // Private Methods - Message Queue
+  // ============================================================================
 
   /**
    * Отправка сообщений из очереди
    */
   private flushQueue(): void {
-    if (this.messageQueue.length === 0) {
+    if (this.messageQueue.isEmpty) {
       return;
     }
 
-    this.log(`Flushing message queue (${this.messageQueue.length} messages)`);
+    this.log(`Flushing message queue (${this.messageQueue.size} messages)`);
 
-    const queue = [...this.messageQueue];
-    this.messageQueue = [];
+    const messages = this.messageQueue.flush();
 
-    for (const message of queue) {
+    for (const message of messages) {
       const result = this.send(message.command, {
         onSuccess: message.onSuccess,
         onError: message.onError,
       });
 
-      if (!result.success) {
+      if (!result.success && !result.queued) {
         this.log(`Failed to send queued message: ${result.error}`);
       }
     }
   }
 
-  /**
-   * Очистка таймаута переподключения
-   */
-  private clearReconnectTimeout(): void {
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = null;
-    }
-  }
+  // ============================================================================
+  // Private Methods - Utilities
+  // ============================================================================
 
   /**
    * Очистка таймаута подключения
