@@ -7,9 +7,7 @@
 ```
 types/
 ├── protocol/           # Типы протокола клиент-сервер
-│   ├── common.ts       # Общие типы (Position)
-│   ├── client-to-server.ts  # Команды Client → Server
-│   └── server-to-client.ts  # Сообщения Server → Client
+│   └── index.ts        # Реэкспорт всех типов из @cd/agent-sdk
 │
 ├── game/               # Типы игровых сущностей
 │   ├── entity.ts       # Entity, EntityType, Stats
@@ -21,18 +19,18 @@ types/
 │   ├── context-menu.ts # ContextMenuData
 │   └── speech-bubble.ts # SpeechBubble
 │
-└── commands.ts         # Типизация командной системы (legacy)
+└── index.ts            # Barrel export всех типов
 ```
 
 ## Правила организации
 
 ### 1. Где размещать новые типы
 
-| Тип данных | Папка | Пример |
-|------------|-------|--------|
-| Протокол сервера | `protocol/` | Новый payload, новый тип сообщения |
-| Игровые сущности | `game/` | Новый тип врага, новый эффект |
-| UI компоненты | `ui/` | Модальные окна, тултипы |
+| Тип данных | Место | Действие |
+|------------|-------|----------|
+| Протокол сервера | `@cd/agent-sdk` | Обновить SDK, затем `npm update` |
+| Игровые сущности (UI) | `types/game/` | Добавить локально |
+| UI компоненты | `types/ui/` | Добавить локально |
 
 ### 2. Именование
 
@@ -79,19 +77,27 @@ export interface MyType {
 import { Entity, Position, LogType } from "../types";
 ```
 
-### Прямой импорт (для изоляции)
+### Прямой импорт протокола (из SDK)
 
 ```typescript
-import type { Position } from "../types/protocol/common";
+import type { Position, ServerToClientUpdate } from "@cd/agent-sdk";
+```
+
+### Прямой импорт игровых типов
+
+```typescript
 import type { Entity } from "../types/game/entity";
 ```
 
-## Протокол
+## Изменение протокола
 
-Типы протокола соответствуют документации:
+Типы протокола находятся в пакете `@cd/agent-sdk` и соответствуют документации:
 https://github.com/Cognitive-Dungeon/cd-techdoc
 
 При изменении протокола:
-1. Обнови соответствующий файл в `protocol/`
-2. Проверь, что `types.ts` реэкспортирует новые типы
-3. Обнови эту документацию при необходимости
+
+1. Обнови файл `src/protocol.ts` в репозитории `cd-agent-sdk-ts`
+2. Обнови `src/index.ts` для экспорта новых типов
+3. Собери SDK: `npm run build`
+4. Обнови SDK во фронтенде: `npm update @cd/agent-sdk`
+5. Проверь, что импорты работают: `npm run build`

@@ -4,11 +4,11 @@
  * Типы для игровых сущностей (игрок, враги, NPC и т.д.)
  */
 
-import type { Position } from "../protocol/common";
 import type {
+  Position,
   ServerToClientInventoryView,
   ServerToClientEquipmentView,
-} from "../protocol/server-to-client";
+} from "../protocol";
 
 import type { Item } from "./item";
 

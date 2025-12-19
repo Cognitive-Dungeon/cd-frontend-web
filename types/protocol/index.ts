@@ -1,13 +1,23 @@
 /**
  * Protocol Types - Barrel Export
  *
- * Экспортирует все типы протокола клиент-сервер
+ * Экспортирует все типы протокола клиент-сервер.
+ * Все типы реэкспортируются из @cd/agent-sdk для единого источника истины.
+ *
+ * @see https://github.com/Cognitive-Dungeon/cd-techdoc
+ * @see https://github.com/Cognitive-Dungeon/cd-agent-sdk-ts
  */
 
-// Common types
-export type { Position } from "./common";
+// ============================================================================
+// Common Types
+// ============================================================================
 
-// Client → Server (re-exported from @cd/agent-sdk)
+export type { Position } from "@cd/agent-sdk";
+
+// ============================================================================
+// Client → Server
+// ============================================================================
+
 export type {
   ClientToServerMovePayload,
   ClientToServerEntityTargetPayload,
@@ -25,7 +35,10 @@ export type {
 
 export { serializeClientCommand } from "@cd/agent-sdk";
 
+// ============================================================================
 // Server → Client
+// ============================================================================
+
 export type {
   ServerToClientGridMeta,
   ServerToClientTileView,
@@ -40,4 +53,4 @@ export type {
   ServerToClientUpdate,
   ServerToClientError,
   ServerToClientMessage,
-} from "./server-to-client";
+} from "@cd/agent-sdk";
