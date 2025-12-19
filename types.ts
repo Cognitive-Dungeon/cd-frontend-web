@@ -1,481 +1,102 @@
-// TODO: Привести в порядок, учитывая диздок
-// https://github.com/Cognitive-Dungeon/cd-techdoc
-
-export * from "./types/server";
-
-export enum EntityType {
-  PLAYER = "PLAYER",
-  ENEMY_GOBLIN = "GOBLIN",
-  ENEMY_ORC = "ORC",
-  CHEST = "CHEST",
-  ITEM = "ITEM",
-  EXIT = "EXIT",
-  NPC = "NPC",
-}
-
-export enum GameState {
-  EXPLORATION = "EXPLORATION",
-  COMBAT = "COMBAT",
-  GAME_OVER = "GAME_OVER",
-}
-
-export enum LogType {
-  INFO = "INFO",
-  COMBAT = "COMBAT",
-  NARRATIVE = "NARRATIVE", // AI Generated
-  SPEECH = "SPEECH", // User dialogue
-  ERROR = "ERROR",
-  COMMAND = "COMMAND",
-  SUCCESS = "SUCCESS",
-}
-
-export interface SpeechBubble {
-  id: string;
-  entityId: string;
-  text: string;
-  timestamp: number;
-}
-
-export interface Position {
-  x: number;
-  y: number;
-}
-
-export interface Stats {
-  hp: number;
-  maxHp: number;
-  stamina: number;
-  maxStamina: number;
-  strength: number;
-  gold: number;
-}
-
-export enum ItemType {
-  POTION = "POTION",
-  WEAPON = "WEAPON",
-  GOLD = "GOLD",
-}
-
-export enum ItemActionType {
-  HEAL = "HEAL",
-  DAMAGE = "DAMAGE",
-  BUFF = "BUFF",
-  INSTANT = "INSTANT",
-}
-
-export interface ItemAction {
-  type: ItemActionType;
-  requiresTarget: boolean;
-  value?: number;
-  description?: string;
-}
-
-export interface Item {
-  id: string;
-  name: string;
-  type: ItemType;
-  value: number; // Heal amount or damage or gold amount
-  description?: string;
-  action?: ItemAction; // Action when item is used
-  category?: string;
-  isStackable?: boolean;
-  stackSize?: number;
-  damage?: number;
-  defense?: number;
-  weight?: number;
-  isSentient?: boolean;
-  symbol?: string; // Visual symbol from server (e.g., "†", "!", "$")
-  color?: string; // Hex color from server (e.g., "#C0C0C0")
-}
-
-export interface Entity {
-  id: string;
-  label: string; // Visual label for targeting (A, B, C...)
-  type: EntityType;
-  symbol: string;
-  color: string;
-  pos: Position;
-  stats: Stats;
-  inventory: Item[];
-  inventoryData?: ServerToClientInventoryView | null;
-  equipment?: ServerToClientEquipmentView | null;
-  itemData?: Item;
-  name: string;
-  isHostile: boolean;
-  isDead: boolean;
-  npcType?: "MERCHANT" | "HEALER" | "GUARD";
-
-  // Time System
-  nextActionTick: number;
-
-  // AI & Narrative
-  personality?: "Cowardly" | "Furious";
-  aiState?: "IDLE" | "AGGRESSIVE" | "FLEEING";
-}
-
-export type TileEnv = "stone" | "grass" | "water" | "tree" | "floor";
-
-export interface Tile {
-  x: number;
-  y: number;
-  isWall: boolean;
-  env: TileEnv;
-  isVisible: boolean;
-  isExplored: boolean;
-}
-
-export interface LogMessage {
-  id: string;
-  text: string;
-  type: LogType;
-  timestamp: number;
-  position?: Position; // Position of the event (target/action location)
-  playerPosition?: Position; // Position of player when command was executed
-  commandData?: {
-    action: string;
-    payload?: any;
-  };
-}
-
-export interface ContextMenuData {
-  x: number;
-  y: number;
-  cellX: number;
-  cellY: number;
-  entities: Entity[];
-}
-
-export interface GameWorld {
-  map: Tile[][];
-  width: number;
-  height: number;
-  level: number;
-  globalTick: number;
-}
+/**
+ * Types - Main Barrel Export
+ *
+ * Этот файл реэкспортирует все типы из новой модульной структуры.
+ * Сохранена обратная совместимость с существующими импортами.
+ *
+ * Новая структура:
+ * - types/protocol/ - Типы протокола клиент-сервер
+ * - types/game/     - Типы игровых сущностей
+ * - types/ui/       - Типы UI компонентов
+ *
+ * @see https://github.com/Cognitive-Dungeon/cd-techdoc
+ */
 
 // ============================================================================
-// Server Protocol Types (Server -> Client)
+// Protocol Types (Client ↔ Server)
 // ============================================================================
-// Типы для общения с сервером согласно протоколу Server -> Client (Updates)
-// https://github.com/Cognitive-Dungeon/cd-techdoc
 
-/**
- * Метаданные о размере игровой карты (Server -> Client)
- */
-export interface ServerToClientGridMeta {
-  /** Ширина карты в тайлах */
-  w: number;
-  /** Высота карты в тайлах */
-  h: number;
-}
+// Common
+export type { Position } from "./types/protocol";
 
-/**
- * Вид тайла карты, видимый клиенту (Server -> Client)
- */
-export interface ServerToClientTileView {
-  /** Координата X тайла */
-  x: number;
-  /** Координата Y тайла */
-  y: number;
-  /** Символ для отображения (e.g., `.` для пола, `#` для стены) */
-  symbol: string;
-  /** Цвет символа (e.g., `#333333`) */
-  color: string;
-  /** `true`, если тайл является непроходимой стеной */
-  isWall: boolean;
-  /** `true`, если тайл находится в текущем поле зрения */
-  isVisible: boolean;
-  /** `true`, если сущность когда-либо видела этот тайл (для "тумана войны") */
-  isExplored: boolean;
-}
+// Client → Server
+export type {
+  ClientToServerMovePayload,
+  ClientToServerEntityTargetPayload,
+  ClientToServerPositionTargetPayload,
+  ClientToServerUsePayload,
+  ClientToServerDropPayload,
+  ClientToServerItemPayload,
+  ClientToServerTextPayload,
+  ClientToServerCustomPayload,
+  ClientToServerAction,
+  ClientToServerCommand,
+  CommandAction,
+  CommandPayloadMap,
+} from "./types/protocol";
 
-/**
- * Характеристики сущности (Server -> Client)
- */
-export interface ServerToClientStatsView {
-  /** Текущее здоровье */
-  hp: number;
-  /** Максимальное здоровье */
-  maxHp: number;
-  /** Выносливость (опционально) */
-  stamina?: number;
-  /** Максимальная выносливость (опционально) */
-  maxStamina?: number;
-  /** Золото (опционально) */
-  gold?: number;
-  /** Сила (опционально) */
-  strength?: number;
-  /** `true`, если сущность мертва */
-  isDead: boolean;
-}
+export { serializeClientCommand } from "./types/protocol";
 
-/**
- * Данные для отображения сущности (Server -> Client)
- */
-export interface ServerToClientEntityRender {
-  /** Символ для отображения */
-  symbol: string;
-  /** Цвет символа */
-  color: string;
-}
-
-/**
- * Вид предмета (Server -> Client)
- */
-export interface ServerToClientItemView {
-  id: string;
-  name: string;
-  symbol: string;
-  color: string;
-  category: string;
-  isStackable: boolean;
-  stackSize: number;
-  damage?: number;
-  defense?: number;
-  weight: number;
-  value: number;
-  isSentient: boolean;
-}
-
-/**
- * Инвентарь сущности (Server -> Client)
- */
-export interface ServerToClientInventoryView {
-  items: ServerToClientItemView[];
-  maxSlots: number;
-  currentWeight: number;
-  maxWeight: number;
-}
-
-/**
- * Экипировка сущности (Server -> Client)
- */
-export interface ServerToClientEquipmentView {
-  weapon?: ServerToClientItemView;
-  armor?: ServerToClientItemView;
-}
-
-/**
- * Вид сущности, видимый клиенту (Server -> Client)
- */
-export interface ServerToClientEntityView {
-  /** Уникальный идентификатор сущности */
-  id: string;
-  /** Тип сущности (`PLAYER`, `ENEMY`, `NPC`, `ITEM`) */
-  type: string;
-  /** Имя (e.g., "Герой", "Хитрый Гоблин") */
-  name: string;
-  /** Координаты сущности */
-  pos: Position;
-  /** Данные для отображения */
-  render: ServerToClientEntityRender;
-  /** Характеристики сущности (опционально) */
-  stats?: ServerToClientStatsView;
-  /** Инвентарь (виден только владельцу) */
-  inventory?: ServerToClientInventoryView;
-  /** Экипировка (видна только владельцу) */
-  equipment?: ServerToClientEquipmentView;
-}
-
-/**
- * Тип лога для стилизации (Server -> Client)
- */
-export type ServerToClientLogType = "INFO" | "COMBAT" | "SPEECH" | "ERROR";
-
-/**
- * Запись в игровом логе (Server -> Client)
- */
-export interface ServerToClientLogEntry {
-  /** Уникальный ID */
-  id: string;
-  /** Текст сообщения */
-  text: string;
-  /** Тип лога для стилизации: `INFO`, `COMBAT`, `SPEECH`, `ERROR` */
-  type: ServerToClientLogType;
-  /** Время создания сообщения (Unix milliseconds) */
-  timestamp: number;
-}
+// Server → Client
+export type {
+  ServerToClientGridMeta,
+  ServerToClientTileView,
+  ServerToClientStatsView,
+  ServerToClientEntityRender,
+  ServerToClientItemView,
+  ServerToClientInventoryView,
+  ServerToClientEquipmentView,
+  ServerToClientEntityView,
+  ServerToClientLogType,
+  ServerToClientLogEntry,
+  ServerToClientUpdate,
+  ServerToClientError,
+  ServerToClientMessage,
+} from "./types/protocol";
 
 // ============================================================================
-// Client Protocol Types (Client -> Server)
+// Game Types
 // ============================================================================
-// Типы для общения с сервером согласно протоколу Client -> Server (Commands)
-// https://github.com/Cognitive-Dungeon/cd-techdoc
 
-/**
- * Payload для команды перемещения (Client -> Server)
- */
-export interface ClientToServerMovePayload {
-  /** Смещение по оси X (-1, 0, 1) */
-  dx?: number;
-  /** Смещение по оси Y (-1, 0, 1) */
-  dy?: number;
-  /** Абсолютная координата X (альтернатива dx/dy) */
-  x?: number;
-  /** Абсолютная координата Y (альтернатива dx/dy) */
-  y?: number;
-}
+// Entity
+export type {
+  Stats,
+  Entity,
+  NpcType,
+  Personality,
+  AiState,
+} from "./types/game";
 
-/**
- * Payload для команд, требующих цель-сущность (Client -> Server)
- */
-export interface ClientToServerEntityTargetPayload {
-  /** ID целевой сущности */
-  targetId: string;
-}
+export { EntityType } from "./types/game";
 
-/**
- * Payload для команд, требующих целевую позицию (Client -> Server)
- */
-export interface ClientToServerPositionTargetPayload {
-  /** Координата X целевой позиции */
-  x: number;
-  /** Координата Y целевой позиции */
-  y: number;
-}
+// Item
+export type { Item, ItemAction } from "./types/game";
 
-/**
- * Payload для команд использования предметов (Client -> Server)
- */
-export interface ClientToServerUsePayload {
-  /** Название предмета */
-  name: string;
-  /** Опциональный ID целевой сущности */
-  targetId?: string;
-}
+export { ItemType, ItemActionType } from "./types/game";
 
-/**
- * Payload для команд выброса предметов (Client -> Server)
- */
-export interface ClientToServerDropPayload {
-  /** Название предмета */
-  name: string;
-}
+// World
+export type { Tile, TileEnv, GameWorld } from "./types/game";
 
-/**
- * Payload для команд с предметами (Client -> Server)
- */
-export interface ClientToServerItemPayload {
-  itemId: string;
-  count?: number;
-}
+// Log
+export type { LogMessage, LogCommandData } from "./types/game";
 
-/**
- * Payload для текстовых команд (Client -> Server)
- */
-export interface ClientToServerTextPayload {
-  /** Текст сообщения */
-  text: string;
-}
+export { GameState, LogType } from "./types/game";
 
-/**
- * Payload для кастомных команд (Client -> Server)
- */
-export interface ClientToServerCustomPayload {
-  [key: string]: any;
-}
+// ============================================================================
+// UI Types
+// ============================================================================
 
-/**
- * Типы действий команд (Client -> Server)
- */
-export type ClientToServerAction =
-  | "LOGIN"
-  | "MOVE"
-  | "ATTACK"
-  | "TALK"
-  | "INTERACT"
-  | "WAIT"
-  | "PICKUP"
-  | "DROP"
-  | "USE"
-  | "EQUIP"
-  | "UNEQUIP"
-  | "CUSTOM";
+export type { ContextMenuData } from "./types/ui";
 
-/**
- * Команда от клиента к серверу (Client -> Server)
- *
- * Дискриминированный union тип на основе action для типобезопасности payload
- */
-export type ClientToServerCommand =
-  | {
-      action: "LOGIN";
-      token: string;
-    }
-  | {
-      action: "MOVE";
-      payload: ClientToServerMovePayload;
-    }
-  | {
-      action: "ATTACK" | "TALK" | "INTERACT";
-      payload: ClientToServerEntityTargetPayload;
-    }
-  | {
-      action: "WAIT";
-      payload?: Record<string, never> | null;
-    }
-  | {
-      action: "PICKUP" | "DROP" | "USE" | "EQUIP" | "UNEQUIP";
-      payload: ClientToServerItemPayload;
-    }
-  | {
-      action: "CUSTOM";
-      payload: ClientToServerCustomPayload;
-    };
+export type { SpeechBubble } from "./types/ui";
 
-/**
- * Сериализует команду клиента в JSON строку для отправки по WebSocket
- *
- * @param command - Команда для отправки
- * @returns JSON строка, готовкая для отправки через WebSocket.send()
- *
- * @example
- * ```typescript
- * // LOGIN command
- * const loginCommand: ClientToServerCommand = {
- *   action: "LOGIN",
- *   token: "player-entity-id"
- * };
- * socket.send(serializeClientCommand(loginCommand));
- * // Отправляет: {"action":"LOGIN","token":"player-entity-id"}
- *
- * // MOVE command
- * const moveCommand: ClientToServerCommand = {
- *   action: "MOVE",
- *   payload: { dx: 0, dy: -1 }
- * };
- * socket.send(serializeClientCommand(moveCommand));
- * // Отправляет: {"action":"MOVE","payload":{"dx":0,"dy":-1}}
- * ```
- */
-export function serializeClientCommand(command: ClientToServerCommand): string {
-  return JSON.stringify(command);
-}
+// ============================================================================
+// Server Manager (deprecated location - use services/ServerManager)
+// ============================================================================
 
-/**
- * Основной контейнер ответа сервера (Server -> Client)
- *
- * Сервер отправляет клиенту единственный тип сообщения — `ServerToClientUpdate`,
- * который содержит полный снимок игрового состояния.
- */
-export interface ServerToClientUpdate {
-  /** Тип сообщения. На данный момент всегда `"UPDATE"` */
-  type: "UPDATE";
-  /** Текущее глобальное время в игре */
-  tick: number;
-  /** ID сущности, которой управляет данный клиент */
-  myEntityId: string;
-  /**
-   * ID сущности, чей ход сейчас.
-   * Если `activeEntityId === myEntityId`, фронтенд должен разрешить игроку ввод.
-   */
-  activeEntityId: string;
-  /** Объект с метаданными о размере карты */
-  grid: ServerToClientGridMeta;
-  /** Массив всех видимых и исследованных клиентом тайлов */
-  map: ServerToClientTileView[];
-  /** Массив всех видимых клиентом сущностей */
-  entities: ServerToClientEntityView[];
-  /** Массив новых игровых сообщений */
-  logs: ServerToClientLogEntry[];
-}
+export {
+  ServerManager,
+  DEFAULT_SERVERS,
+  type ServerInfo,
+  type ServerStatus,
+} from "./types/server";

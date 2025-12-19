@@ -1,15 +1,38 @@
 /**
- * Barrel export для типов команд
+ * Types - Internal Barrel Export
  *
- * Экспортирует все типы, связанные с командной системой,
- * для удобного импорта в других частях приложения.
+ * Экспортирует все типы из модульной структуры.
+ * Для использования в приложении импортируйте из "../types" (types.ts)
  */
 
+// ============================================================================
+// Protocol Types
+// ============================================================================
+
+export * from "./protocol";
+
+// ============================================================================
+// Game Types
+// ============================================================================
+
+export * from "./game";
+
+// ============================================================================
+// UI Types
+// ============================================================================
+
+export * from "./ui";
+
+// ============================================================================
+// Legacy Exports (for backward compatibility)
+// ============================================================================
+
+// Commands types (will be moved to commands/ module later)
 export type {
   LoginPayload,
   WaitPayload,
-  CommandPayloadMap,
-  CommandAction,
+  CommandPayloadMap as LegacyCommandPayloadMap,
+  CommandAction as LegacyCommandAction,
   CreateClientCommandFn,
   TypedCommandHandler,
   CommandHandlersMap,

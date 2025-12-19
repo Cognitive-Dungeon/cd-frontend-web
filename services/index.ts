@@ -1,14 +1,13 @@
 /**
- * Barrel export для сервисов
+ * Services - Barrel Export
  *
- * Экспортирует WebSocketService и все связанные типы
- * для удобного импорта в других частях приложения.
+ * Экспортирует все сервисы приложения
  */
 
-// Экспорт основного сервиса
+// WebSocket Service
 export { WebSocketService } from "./WebSocketService";
 
-// Экспорт всех типов
+// WebSocket Types
 export type {
   WebSocketConfig,
   WebSocketEventListener,
@@ -27,5 +26,12 @@ export type {
   AuthChangeEventData,
 } from "./types";
 
-// Экспорт enum'ов
 export { WebSocketState, WebSocketEvent, DisconnectReason } from "./types";
+
+// Server Manager
+export {
+  ServerManager,
+  DEFAULT_SERVERS,
+  type ServerInfo,
+  type ServerStatus,
+} from "./ServerManager";
