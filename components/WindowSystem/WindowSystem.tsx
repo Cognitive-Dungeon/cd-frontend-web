@@ -1,7 +1,6 @@
 import { FC, useEffect, useRef, useCallback } from "react";
 
 import { KeyBindingManager } from "../../commands";
-
 import {
   Entity,
   LogMessage,
@@ -12,11 +11,8 @@ import {
 } from "../../types";
 
 import { getStoredWindowState } from "./utils";
-
 import Window from "./Window";
-
 import { useWindowManager } from "./WindowManager";
-
 import {
   DOCK_WINDOW_ID,
   createDockWindowConfig,
@@ -36,7 +32,6 @@ import {
   createLoginWindowConfig,
   ENTITY_INSPECTOR_WINDOW_ID,
   createEntityInspectorWindowConfig,
-  ITEM_INSPECTOR_WINDOW_ID,
   createItemInspectorWindowConfig,
   QUICK_ACCESS_WINDOW_ID,
   createQuickAccessWindowConfig,
@@ -373,42 +368,26 @@ const WindowSystem: FC<WindowSystemProps> = ({
   useEffect(() => {
     const inventoryConfig = createInventoryWindowConfig({
       items: playerInventory,
-
       inventoryData: playerInventoryData,
-
       equipment: playerEquipment,
-
       onUseItem,
-
       onDropItem,
-
       onEquipItem,
-
       onUnequipItem,
-
       onInspectItem: (item) => handleInspectItemRef.current?.(item),
     });
 
     updateWindowContent(INVENTORY_WINDOW_ID, inventoryConfig.content);
-
     updateWindowBadge(INVENTORY_WINDOW_ID, inventoryConfig.badge);
   }, [
     playerInventory,
-
     playerInventoryData,
-
     playerEquipment,
-
     onUseItem,
-
     onDropItem,
-
     onEquipItem,
-
     onUnequipItem,
-
     updateWindowContent,
-
     updateWindowBadge,
   ]);
 
