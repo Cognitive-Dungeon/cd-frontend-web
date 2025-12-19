@@ -11,14 +11,22 @@
 // Network Services - Re-exported from @cd/network package
 // ============================================================================
 
-export { WebSocketService, ServerManager, DEFAULT_SERVERS } from "@cd/network";
+export {
+  WebSocketService,
+  ServerManager,
+  DEFAULT_SERVERS,
+} from "@cd/agent-sdk";
 
 // ============================================================================
 // Network Types - Re-exported from @cd/network package
 // ============================================================================
 
 // Enums
-export { WebSocketState, WebSocketEvent, DisconnectReason } from "@cd/network";
+export {
+  WebSocketState,
+  WebSocketEvent,
+  DisconnectReason,
+} from "@cd/agent-sdk";
 
 // WebSocket Configuration & State
 export type {
@@ -56,7 +64,7 @@ export {
   ConnectionMetrics,
   HeartbeatManager,
   ReconnectionManager,
-} from "@cd/network";
+} from "@cd/agent-sdk";
 
 // ============================================================================
 // Other Services (not part of network layer)
