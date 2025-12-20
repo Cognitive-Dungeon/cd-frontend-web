@@ -1,7 +1,7 @@
 import ReactJson from "@microlink/react-json-view";
-import { FC } from "react";
+import {FC} from "react";
 
-import { Item } from "../../../../../types";
+import {Item} from "../../../../../types";
 
 interface ItemInspectorWindowProps {
   item: Item;

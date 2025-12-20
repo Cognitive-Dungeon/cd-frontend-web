@@ -1,9 +1,9 @@
-import { FileJson } from "lucide-react";
+import {FileJson} from "lucide-react";
 
-import { Item } from "../../../types";
-import { WindowConfig } from "../types";
+import {Item} from "../../../types";
+import {WindowConfig} from "../types";
 
-import { ItemInspectorWindow } from "./components/ItemInspectorWindow";
+import {ItemInspectorWindow} from "./components/ItemInspectorWindow";
 
 export const ITEM_INSPECTOR_WINDOW_ID = "item-inspector";
 

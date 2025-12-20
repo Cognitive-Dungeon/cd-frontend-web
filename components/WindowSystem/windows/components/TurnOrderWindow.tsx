@@ -1,7 +1,7 @@
-import { Users, Sword, User, Heart, Zap, Coins, Shield } from "lucide-react";
-import { FC } from "react";
+import {Coins, Heart, Shield, Sword, User, Users, Zap} from "lucide-react";
+import {FC} from "react";
 
-import { Entity } from "../../../../types";
+import {Entity} from "../../../../types";
 
 interface TurnOrderWindowProps {
   entities: Entity[];

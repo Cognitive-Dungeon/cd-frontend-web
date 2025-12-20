@@ -1,8 +1,8 @@
-import { Code } from "lucide-react";
+import {Code} from "lucide-react";
 
-import { WindowConfig } from "../types";
+import {WindowConfig} from "../types";
 
-import { JSONViewer } from "./components/json/JSONViewer";
+import {JSONViewer} from "./components/json/JSONViewer";
 
 export const JSON_VIEWER_WINDOW_ID = "json-viewer";
 

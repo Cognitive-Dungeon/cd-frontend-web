@@ -6,19 +6,19 @@
  */
 
 import {
-  CommandUp,
-  CommandDown,
-  CommandLeft,
-  CommandRight,
-  CommandAttack,
-  CommandTalk,
-  CommandInspect,
-  CommandPickup,
-  CommandTrade,
-  CommandTeleport,
-  CommandCastArea,
+    CommandAttack,
+    CommandCastArea,
+    CommandDown,
+    CommandInspect,
+    CommandLeft,
+    CommandPickup,
+    CommandRight,
+    CommandTalk,
+    CommandTeleport,
+    CommandTrade,
+    CommandUp,
 } from "./definitions";
-import { GameCommand, KeyBinding } from "./types";
+import {GameCommand, KeyBinding} from "./types";
 
 // ============================================================================
 // Default Key Bindings

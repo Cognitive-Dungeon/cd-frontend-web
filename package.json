@@ -11,7 +11,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix --format compact"
   },
   "dependencies": {
-    "@cd/agent-sdk": "github:Cognitive-Dungeon/cd-agent-sdk-ts",
+    "@cognitive-dungeon/agent-sdk": "^0.1.5-canary-09d9226",
     "@google/genai": "^1.30.0",
     "@microlink/react-json-view": "^1.27.0",
     "eslint": "^8.57.1",

@@ -1,9 +1,9 @@
-import { Search } from "lucide-react";
+import {Search} from "lucide-react";
 
-import { Entity } from "../../../types";
-import { WindowConfig } from "../types";
+import {Entity} from "../../../types";
+import {WindowConfig} from "../types";
 
-import { EntityInspectorWindow } from "./components/EntityInspectorWindow";
+import {EntityInspectorWindow} from "./components/EntityInspectorWindow";
 
 export const ENTITY_INSPECTOR_WINDOW_ID = "entity-inspector";
 

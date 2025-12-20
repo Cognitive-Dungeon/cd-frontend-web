@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import {useCallback, useEffect, useState} from "react";
 
-import { KeyBindingManager } from "../commands";
-import { Position, ContextMenuData } from "../types";
+import {KeyBindingManager} from "@/commands";
+
+import {ContextMenuData, Position} from "../types";
 
 interface UseInputHandlingProps {
   keyBindingManager: KeyBindingManager;

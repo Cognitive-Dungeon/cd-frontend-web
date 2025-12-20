@@ -1,9 +1,9 @@
-import { Package } from "lucide-react";
+import {Package} from "lucide-react";
 
-import { Item, ServerToClientEquipmentView } from "../../../types";
-import { WindowConfig } from "../types";
+import {Item, ServerToClientEquipmentView} from "../../../types";
+import {WindowConfig} from "../types";
 
-import { InventoryWindow } from "./components/InventoryWindow";
+import {InventoryWindow} from "./components/InventoryWindow";
 
 export const INVENTORY_WINDOW_ID = "inventory-window";
 

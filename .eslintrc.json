@@ -60,7 +60,7 @@
         ],
         "pathGroups": [
           {
-            "pattern": "@cd/**",
+            "pattern": "@cognitive-dungeon/**",
             "group": "internal",
             "position": "before"
           }

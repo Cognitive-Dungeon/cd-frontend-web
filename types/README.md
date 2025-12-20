@@ -7,7 +7,7 @@
 ```
 types/
 ├── protocol/           # Типы протокола клиент-сервер
-│   └── index.ts        # Реэкспорт всех типов из @cd/agent-sdk
+│   └── index.ts        # Реэкспорт всех типов из @cognitive-dungeon/agent-sdk
 │
 ├── game/               # Типы игровых сущностей
 │   ├── entity.ts       # Entity, EntityType, Stats
@@ -28,7 +28,7 @@ types/
 
 | Тип данных | Место | Действие |
 |------------|-------|----------|
-| Протокол сервера | `@cd/agent-sdk` | Обновить SDK, затем `npm update` |
+| Протокол сервера | `@cognitive-dungeon/agent-sdk` | Обновить SDK, затем `npm update` |
 | Игровые сущности (UI) | `types/game/` | Добавить локально |
 | UI компоненты | `types/ui/` | Добавить локально |
 
@@ -80,7 +80,7 @@ import { Entity, Position, LogType } from "../types";
 ### Прямой импорт протокола (из SDK)
 
 ```typescript
-import type { Position, ServerToClientUpdate } from "@cd/agent-sdk";
+import type { Position, ServerToClientUpdate } from "@cognitive-dungeon/agent-sdk";
 ```
 
 ### Прямой импорт игровых типов
@@ -91,7 +91,7 @@ import type { Entity } from "../types/game/entity";
 
 ## Изменение протокола
 
-Типы протокола находятся в пакете `@cd/agent-sdk` и соответствуют документации:
+Типы протокола находятся в пакете `@cognitive-dungeon/agent-sdk` и соответствуют документации:
 https://github.com/Cognitive-Dungeon/cd-techdoc
 
 При изменении протокола:
@@ -99,5 +99,5 @@ https://github.com/Cognitive-Dungeon/cd-techdoc
 1. Обнови файл `src/protocol.ts` в репозитории `cd-agent-sdk-ts`
 2. Обнови `src/index.ts` для экспорта новых типов
 3. Собери SDK: `npm run build`
-4. Обнови SDK во фронтенде: `npm update @cd/agent-sdk`
+4. Обнови SDK во фронтенде: `npm update @cognitive-dungeon/agent-sdk`
 5. Проверь, что импорты работают: `npm run build`

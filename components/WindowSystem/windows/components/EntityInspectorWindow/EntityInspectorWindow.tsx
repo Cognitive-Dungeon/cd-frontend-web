@@ -1,7 +1,7 @@
 import ReactJson from "@microlink/react-json-view";
-import { FC, useMemo } from "react";
+import {FC, useMemo} from "react";
 
-import { Entity } from "../../../../../types";
+import {Entity} from "../../../../../types";
 
 interface EntityInspectorWindowProps {
   entityId: string;

@@ -1,32 +1,24 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  ReactNode,
-  FC,
-} from "react";
+import {createContext, FC, ReactNode, useCallback, useContext, useEffect, useState,} from "react";
 
 import {
-  WindowState,
-  WindowConfig,
-  WindowPosition,
-  WindowOrigin,
-  WindowSize,
-  DockedPosition,
-  WindowBounds,
-  MagneticSnap,
-  calculateWindowTopLeftPx,
-  calculateNormalizedPosition,
-  getOriginFromMagneticSnap,
+    calculateNormalizedPosition,
+    calculateWindowTopLeftPx,
+    DockedPosition,
+    getOriginFromMagneticSnap,
+    MagneticSnap,
+    WindowBounds,
+    WindowConfig,
+    WindowOrigin,
+    WindowPosition,
+    WindowSize,
+    WindowState,
 } from "./types";
 import {
-  saveWindowState,
-  getStoredWindowState,
-  applyDefaultLayout,
-  resetToDefaultLayout,
-  clampPositionPx,
+    applyDefaultLayout,
+    clampPositionPx,
+    getStoredWindowState,
+    resetToDefaultLayout,
+    saveWindowState,
 } from "./utils";
 
 interface WindowManagerContextType {

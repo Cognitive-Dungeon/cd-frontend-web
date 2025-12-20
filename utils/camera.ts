@@ -1,4 +1,4 @@
-import { BASE_CELL_SIZE } from "../constants";
+import {BASE_CELL_SIZE} from "../constants";
 
 /**
  * Вычисляет размер клетки с учетом зума

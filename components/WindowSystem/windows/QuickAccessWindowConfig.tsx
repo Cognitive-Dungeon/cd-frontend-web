@@ -1,9 +1,9 @@
-import { Pin } from "lucide-react";
+import {Pin} from "lucide-react";
 
-import type { Item } from "../../../types";
-import type { WindowConfig } from "../types";
+import type {Item} from "../../../types";
+import type {WindowConfig} from "../types";
 
-import { QuickAccessWindow } from "./components/QuickAccessWindow";
+import {QuickAccessWindow} from "./components/QuickAccessWindow";
 
 export const QUICK_ACCESS_WINDOW_ID = "quick-access-window";
 

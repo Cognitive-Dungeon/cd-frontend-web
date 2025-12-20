@@ -1,8 +1,8 @@
-import { Code, MapPin, Send } from "lucide-react";
-import { useEffect, useRef, useState, useMemo } from "react";
+import {Code, MapPin, Send} from "lucide-react";
+import {useEffect, useMemo, useRef, useState} from "react";
 
-import { LogMessage, LogType, Position } from "../../../../types";
-import { useWindowContext } from "../../Window";
+import {LogMessage, LogType, Position} from "../../../../types";
+import {useWindowContext} from "../../Window";
 
 interface GameLogWindowProps {
   logs: LogMessage[];

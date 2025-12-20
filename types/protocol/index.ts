@@ -2,7 +2,7 @@
  * Protocol Types - Barrel Export
  *
  * Экспортирует все типы протокола клиент-сервер.
- * Все типы реэкспортируются из @cd/agent-sdk для единого источника истины.
+ * Все типы реэкспортируются из @cognitive-dungeon/agent-sdk для единого источника истины.
  *
  * @see https://github.com/Cognitive-Dungeon/cd-techdoc
  * @see https://github.com/Cognitive-Dungeon/cd-agent-sdk-ts
@@ -12,7 +12,7 @@
 // Common Types
 // ============================================================================
 
-export type { Position } from "@cd/agent-sdk";
+export type { Position } from "@cognitive-dungeon/agent-sdk";
 
 // ============================================================================
 // Client → Server
@@ -31,9 +31,9 @@ export type {
   ClientToServerCommand,
   CommandAction,
   CommandPayloadMap,
-} from "@cd/agent-sdk";
+} from "@cognitive-dungeon/agent-sdk";
 
-export { serializeClientCommand } from "@cd/agent-sdk";
+export { serializeClientCommand } from "@cognitive-dungeon/agent-sdk";
 
 // ============================================================================
 // Server → Client
@@ -53,4 +53,4 @@ export type {
   ServerToClientUpdate,
   ServerToClientError,
   ServerToClientMessage,
-} from "@cd/agent-sdk";
+} from "@cognitive-dungeon/agent-sdk";

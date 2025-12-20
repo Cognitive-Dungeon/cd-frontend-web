@@ -5,10 +5,7 @@
  * Обеспечивают проверку корректности команд перед отправкой.
  */
 
-import {
-  ClientToServerCommand,
-  CommandAction,
-} from "./types";
+import {ClientToServerCommand, CommandAction,} from "./types";
 
 // ============================================================================
 // Type Guards

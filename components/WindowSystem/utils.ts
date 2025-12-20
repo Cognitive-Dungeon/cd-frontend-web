@@ -1,13 +1,13 @@
 import {
-  WindowsStorage,
-  StoredWindowState,
-  WindowPosition,
-  WindowOrigin,
-  WindowSize,
-  DockedPosition,
-  MagneticSnap,
-  calculateWindowTopLeftPx,
-  calculateNormalizedPosition,
+    calculateNormalizedPosition,
+    calculateWindowTopLeftPx,
+    DockedPosition,
+    MagneticSnap,
+    StoredWindowState,
+    WindowOrigin,
+    WindowPosition,
+    WindowSize,
+    WindowsStorage,
 } from "./types";
 
 const STORAGE_KEY = "cd-window-system";

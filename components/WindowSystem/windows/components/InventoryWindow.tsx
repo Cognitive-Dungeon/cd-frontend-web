@@ -29,12 +29,12 @@
  * ```
  */
 
-import { Package } from "lucide-react";
-import { FC, useState, useEffect } from "react";
+import {Package} from "lucide-react";
+import {FC, useEffect, useState} from "react";
 
-import { Item, ServerToClientEquipmentView } from "../../../../types";
+import {Item, ServerToClientEquipmentView} from "../../../../types";
 
-import { InventorySlot } from "./InventorySlot";
+import {InventorySlot} from "./InventorySlot";
 
 interface InventoryWindowProps {
   items: Item[];

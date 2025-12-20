@@ -1,5 +1,5 @@
 import Dock from "../Dock";
-import { WindowConfig } from "../types";
+import {WindowConfig} from "../types";
 
 export const DOCK_WINDOW_ID = "system-dock";
 

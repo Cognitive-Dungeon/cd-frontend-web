@@ -1,8 +1,8 @@
-import { LucideIcon } from "lucide-react";
-import { FC, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import {LucideIcon} from "lucide-react";
+import {FC, useEffect, useState} from "react";
+import {createPortal} from "react-dom";
 
-import { Entity } from "../types";
+import {Entity} from "../types";
 
 interface RadialMenuAction {
   id: string;

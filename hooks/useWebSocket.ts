@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 
 import {
-  DisconnectedEventData,
-  ErrorEventData,
-  MessageEventData,
-  ReconnectAttemptEventData,
-  WebSocketConfig,
-  WebSocketEvent,
-  WebSocketService,
-} from "@cd/agent-sdk";
+    DisconnectedEventData,
+    ErrorEventData,
+    MessageEventData,
+    ReconnectAttemptEventData,
+    WebSocketConfig,
+    WebSocketEvent,
+    WebSocketService,
+} from "@cognitive-dungeon/agent-sdk";
 
-import { ClientToServerCommand, LogType } from "../types";
+
+import {ClientToServerCommand, LogType} from "../types";
 
 interface UseWebSocketProps {
   onMessage: (data: any) => void;

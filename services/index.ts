@@ -2,23 +2,23 @@
  * Services - Barrel Export
  *
  * Этот файл реэкспортирует сервисы для обратной совместимости.
- * Новый код должен импортировать напрямую из @cd/agent-sdk.
+ * Новый код должен импортировать напрямую из @cognitive-dungeon/agent-sdk.
  *
- * @deprecated Import from "@cd/agent-sdk" instead
+ * @deprecated Import from "@cognitive-dungeon/agent-sdk" instead
  */
 
 // ============================================================================
-// Network Services - Re-exported from @cd/agent-sdk package
+// Network Services - Re-exported from @cognitive-dungeon/agent-sdk package
 // ============================================================================
 
 export {
   WebSocketService,
   ServerManager,
   DEFAULT_SERVERS,
-} from "@cd/agent-sdk";
+} from "@cognitive-dungeon/agent-sdk";
 
 // ============================================================================
-// Network Types - Re-exported from @cd/agent-sdk package
+// Network Types - Re-exported from @cognitive-dungeon/agent-sdk package
 // ============================================================================
 
 // Enums
@@ -26,7 +26,7 @@ export {
   WebSocketState,
   WebSocketEvent,
   DisconnectReason,
-} from "@cd/agent-sdk";
+} from "@cognitive-dungeon/agent-sdk";
 
 // WebSocket Configuration & State
 export type {
@@ -35,7 +35,7 @@ export type {
   WebSocketEventDataMap,
   SendOptions,
   SendResult,
-} from "@cd/agent-sdk";
+} from "@cognitive-dungeon/agent-sdk";
 
 // WebSocket Event Data
 export type {
@@ -47,13 +47,13 @@ export type {
   StateChangeEventData,
   MessageSentEventData,
   AuthChangeEventData,
-} from "@cd/agent-sdk";
+} from "@cognitive-dungeon/agent-sdk";
 
 // Internal Types (for advanced usage)
-export type { QueuedMessage, WebSocketMetrics } from "@cd/agent-sdk";
+export type { QueuedMessage, WebSocketMetrics } from "@cognitive-dungeon/agent-sdk";
 
 // Server Management Types
-export type { ServerInfo, ServerStatus } from "@cd/agent-sdk";
+export type { ServerInfo, ServerStatus } from "@cognitive-dungeon/agent-sdk";
 
 // ============================================================================
 // WebSocket Internal Modules (for direct access if needed)
@@ -64,7 +64,7 @@ export {
   ConnectionMetrics,
   HeartbeatManager,
   ReconnectionManager,
-} from "@cd/agent-sdk";
+} from "@cognitive-dungeon/agent-sdk";
 
 // ============================================================================
 // Other Services (not part of network layer)

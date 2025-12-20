@@ -4,7 +4,7 @@
  * Типы для контекстного меню в UI
  */
 
-import type { Entity } from "../game/entity";
+import type {Entity} from "../game/entity";
 
 /**
  * Данные контекстного меню

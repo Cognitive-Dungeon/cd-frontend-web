@@ -1,7 +1,7 @@
 import { Plus, RefreshCw, Server } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-import type { ServerInfo, ServerStatus } from "../../../../types/server";
+import type { ServerInfo, ServerStatus, ServerVersionInfo } from "../../../../types/server";
 import { ServerManager } from "../../../../types/server";
 
 import { AddServerForm } from "./AddServerForm";
@@ -29,6 +29,7 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
     });
     return cachedStatuses;
   });
+  const [versions, setVersions] = useState<Map<string, ServerVersionInfo>>(new Map());
   const [selectedServerId, setSelectedServerId] = useState<string | null>(
     () => {
       const selectedId = ServerManager.getSelectedServerId();
@@ -45,8 +46,11 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
   const [newServerHost, setNewServerHost] = useState("");
   const [newServerPort, setNewServerPort] = useState("8080");
 
-  // Check single server availability
+  // --- LOGIC ---
+
+  // Check single server availability AND version
   const checkServer = useCallback(async (server: ServerInfo) => {
+    // 1. Сбрасываем текущий статус на "проверяется" (визуально можно обыграть в item)
     setStatuses((prev) => {
       const newMap = new Map(prev);
       newMap.set(server.id, {
@@ -57,6 +61,7 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
       return newMap;
     });
 
+    // 2. Сначала проверяем WebSocket (для Latency), это важнее для игры
     const status = await ServerManager.checkServerAvailability(server);
     ServerManager.cacheStatus(status);
 
@@ -65,11 +70,27 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
       newMap.set(server.id, status);
       return newMap;
     });
+
+    // 3. Если сервер жив (WebSocket ответил), запрашиваем версию через HTTP
+    if (status.isAvailable) {
+      try {
+        const versionInfo = await ServerManager.getServerVersion(server);
+
+        setVersions((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(server.id, versionInfo);
+          return newMap;
+        });
+      } catch (error) {
+        console.warn(`Could not fetch version for server ${server.name}`, error);
+      }
+    }
   }, []);
 
   // Check all servers
   const checkAllServers = useCallback(async () => {
     setIsCheckingAll(true);
+    setVersions(new Map());
     await Promise.all(servers.map((server) => checkServer(server)));
     setIsCheckingAll(false);
   }, [servers, checkServer]);
@@ -113,6 +134,11 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
       ServerManager.removeServer(serverId);
       setServers((prev) => prev.filter((s) => s.id !== serverId));
       setStatuses((prev) => {
+        const newMap = new Map(prev);
+        newMap.delete(serverId);
+        return newMap;
+      });
+      setVersions((prev) => {
         const newMap = new Map(prev);
         newMap.delete(serverId);
         return newMap;
@@ -205,6 +231,7 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
                 key={server.id}
                 server={server}
                 status={statuses.get(server.id)}
+                version={versions.get(server.id)}
                 isSelected={selectedServerId === server.id}
                 onSelect={setSelectedServerId}
                 onCheck={checkServer}

@@ -1,9 +1,9 @@
-import { Server } from "lucide-react";
+import {Server} from "lucide-react";
 
-import { ServerInfo } from "../../../types/server";
-import { WindowConfig } from "../types";
+import {ServerInfo} from "../../../types/server";
+import {WindowConfig} from "../types";
 
-import { ServerSelectionWindow } from "./components/ServerSelectionWindow";
+import {ServerSelectionWindow} from "./components/ServerSelectionWindow";
 
 export const SERVER_SELECTION_WINDOW_ID = "server-selection";
 

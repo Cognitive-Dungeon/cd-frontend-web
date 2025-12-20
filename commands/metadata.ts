@@ -5,7 +5,7 @@
  * Содержит информацию о каждой команде: названия, описания, требования.
  */
 
-import { CommandMetadata, CommandAction } from "./types";
+import {CommandAction, CommandMetadata} from "./types";
 
 // ============================================================================
 // Command Metadata Registry

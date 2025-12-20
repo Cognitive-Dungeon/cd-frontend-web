@@ -1,7 +1,7 @@
-import { LayoutGrid, Minimize2 } from "lucide-react";
-import { FC } from "react";
+import {LayoutGrid, Minimize2} from "lucide-react";
+import {FC} from "react";
 
-import { useWindowManager } from "./WindowManager";
+import {useWindowManager} from "./WindowManager";
 
 const Dock: FC = () => {
   const { windows, minimizeWindow, restoreWindow } = useWindowManager();

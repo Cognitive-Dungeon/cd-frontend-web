@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import {GoogleGenAI, Type} from "@google/genai";
 
 let aiClient: GoogleGenAI | null = null;
 

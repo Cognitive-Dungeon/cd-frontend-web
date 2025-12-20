@@ -1,7 +1,9 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 
-import { Position, Entity, GameWorld, LogType } from "../types";
-import { findPath } from "../utils/pathfinding";
+import {findPath} from "@/utils";
+
+import {Entity, GameWorld, LogType, Position} from "../types";
+
 
 interface UsePathfindingProps {
   player: Entity | null;

@@ -1,16 +1,10 @@
-import type { FC } from "react";
+import type {FC} from "react";
 
-import { KeyBindingManager } from "../commands";
-import type {
-  Entity,
-  GameState,
-  LogMessage,
-  Item,
-  ServerToClientEquipmentView,
-} from "../types";
+import {KeyBindingManager} from "../commands";
+import type {Entity, GameState, Item, LogMessage, ServerToClientEquipmentView,} from "../types";
 
 import StatusPanel from "./StatusPanel";
-import { WindowSystem } from "./WindowSystem";
+import {WindowSystem} from "./WindowSystem";
 
 interface HUDProps {
   player: Entity | null;

@@ -1,5 +1,5 @@
-import { Braces, Check, ChevronDown, ChevronRight, Copy } from "lucide-react";
-import { FC, useMemo, useState } from "react";
+import {Braces, Check, ChevronDown, ChevronRight, Copy} from "lucide-react";
+import {FC, useMemo, useState} from "react";
 
 interface JSONViewerProps {
   data: any;

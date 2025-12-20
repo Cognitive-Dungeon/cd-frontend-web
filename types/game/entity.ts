@@ -4,13 +4,9 @@
  * Типы для игровых сущностей (игрок, враги, NPC и т.д.)
  */
 
-import type {
-  Position,
-  ServerToClientInventoryView,
-  ServerToClientEquipmentView,
-} from "../protocol";
+import type {Position, ServerToClientEquipmentView, ServerToClientInventoryView,} from "../protocol";
 
-import type { Item } from "./item";
+import type {Item} from "./item";
 
 // ============================================================================
 // Entity Type Enum

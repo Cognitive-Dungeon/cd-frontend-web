@@ -1,40 +1,33 @@
-import { FC, useEffect, useRef, useCallback } from "react";
+import {FC, useCallback, useEffect, useRef} from "react";
 
-import { KeyBindingManager } from "../../commands";
-import {
-  Entity,
-  LogMessage,
-  Position,
-  ContextMenuData,
-  Item,
-  ServerToClientEquipmentView,
-} from "../../types";
+import {KeyBindingManager} from "../../commands";
+import {ContextMenuData, Entity, Item, LogMessage, Position, ServerToClientEquipmentView,} from "../../types";
 
-import { getStoredWindowState } from "./utils";
+import {getStoredWindowState} from "./utils";
 import Window from "./Window";
-import { useWindowManager } from "./WindowManager";
+import {useWindowManager} from "./WindowManager";
 import {
-  DOCK_WINDOW_ID,
-  createDockWindowConfig,
-  SETTINGS_WINDOW_ID,
-  createSettingsWindowConfig,
-  TURN_ORDER_BAR_WINDOW_ID,
-  createTurnOrderBarWindowConfig,
-  TURN_ORDER_WINDOW_ID,
-  createTurnOrderWindowConfig,
-  CASINO_WINDOW_ID,
-  createCasinoWindowConfig,
-  GAME_LOG_WINDOW_ID,
-  createGameLogWindowConfig,
-  INVENTORY_WINDOW_ID,
-  createInventoryWindowConfig,
-  LOGIN_WINDOW_ID,
-  createLoginWindowConfig,
-  ENTITY_INSPECTOR_WINDOW_ID,
-  createEntityInspectorWindowConfig,
-  createItemInspectorWindowConfig,
-  QUICK_ACCESS_WINDOW_ID,
-  createQuickAccessWindowConfig,
+    CASINO_WINDOW_ID,
+    createCasinoWindowConfig,
+    createDockWindowConfig,
+    createEntityInspectorWindowConfig,
+    createGameLogWindowConfig,
+    createInventoryWindowConfig,
+    createItemInspectorWindowConfig,
+    createLoginWindowConfig,
+    createQuickAccessWindowConfig,
+    createSettingsWindowConfig,
+    createTurnOrderBarWindowConfig,
+    createTurnOrderWindowConfig,
+    DOCK_WINDOW_ID,
+    ENTITY_INSPECTOR_WINDOW_ID,
+    GAME_LOG_WINDOW_ID,
+    INVENTORY_WINDOW_ID,
+    LOGIN_WINDOW_ID,
+    QUICK_ACCESS_WINDOW_ID,
+    SETTINGS_WINDOW_ID,
+    TURN_ORDER_BAR_WINDOW_ID,
+    TURN_ORDER_WINDOW_ID,
 } from "./windows";
 
 interface WindowSystemProps {

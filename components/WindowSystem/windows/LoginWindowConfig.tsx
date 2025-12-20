@@ -1,8 +1,8 @@
-import { LogIn } from "lucide-react";
+import {LogIn} from "lucide-react";
 
-import { WindowConfig } from "../types";
+import {WindowConfig} from "../types";
 
-import { LoginWindow } from "./components/LoginWindow";
+import {LoginWindow} from "./components/LoginWindow";
 
 export const LOGIN_WINDOW_ID = "login-window";
 

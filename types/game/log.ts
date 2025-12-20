@@ -4,7 +4,7 @@
  * Типы для игрового лога и состояния игры
  */
 
-import type { Position } from "../protocol";
+import type {Position} from "../protocol";
 
 // ============================================================================
 // Game State

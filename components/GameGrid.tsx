@@ -1,19 +1,12 @@
-import { Sword, MessageCircle, Hand, Search } from "lucide-react";
-import { FC, useCallback, useState, useRef, useEffect } from "react";
+import {Hand, MessageCircle, Search, Sword} from "lucide-react";
+import {FC, useCallback, useEffect, useRef, useState} from "react";
 
-import { COLORS, SYMBOLS } from "../constants";
-import {
-  ContextMenuData,
-  Entity,
-  EntityType,
-  GameWorld,
-  Position,
-  SpeechBubble,
-} from "../types";
-import { getCellSize } from "../utils/camera";
+import {COLORS, SYMBOLS} from "../constants";
+import {ContextMenuData, Entity, EntityType, GameWorld, Position, SpeechBubble,} from "../types";
+import {getCellSize} from "../utils/camera";
 
-import { ContextMenu } from "./ContextMenu";
-import { RadialMenu } from "./RadialMenu";
+import {ContextMenu} from "./ContextMenu";
+import {RadialMenu} from "./RadialMenu";
 
 interface GameGridProps {
   world: GameWorld;

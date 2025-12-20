@@ -1,6 +1,6 @@
-import { FC } from "react";
+import {FC} from "react";
 
-import { Entity, GameState } from "../types";
+import {Entity, GameState} from "../types";
 
 interface StatusPanelProps {
   player: Entity;

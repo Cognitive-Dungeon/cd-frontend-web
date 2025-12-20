@@ -1,24 +1,16 @@
-import {
-  useRef,
-  useState,
-  useEffect,
-  FC,
-  useCallback,
-  createContext,
-  useContext,
-} from "react";
+import {createContext, FC, useCallback, useContext, useEffect, useRef, useState,} from "react";
 
 import {
-  WindowState,
-  DockedPosition,
-  MinimizeBehavior,
-  SnapPoint,
-  SNAP_POINTS,
-  findClosestSnap,
-  getViewportSnapPointPx,
-  getWindowSnapPointPx,
+    DockedPosition,
+    findClosestSnap,
+    getViewportSnapPointPx,
+    getWindowSnapPointPx,
+    MinimizeBehavior,
+    SNAP_POINTS,
+    SnapPoint,
+    WindowState,
 } from "./types";
-import { useWindowManager } from "./WindowManager";
+import {useWindowManager} from "./WindowManager";
 
 interface WindowProps {
   window: WindowState;

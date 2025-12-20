@@ -1,4 +1,4 @@
-import { Position, GameWorld } from "../types";
+import {GameWorld, Position} from "../types";
 
 interface PathNode {
   pos: Position;

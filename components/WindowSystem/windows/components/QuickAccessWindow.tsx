@@ -1,9 +1,9 @@
-import type { FC, DragEvent } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import type {DragEvent, FC} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 
-import type { Item } from "../../../../types";
+import type {Item} from "../../../../types";
 
-import { InventorySlot } from "./InventorySlot";
+import {InventorySlot} from "./InventorySlot";
 
 /**
 

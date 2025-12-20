@@ -1,7 +1,7 @@
-import { Code, MapPin } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import {Code, MapPin} from "lucide-react";
+import {useEffect, useRef, useState} from "react";
 
-import { LogMessage, LogType, Position } from "../types";
+import {LogMessage, LogType, Position} from "../types";
 
 interface GameLogProps {
   logs: LogMessage[];

@@ -1,9 +1,9 @@
-import { MessageSquare } from "lucide-react";
+import {MessageSquare} from "lucide-react";
 
-import { LogMessage, Position } from "../../../types";
-import { WindowConfig } from "../types";
+import {LogMessage, Position} from "../../../types";
+import {WindowConfig} from "../types";
 
-import { GameLogWindow } from "./components/GameLogWindow";
+import {GameLogWindow} from "./components/GameLogWindow";
 
 export const GAME_LOG_WINDOW_ID = "game-log-window";
 

@@ -87,11 +87,7 @@ export interface CommandMetadata {
 // ============================================================================
 
 // Import types inline to avoid circular dependencies
-import type {
-  CommandAction as CA,
-  CommandPayloadMap as CPM,
-  ClientToServerCommand as CTSC,
-} from "../types/protocol";
+import type {ClientToServerCommand as CTSC, CommandAction as CA, CommandPayloadMap as CPM,} from "../types/protocol";
 
 /**
  * Типизированная функция создания команды

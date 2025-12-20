@@ -6,11 +6,7 @@
  * автоматически проверяя правильность payload на этапе компиляции.
  */
 
-import {
-  ClientToServerCommand,
-  ClientToServerMovePayload,
-  ClientToServerCustomPayload,
-} from "./types";
+import {ClientToServerCommand, ClientToServerCustomPayload, ClientToServerMovePayload,} from "./types";
 
 // ============================================================================
 // Authentication Commands

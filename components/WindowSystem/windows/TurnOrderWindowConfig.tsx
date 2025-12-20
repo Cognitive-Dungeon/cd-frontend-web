@@ -1,9 +1,9 @@
-import { Users } from "lucide-react";
+import {Users} from "lucide-react";
 
-import { Entity } from "../../../types";
-import { WindowConfig } from "../types";
+import {Entity} from "../../../types";
+import {WindowConfig} from "../types";
 
-import { TurnOrderWindow } from "./components/TurnOrderWindow";
+import {TurnOrderWindow} from "./components/TurnOrderWindow";
 
 export const TURN_ORDER_WINDOW_ID = "turn-order";
 

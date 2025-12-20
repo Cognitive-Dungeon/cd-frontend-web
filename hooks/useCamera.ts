@@ -1,8 +1,10 @@
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 
-import { MIN_ZOOM, MAX_ZOOM, ZOOM_STEP } from "../constants";
-import { Position, Entity, GameWorld } from "../types";
-import { calculateCameraOffset } from "../utils/camera";
+import {calculateCameraOffset} from "@/utils";
+
+import {MAX_ZOOM, MIN_ZOOM, ZOOM_STEP} from "../constants";
+import {Entity, GameWorld, Position} from "../types";
+
 
 interface UseCameraProps {
   world: GameWorld | null;

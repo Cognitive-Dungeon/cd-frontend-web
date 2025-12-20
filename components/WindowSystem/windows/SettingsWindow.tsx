@@ -1,7 +1,7 @@
-import { Settings } from "lucide-react";
+import {Settings} from "lucide-react";
 
-import { KeyBindingManager } from "../../../commands";
-import { WindowConfig } from "../types";
+import {KeyBindingManager} from "../../../commands";
+import {WindowConfig} from "../types";
 
 import KeybindingsSettings from "./components/KeybindingsSettings";
 

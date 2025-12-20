@@ -1,6 +1,6 @@
-import { useRef, useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 
-import { Entity, ContextMenuData } from "../../../../types";
+import {ContextMenuData, Entity} from "../../../../types";
 
 interface TurnOrderBarProps {
   entities: Entity[];

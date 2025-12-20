@@ -1,15 +1,9 @@
-import { Focus, Navigation } from "lucide-react";
-import { forwardRef } from "react";
+import {Focus, Navigation} from "lucide-react";
+import {forwardRef} from "react";
 
-import type {
-  Entity,
-  GameWorld,
-  Position,
-  SpeechBubble,
-  ContextMenuData,
-} from "../types";
+import type {ContextMenuData, Entity, GameWorld, Position, SpeechBubble,} from "../types";
 
-import { ContextMenu } from "./ContextMenu";
+import {ContextMenu} from "./ContextMenu";
 import GameGrid from "./GameGrid";
 
 interface GameViewProps {

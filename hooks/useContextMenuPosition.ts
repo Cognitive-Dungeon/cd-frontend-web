@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, RefObject } from "react";
+import {RefObject, useLayoutEffect, useState} from "react";
 
 interface MenuPosition {
   x: number;

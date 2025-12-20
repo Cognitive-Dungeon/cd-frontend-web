@@ -1,18 +1,9 @@
-import {
-  Focus,
-  Sword,
-  MessageCircle,
-  Zap,
-  Sparkles,
-  Navigation,
-  Hand,
-  FileJson,
-} from "lucide-react";
-import { FC, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import {FileJson, Focus, Hand, MessageCircle, Navigation, Sparkles, Sword, Zap,} from "lucide-react";
+import {FC, useEffect, useRef} from "react";
+import {createPortal} from "react-dom";
 
-import { useContextMenuPosition } from "../hooks";
-import { ContextMenuData, Position, Entity } from "../types";
+import {useContextMenuPosition} from "../hooks";
+import {ContextMenuData, Entity, Position} from "../types";
 
 interface ContextMenuProps {
   data: ContextMenuData;

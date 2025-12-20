@@ -1,7 +1,7 @@
-import { AlertCircle, Wifi, WifiOff } from "lucide-react";
-import type { FC } from "react";
+import {AlertCircle, Wifi, WifiOff} from "lucide-react";
+import type {FC} from "react";
 
-import type { ServerStatus } from "../../../../types/server";
+import type {ServerStatus} from "../../../../types/server";
 
 interface ServerStatusBadgeProps {
   status?: ServerStatus;

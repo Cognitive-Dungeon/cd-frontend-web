@@ -1,13 +1,14 @@
-import { Check, RefreshCw, Trash2 } from "lucide-react";
-import type { FC } from "react";
+import {Check, RefreshCw, Trash2} from "lucide-react";
+import type {FC} from "react";
 
-import type { ServerInfo, ServerStatus } from "../../../../types/server";
+import {ServerInfo, ServerManager, ServerStatus, ServerVersionInfo} from "../../../../types/server";
 
-import { ServerStatusBadge } from "./ServerStatusBadge";
+import {ServerStatusBadge} from "./ServerStatusBadge";
 
 interface ServerListItemProps {
   server: ServerInfo;
   status?: ServerStatus;
+  version?: ServerVersionInfo;
   isSelected: boolean;
   onSelect: (serverId: string) => void;
   onCheck: (server: ServerInfo) => void;
@@ -17,6 +18,7 @@ interface ServerListItemProps {
 export const ServerListItem: FC<ServerListItemProps> = ({
   server,
   status,
+  version,
   isSelected,
   onSelect,
   onCheck,
@@ -40,11 +42,11 @@ export const ServerListItem: FC<ServerListItemProps> = ({
 
       {/* Server Info */}
       <div className="flex items-start justify-between mb-2">
-        <div className="flex-1">
+          <div className="flex-1 overflow-hidden"> {/* overflow-hidden для truncate */}
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-white">{server.name}</h3>
+              <h3 className="font-semibold text-white truncate">{server.name}</h3>
             {server.isDefault && (
-              <span className="px-1.5 py-0.5 text-[10px] bg-blue-600 text-white rounded">
+              <span className="px-1.5 py-0.5 text-[10px] bg-blue-600 text-white rounded shrink-0">
                 DEFAULT
               </span>
             )}
@@ -52,19 +54,30 @@ export const ServerListItem: FC<ServerListItemProps> = ({
           <p className="text-sm text-gray-400 mt-1">
             {server.host}:{server.port}
           </p>
+
+          {/* === ОТОБРАЖЕНИЕ ВЕРСИИ === */}
+          {version && status?.isAvailable && (
+            <p
+              className="text-[10px] text-neutral-500 font-mono mt-0.5 truncate"
+              title={`Commit: ${version.Commit}\nBranch: ${version.Branch}`}
+            >
+              {ServerManager.formatVersionString(version)}
+            </p>
+          )}
         </div>
       </div>
 
       {/* Status and Actions */}
-      <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-3">
         <ServerStatusBadge status={status} />
+
         <div className="flex items-center gap-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onCheck(server);
             }}
-            className="p-1 hover:bg-neutral-700 rounded transition-colors"
+            className="p-1 hover:bg-neutral-700 rounded transition-colors text-gray-400 hover:text-white"
             title="Check server"
           >
             <RefreshCw size={14} />
@@ -75,7 +88,7 @@ export const ServerListItem: FC<ServerListItemProps> = ({
                 e.stopPropagation();
                 onRemove(server.id);
               }}
-              className="p-1 hover:bg-red-900 hover:text-red-400 rounded transition-colors"
+              className="p-1 hover:bg-red-900/50 text-gray-400 hover:text-red-400 rounded transition-colors"
               title="Remove server"
             >
               <Trash2 size={14} />

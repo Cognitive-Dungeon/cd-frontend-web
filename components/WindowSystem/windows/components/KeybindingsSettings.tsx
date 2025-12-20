@@ -1,21 +1,21 @@
-import { Plus, Trash2 } from "lucide-react";
-import { FC, useState, useEffect } from "react";
+import {Plus, Trash2} from "lucide-react";
+import {FC, useEffect, useState} from "react";
 
 import {
-  CommandAttack,
-  CommandCastArea,
-  CommandCustom,
-  CommandDown,
-  CommandInspect,
-  CommandLeft,
-  CommandPickup,
-  CommandRight,
-  CommandTalk,
-  CommandTeleport,
-  CommandTrade,
-  CommandUp,
-  GameCommand,
-  KeyBindingManager,
+    CommandAttack,
+    CommandCastArea,
+    CommandCustom,
+    CommandDown,
+    CommandInspect,
+    CommandLeft,
+    CommandPickup,
+    CommandRight,
+    CommandTalk,
+    CommandTeleport,
+    CommandTrade,
+    CommandUp,
+    GameCommand,
+    KeyBindingManager,
 } from "../../../../commands";
 
 interface KeybindingsSettingsProps {

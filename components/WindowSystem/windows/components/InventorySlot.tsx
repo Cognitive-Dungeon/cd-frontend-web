@@ -31,12 +31,12 @@
  * ```
  */
 
-import { Sparkles, Shield, ShieldOff, Trash2, Search } from "lucide-react";
-import { FC, useState, DragEvent, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
+import {Search, Shield, ShieldOff, Sparkles, Trash2} from "lucide-react";
+import {DragEvent, FC, useEffect, useRef, useState} from "react";
+import {createPortal} from "react-dom";
 
-import { useContextMenuPosition } from "../../../../hooks";
-import { Item } from "../../../../types";
+import {useContextMenuPosition} from "../../../../hooks";
+import {Item} from "../../../../types";
 
 interface InventorySlotProps {
   item: Item | null;
