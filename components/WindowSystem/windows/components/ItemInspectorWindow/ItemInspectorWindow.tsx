@@ -11,9 +11,9 @@ export const ItemInspectorWindow: FC<ItemInspectorWindowProps> = ({
   item,
 }) => {
   return (
-    <div className="flex flex-col h-full bg-neutral-950 text-gray-300 font-mono">
+    <div className="flex flex-col h-full bg-window-base text-window-text font-mono">
       {/* Header */}
-      <div className="p-4 border-b border-neutral-700">
+      <div className="p-4 border-b border-window-border">
         <div className="flex items-center gap-3">
           <span
             className="text-3xl"
@@ -22,8 +22,8 @@ export const ItemInspectorWindow: FC<ItemInspectorWindowProps> = ({
             {item.symbol || "?"}
           </span>
           <div>
-            <h3 className="text-lg font-bold text-white">{item.name}</h3>
-            <p className="text-xs text-gray-500">
+            <h3 className="text-lg font-bold text-window-text">{item.name}</h3>
+            <p className="text-xs text-dock-text-dim">
               ID: {item.id} | Type: {item.type}
             </p>
           </div>

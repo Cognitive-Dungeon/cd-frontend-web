@@ -30,7 +30,7 @@ export const ServerListItem: FC<ServerListItemProps> = ({
       className={`relative p-4 rounded border cursor-pointer transition-all ${
         isSelected
           ? "bg-blue-900/30 border-blue-500"
-          : " border-neutral-700 hover:border-neutral-600"
+          : " border-window-border hover:border-window-border-focus"
       }`}
     >
       {/* Selected Indicator */}
@@ -44,21 +44,21 @@ export const ServerListItem: FC<ServerListItemProps> = ({
       <div className="flex items-start justify-between">
         <div className="flex-1 overflow-hidden"> {/* overflow-hidden для truncate */}
           <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-white truncate">{server.name}</h3>
+              <h3 className="font-semibold text-window-text truncate">{server.name}</h3>
             {/* {server.isDefault && (
-              <span className="px-1.5 py-0.5 text-[10px] bg-blue-600 text-white rounded shrink-0">
+              <span className="px-1.5 py-0.5 text-[10px] bg-ui-button-primary-bg text-ui-button-primary-text rounded shrink-0">
                 DEFAULT
               </span>
             )} */}
           </div>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-window-icon-color mt-1">
             {server.host}:{server.port}
           </p>
 
           {/* === ОТОБРАЖЕНИЕ ВЕРСИИ === */}
           {version && status?.isAvailable && (
             <p
-              className="text-[10px] text-neutral-500 font-mono mt-0.5 truncate"
+              className="text-[10px] text-dock-text-dim font-mono mt-0.5 truncate"
               title={`Commit: ${version.Commit}\nBranch: ${version.Branch}`}
             >
               {ServerManager.formatVersionString(version)}
@@ -66,7 +66,7 @@ export const ServerListItem: FC<ServerListItemProps> = ({
           )}
           {(!version || !status?.isAvailable) && (
             <p
-              className="text-[10px] text-neutral-500 font-mono mt-0.5 truncate"
+              className="text-[10px] text-dock-text-dim font-mono mt-0.5 truncate"
             >
               No build information available
             </p>
@@ -83,7 +83,7 @@ export const ServerListItem: FC<ServerListItemProps> = ({
                       e.stopPropagation();
                       onRemove(server.id);
                     }}
-                    className="p-1 text-gray-400 hover:text-red-400 rounded transition-colors"
+                    className="p-1 text-window-icon-color hover:text-red-400 rounded transition-colors"
                     title="Remove server"
                   >
                     <Trash2 size={14} />

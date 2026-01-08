@@ -10,7 +10,7 @@ interface ServerStatusBadgeProps {
 export const ServerStatusBadge: FC<ServerStatusBadgeProps> = ({ status }) => {
   if (!status) {
     return (
-      <span className="flex items-center gap-1 text-xs text-gray-500">
+      <span className="flex items-center gap-1 text-xs text-dock-text-dim">
         Unknown
       </span>
     );

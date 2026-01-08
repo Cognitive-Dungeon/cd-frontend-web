@@ -96,20 +96,20 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
   const getLogColor = (type: LogType) => {
     switch (type) {
       case LogType.COMBAT:
-        return "text-red-400";
+        return "text-log-combat";
       case LogType.NARRATIVE:
-        return "text-purple-400 italic";
+        return "text-log-narrative italic";
       case LogType.SPEECH:
-        return "text-yellow-300";
+        return "text-log-speech";
       case LogType.ERROR:
-        return "text-red-600 font-bold";
+        return "text-log-error font-bold";
       case LogType.COMMAND:
-        return "text-cyan-600 font-bold";
+        return "text-log-command font-bold";
       case LogType.SUCCESS:
-        return "text-green-400";
+        return "text-log-success";
       case LogType.INFO:
       default:
-        return "text-gray-400";
+        return "text-log-info";
     }
   };
 
@@ -155,7 +155,7 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
 
   return (
     <div
-      className={`flex flex-col ${isMinimized ? "h-auto bg-transparent" : "h-full bg-neutral-950"} font-mono text-sm overflow-hidden`}
+      className={`flex flex-col ${isMinimized ? "h-auto bg-transparent" : "h-full bg-window-content"} font-mono text-sm overflow-hidden`}
     >
       {/* Logs Area */}
       {!isMinimized ? (
@@ -170,7 +170,7 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
               >
                 <div className="flex-1">
                   {log.type !== LogType.COMMAND && (
-                    <span className="opacity-30 mr-2 text-xs select-none">
+                    <span className="text-log-timestamp mr-2 text-xs select-none">
                       [
                       {new Date(log.timestamp).toLocaleTimeString([], {
                         hour12: false,
@@ -195,7 +195,7 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
                   {log.playerPosition && onGoToPosition && (
                     <button
                       onClick={() => onGoToPosition(log.playerPosition!)}
-                      className="p-1 rounded hover:bg-neutral-800"
+                      className="p-1 rounded hover:bg-window-button-hover"
                       title={`Перейти к позиции игрока (${log.playerPosition.x}, ${log.playerPosition.y})`}
                     >
                       <MapPin size={14} className="text-blue-400" />
@@ -204,7 +204,7 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
                   {log.commandData && (
                     <button
                       onClick={() => toggleJsonView(log.id)}
-                      className="p-1 rounded hover:bg-neutral-800"
+                      className="p-1 rounded hover:bg-window-button-hover"
                       title="Показать JSON"
                     >
                       <Code size={14} className="text-gray-500" />
@@ -213,7 +213,7 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
                 </div>
               </div>
               {log.commandData && expandedLogId === log.id && (
-                <div className="ml-6 p-2 bg-neutral-900 rounded border border-neutral-700 text-xs font-mono text-gray-400">
+                <div className="ml-6 p-2 bg-window-content rounded border border-window-border text-xs font-mono text-gray-400">
                   <pre className="whitespace-pre-wrap break-all">
                     {JSON.stringify(log.commandData, null, 2)}
                   </pre>
@@ -238,13 +238,13 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
 
       {/* Input Area */}
       <div
-        className={`border-t border-neutral-800 ${isMinimized ? "bg-transparent" : "bg-neutral-900"} p-2`}
+        className={`border-t border-window-border ${isMinimized ? "bg-transparent" : "bg-window-content"} p-2`}
       >
         <div className="flex gap-2">
           <select
             value={messageType}
             onChange={(e) => setMessageType(e.target.value as any)}
-            className="bg-neutral-800 text-gray-300 text-xs rounded px-2 py-1 border border-neutral-700 outline-none focus:border-neutral-500"
+            className="bg-ui-input-bg text-ui-input-text text-xs rounded px-2 py-1 border border-ui-input-border outline-none focus:border-window-border-focus"
           >
             <option value="SAY">Say</option>
             <option value="WHISPER">Whisper</option>
@@ -257,11 +257,11 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Enter command or message..."
-              className="w-full bg-neutral-800 text-gray-200 text-sm rounded px-3 py-1.5 border border-neutral-700 outline-none focus:border-neutral-500 pr-8"
+              className="w-full bg-ui-input-bg text-ui-input-text placeholder-ui-input-placeholder text-sm rounded px-3 py-1.5 border border-ui-input-border outline-none focus:border-window-border-focus pr-8"
             />
             <button
               onClick={handleSend}
-              className="absolute right-1.5 top-1.5 text-gray-400 hover:text-white transition-colors"
+              className="absolute right-1.5 top-1.5 text-window-icon-color hover:text-white transition-colors"
             >
               <Send size={14} />
             </button>
@@ -271,7 +271,7 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
 
       {/* Filter Tabs */}
       <div
-        className={`flex border-t border-neutral-800 ${isMinimized ? "bg-transparent" : "bg-neutral-900"}`}
+        className={`flex border-t border-window-border ${isMinimized ? "bg-transparent" : "bg-window-content"}`}
       >
         {(["ALL", "COMBAT", "NARRATIVE", "CHAT", "SYSTEM"] as LogFilter[]).map(
           (filter) => (
@@ -285,8 +285,8 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
               }}
               className={`flex-1 py-1.5 text-xs font-medium transition-colors border-b-2 ${
                 activeFilter === filter
-                  ? "text-white border-cyan-500 bg-neutral-800"
-                  : "text-gray-500 border-transparent hover:text-gray-300 hover:bg-neutral-800"
+                  ? "text-ui-tab-active-text border-ui-tab-active-border bg-ui-tab-active-bg"
+                  : "text-ui-tab-inactive-text border-transparent hover:text-window-text hover:bg-ui-tab-hover-bg"
               }`}
             >
               {filter}

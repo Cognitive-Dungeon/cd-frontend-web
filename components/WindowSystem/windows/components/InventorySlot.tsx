@@ -244,13 +244,13 @@ export const InventorySlot: FC<InventorySlotProps> = ({
 
         relative w-16 h-16 border-2 rounded
 
-        ${item ? "bg-neutral-800 border-neutral-600 cursor-move" : "bg-transparent border-neutral-800/50"}
+        ${item ? "bg-ui-input-bg border-window-border cursor-move" : "bg-transparent border-window-border"}
 
         ${isDragging ? "opacity-50" : ""}
 
-        ${isOver ? "border-cyan-500 bg-cyan-900/20" : ""}
+        ${isOver ? "border-ui-tab-active-border bg-ui-tab-hover-bg" : ""}
 
-        ${unavailable ? "opacity-40 cursor-not-allowed" : "hover:border-neutral-500"}
+        ${unavailable ? "opacity-40 cursor-not-allowed" : "hover:border-window-border-focus"}
 
         transition-all duration-100
 
@@ -285,7 +285,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
             <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 transition-colors rounded pointer-events-none" />
           </>
         ) : (
-          <div className="text-neutral-700 text-2xl">+</div>
+          <div className="text-dock-text-dim text-2xl">+</div>
         )}
       </div>
 
@@ -295,7 +295,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
         createPortal(
           <div
             ref={contextMenuRef}
-            className="fixed bg-neutral-800 border border-neutral-600 rounded shadow-xl z-[10000] min-w-40"
+            className="fixed bg-window-content border border-window-border rounded shadow-xl z-[10000] min-w-40"
             style={{
               left: `${menuPosition.x}px`,
               top: `${menuPosition.y}px`,
@@ -303,14 +303,14 @@ export const InventorySlot: FC<InventorySlotProps> = ({
             onClick={(e) => e.stopPropagation()}
             data-interactive="true"
           >
-            <div className="p-1.5 border-b border-neutral-700 text-[10px] text-gray-400 truncate">
+            <div className="p-1.5 border-b border-window-border text-[10px] text-window-icon-color truncate">
               {item.name}
             </div>
             <div className="py-1">
               {onUse && (
                 <button
                   onClick={handleUse}
-                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-green-400 flex items-center gap-1.5"
+                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-dock-item-hover text-log-success flex items-center gap-1.5"
                 >
                   <Sparkles className="w-3 h-3" />
                   <span>Use</span>
@@ -320,7 +320,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
                 ? onUnequip && (
                     <button
                       onClick={handleUnequip}
-                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-yellow-400 flex items-center gap-1.5"
+                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-dock-item-hover text-log-speech flex items-center gap-1.5"
                     >
                       <ShieldOff className="w-3 h-3" />
                       <span>Unequip</span>
@@ -329,7 +329,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
                 : onEquip && (
                     <button
                       onClick={handleEquip}
-                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-cyan-400 flex items-center gap-1.5"
+                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-dock-item-hover text-log-command flex items-center gap-1.5"
                     >
                       <Shield className="w-3 h-3" />
                       <span>Equip</span>
@@ -338,7 +338,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
               {onDrop && (
                 <button
                   onClick={handleDropItem}
-                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-red-400 flex items-center gap-1.5"
+                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-dock-item-hover text-log-combat flex items-center gap-1.5"
                 >
                   <Trash2 className="w-3 h-3" />
                   <span>Drop</span>
@@ -347,7 +347,7 @@ export const InventorySlot: FC<InventorySlotProps> = ({
               {onInspect && (
                 <button
                   onClick={handleInspect}
-                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-neutral-700 text-purple-400 flex items-center gap-1.5"
+                  className="w-full px-2 py-1.5 text-left text-xs hover:bg-dock-item-hover text-log-narrative flex items-center gap-1.5"
                 >
                   <Search className="w-3 h-3" />
                   <span>Open in Inspector</span>

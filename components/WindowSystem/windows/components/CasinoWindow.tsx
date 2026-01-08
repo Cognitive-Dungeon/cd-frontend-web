@@ -68,23 +68,23 @@ const CasinoWindow: FC<CasinoWindowProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="p-6 text-gray-300 bg-neutral-900 h-full flex flex-col items-center justify-center">
+    <div className="p-6 text-window-text bg-window-base h-full flex flex-col items-center justify-center">
       <div className="w-full max-w-md space-y-6">
         {/* Header with icon */}
         <div className="flex items-center gap-3 justify-center">
           <div className="text-4xl">🎰</div>
-          <h2 className="text-2xl font-bold text-red-500">Взлом казино</h2>
+          <h2 className="text-2xl font-bold text-log-combat">Взлом казино</h2>
         </div>
 
         {/* Message */}
         <div className="text-center space-y-2">
           {hasReset && winnings === 0 ? (
             <div className="text-center">
-              <p className="text-2xl font-bold text-red-500 mb-4">💸</p>
-              <p className="text-lg font-semibold text-red-400">
+              <p className="text-2xl font-bold text-log-combat mb-4">💸</p>
+              <p className="text-lg font-semibold text-log-combat">
                 Вы депнули все что можно.
               </p>
-              <p className="text-lg font-semibold text-red-400">
+              <p className="text-lg font-semibold text-log-combat">
                 Теперь вы без трусов и без собачки
               </p>
               <p className="text-xl font-semibold mt-4">Попробовать еще раз?</p>
@@ -93,15 +93,15 @@ const CasinoWindow: FC<CasinoWindowProps> = ({ onClose }) => {
             <>
               <p className="text-lg">
                 Казино взломанно на{" "}
-                <span className="font-bold text-green-400">{percentage}%</span>.
+                <span className="font-bold text-log-success">{percentage}%</span>.
               </p>
               <p className="text-lg">
                 Выкачанно{" "}
-                <span className="font-bold text-yellow-400">
+                <span className="font-bold text-log-warning">
                   {winnings.toLocaleString("ru-RU")} руб.
                 </span>{" "}
                 из{" "}
-                <span className="font-bold text-red-400">
+                <span className="font-bold text-log-combat">
                   {total.toLocaleString("ru-RU")} руб.
                 </span>
               </p>
@@ -111,9 +111,9 @@ const CasinoWindow: FC<CasinoWindowProps> = ({ onClose }) => {
         </div>
 
         {/* Progress bar */}
-        <div className="w-full bg-neutral-700 rounded-full h-6 overflow-hidden border border-neutral-600">
+        <div className="w-full bg-window-content rounded-full h-6 overflow-hidden border border-window-border">
           <div
-            className="h-full bg-gradient-to-r from-red-600 to-red-500 transition-all duration-200 ease-out flex items-center justify-end pr-2"
+            className="h-full bg-gradient-to-r from-log-combat to-log-combat transition-all duration-200 ease-out flex items-center justify-end pr-2"
             style={{ width: `${progress}%` }}
           >
             {progress > 10 && (
@@ -129,14 +129,14 @@ const CasinoWindow: FC<CasinoWindowProps> = ({ onClose }) => {
           <button
             onClick={handleYes}
             disabled={isLoading}
-            className="px-8 py-3 bg-neutral-700 hover:bg-neutral-600 border-2 border-neutral-500 rounded text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
+            className="px-8 py-3 bg-ui-input-bg hover:bg-dock-item-hover border-2 border-ui-input-border rounded text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
           >
             Да
           </button>
           <button
             onClick={handleNo}
             disabled={isLoading}
-            className="px-8 py-3 bg-neutral-700 hover:bg-neutral-600 border-2 border-neutral-500 rounded text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
+            className="px-8 py-3 bg-ui-input-bg hover:bg-dock-item-hover border-2 border-ui-input-border rounded text-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
           >
             Нет
           </button>

@@ -502,11 +502,11 @@ const GameGrid: FC<GameGridProps> = ({
         {entity.isHostile && entity.stats && (
           <div className="w-full" style={{ marginTop: `${zoom * 2}px` }}>
             <div
-              className="bg-gray-700 rounded-full overflow-hidden"
+              className="bg-window-content rounded-full overflow-hidden"
               style={{ height: `${zoom * 3}px` }}
             >
               <div
-                className="h-full bg-red-500 transition-all"
+                className="h-full bg-log-combat transition-all"
                 style={{
                   width: `${(entity.stats.hp / entity.stats.maxHp) * 100}%`,
                 }}
@@ -554,7 +554,7 @@ const GameGrid: FC<GameGridProps> = ({
 
     // Determine visibility classes and border color
     let visibilityClass = "";
-    let borderColor = "rgb(64, 64, 64)"; // neutral-700 default
+    let borderColor = "rgb(64, 64, 64)"; // window-border default
     if (!isVisible && !isExplored) {
       // Unexplored - completely dark
       visibilityClass = "bg-black";
@@ -562,10 +562,10 @@ const GameGrid: FC<GameGridProps> = ({
     } else if (!isVisible && isExplored) {
       // Explored but not visible - dimmed
       visibilityClass = "opacity-40 grayscale";
-      borderColor = "rgb(38, 38, 38)"; // Darker border (neutral-800)
+      borderColor = "rgb(38, 38, 38)"; // Darker border
     }
 
-    let bgClass = "bg-neutral-900";
+    let bgClass = "bg-window-base";
     let floorSymbol = SYMBOLS.FLOOR;
     let floorColor = COLORS.FLOOR;
 
@@ -583,7 +583,7 @@ const GameGrid: FC<GameGridProps> = ({
       floorSymbol = SYMBOLS.TREE;
       floorColor = COLORS.TREE;
     } else if (tile.isWall) {
-      bgClass = "bg-neutral-800";
+      bgClass = "bg-window-content";
       floorSymbol = SYMBOLS.WALL;
       floorColor = COLORS.WALL;
     }
@@ -591,7 +591,7 @@ const GameGrid: FC<GameGridProps> = ({
     return (
       <div
         key={`${x}-${y}`}
-        className={`relative ${bgClass} ${visibilityClass} flex items-center justify-center cursor-pointer hover:bg-neutral-700/50 transition-colors group`}
+        className={`relative ${bgClass} ${visibilityClass} flex items-center justify-center cursor-pointer hover:bg-dock-item-hover transition-colors group`}
         style={{
           width: CELL_SIZE,
           height: CELL_SIZE,
@@ -899,7 +899,7 @@ const GameGrid: FC<GameGridProps> = ({
 
       {/* Индикатор перетаскивания */}
       {isDragging && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded shadow-lg z-50 text-sm font-semibold">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-ui-button-primary-bg text-ui-button-primary-text px-4 py-2 rounded shadow-lg z-50 text-sm font-semibold">
           Перетащите игрока в новую клетку
         </div>
       )}

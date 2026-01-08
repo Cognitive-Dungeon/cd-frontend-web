@@ -296,15 +296,15 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
   };
 
   return (
-    <div className="flex h-full text-gray-300">
+    <div className="flex h-full text-window-text">
       {/* Sidebar with tabs */}
-      <div className="w-48 bg-neutral-900 border-r border-neutral-700 p-2 flex flex-col gap-1">
+      <div className="w-48 bg-window-content border-r border-window-border p-2 flex flex-col gap-1">
         <button
           onClick={() => setActiveTab("keybindings")}
           className={`px-4 py-2 rounded text-left transition-colors ${
             activeTab === "keybindings"
-              ? "bg-neutral-700 text-white"
-              : "text-gray-400 hover:bg-neutral-800 hover:text-gray-300"
+              ? "bg-ui-tab-active-bg text-ui-tab-active-text"
+              : "text-ui-tab-inactive-text hover:bg-ui-tab-hover-bg hover:text-window-text"
           }`}
         >
           Управление
@@ -313,8 +313,8 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
           onClick={() => setActiveTab("windows")}
           className={`px-4 py-2 rounded text-left transition-colors ${
             activeTab === "windows"
-              ? "bg-neutral-700 text-white"
-              : "text-gray-400 hover:bg-neutral-800 hover:text-gray-300"
+              ? "bg-ui-tab-active-bg text-ui-tab-active-text"
+              : "text-ui-tab-inactive-text hover:bg-ui-tab-hover-bg hover:text-window-text"
           }`}
         >
           Система окон
@@ -323,8 +323,8 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
           onClick={() => setActiveTab("ui")}
           className={`px-4 py-2 rounded text-left transition-colors ${
             activeTab === "ui"
-              ? "bg-neutral-700 text-white"
-              : "text-gray-400 hover:bg-neutral-800 hover:text-gray-300"
+              ? "bg-ui-tab-active-bg text-ui-tab-active-text"
+              : "text-ui-tab-inactive-text hover:bg-ui-tab-hover-bg hover:text-window-text"
           }`}
         >
           UI
@@ -339,20 +339,20 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
               <h2 className="text-lg font-bold">Настройка клавиш</h2>
               <div className="flex items-center gap-2">
                 {saveMessage && (
-                  <span className="text-sm text-green-400 animate-pulse">
+                  <span className="text-sm text-log-success animate-pulse">
                     {saveMessage}
                   </span>
                 )}
                 <button
                   onClick={handleResetToDefaults}
-                  className="px-3 py-1 bg-neutral-700 hover:bg-neutral-600 border border-neutral-600 rounded transition-colors text-sm"
+                  className="px-3 py-1 bg-ui-button-disabled-bg hover:bg-dock-item-hover border border-ui-input-border rounded transition-colors text-sm"
                   title="Сбросить на значения по умолчанию"
                 >
                   Сбросить
                 </button>
                 <button
                   onClick={handleSaveAllBindings}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-500 border border-blue-500 rounded transition-colors text-sm font-semibold"
+                  className="px-3 py-1 bg-ui-button-primary-bg hover:bg-ui-button-primary-hover border border-ui-button-primary-bg rounded transition-colors text-sm font-semibold text-ui-button-primary-text"
                   title="Сохранить все изменения"
                 >
                   Сохранить
@@ -364,7 +364,7 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-neutral-700">
+                    <tr className="border-b border-window-border">
                       <th className="text-left py-2 px-2">Клавиша</th>
                       <th className="text-left py-2 px-2">Команда</th>
                       <th className="w-10"></th>
@@ -374,7 +374,7 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                     {bindings.map((binding) => (
                       <tr
                         key={binding.id}
-                        className="border-b border-neutral-800 hover:bg-neutral-800/50"
+                        className="border-b border-window-border hover:bg-ui-tab-hover-bg"
                       >
                         <td className="py-2 px-2">
                           <button
@@ -382,7 +382,7 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                             className={`px-3 py-1 rounded border transition-colors ${
                               capturingKeyFor === binding.id
                                 ? "border-yellow-500 bg-yellow-500/20 text-yellow-300"
-                                : "border-neutral-600 bg-neutral-800 hover:bg-neutral-700"
+                                : "border-ui-input-border bg-ui-input-bg hover:bg-dock-item-hover"
                             }`}
                           >
                             {capturingKeyFor === binding.id
@@ -400,7 +400,7 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                                 onChange={(e) =>
                                   setCustomAction(e.target.value)
                                 }
-                                className="w-full bg-neutral-800 border border-neutral-600 rounded px-2 py-1 text-gray-300 text-sm focus:outline-none focus:border-gray-500"
+                                className="w-full bg-ui-input-bg border border-ui-input-border rounded px-2 py-1 text-window-text text-sm focus:outline-none focus:border-window-border-focus"
                               />
                               <textarea
                                 placeholder='Payload JSON (например: {"target": "enemy"})'
@@ -409,7 +409,7 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                                   setCustomPayload(e.target.value)
                                 }
                                 rows={3}
-                                className="w-full bg-neutral-800 border border-neutral-600 rounded px-2 py-1 text-gray-300 text-sm font-mono focus:outline-none focus:border-gray-500"
+                                className="w-full bg-ui-input-bg border border-ui-input-border rounded px-2 py-1 text-window-text text-sm font-mono focus:outline-none focus:border-window-border-focus"
                               />
                               <div className="space-y-2">
                                 <div className="flex items-center gap-2">
@@ -420,11 +420,11 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                                     onChange={(e) =>
                                       setRequiresEntityTarget(e.target.checked)
                                     }
-                                    className="w-4 h-4 rounded border-neutral-600 bg-neutral-800 text-blue-600 focus:ring-blue-500"
+                                    className="w-4 h-4 rounded border-ui-input-border bg-ui-input-bg text-blue-600 focus:ring-blue-500"
                                   />
                                   <label
                                     htmlFor={`requires-entity-${binding.id}`}
-                                    className="text-sm text-gray-300"
+                                    className="text-sm text-window-text"
                                   >
                                     Требует выбор Сущности (targetId)
                                   </label>
@@ -439,11 +439,11 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                                         e.target.checked,
                                       )
                                     }
-                                    className="w-4 h-4 rounded border-neutral-600 bg-neutral-800 text-blue-600 focus:ring-blue-500"
+                                    className="w-4 h-4 rounded border-ui-input-border bg-ui-input-bg text-blue-600 focus:ring-blue-500"
                                   />
                                   <label
                                     htmlFor={`requires-position-${binding.id}`}
-                                    className="text-sm text-gray-300"
+                                    className="text-sm text-window-text"
                                   >
                                     Требует выбор Позиции (x, y)
                                   </label>
@@ -460,7 +460,7 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                                 </button>
                                 <button
                                   onClick={handleCancelCustomCommand}
-                                  className="px-2 py-1 bg-neutral-700 hover:bg-neutral-600 rounded text-xs text-gray-300"
+                                  className="px-2 py-1 bg-ui-button-disabled-bg hover:bg-dock-item-hover rounded text-xs text-window-text"
                                 >
                                   Отмена
                                 </button>
@@ -471,15 +471,15 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                               commandsEqual(binding.command, c),
                             ) ? (
                             <div className="text-sm">
-                              <div className="font-semibold text-purple-400">
+                              <div className="font-semibold text-log-narrative">
                                 Custom: {binding.command.action}
                               </div>
-                              <div className="text-xs text-gray-400 mt-1 font-mono">
+                              <div className="text-xs text-dock-text-dim mt-1 font-mono">
                                 {JSON.stringify(binding.command.payload)}
                               </div>
                               {(binding.command.requiresEntityTarget ||
                                 binding.command.requiresPositionTarget) && (
-                                <div className="text-xs text-yellow-400 mt-1">
+                                <div className="text-xs text-log-speech mt-1">
                                   {binding.command.requiresEntityTarget &&
                                     "⚠ Требует выбор сущности"}
                                   {binding.command.requiresEntityTarget &&
@@ -531,7 +531,7 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                                   parseInt(e.target.value),
                                 )
                               }
-                              className="w-full bg-neutral-800 border border-neutral-600 rounded px-2 py-1 text-gray-300 hover:bg-neutral-700 focus:outline-none focus:border-gray-500"
+                              className="w-full bg-ui-input-bg border border-ui-input-border rounded px-2 py-1 text-window-text hover:bg-dock-item-hover focus:outline-none focus:border-window-border-focus"
                             >
                               <option value={-1} disabled>
                                 Выберите команду...
@@ -549,7 +549,7 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                             onClick={() =>
                               handleRemoveBinding(binding.id, binding.code)
                             }
-                            className="p-1 rounded hover:bg-red-600/20 text-red-400 hover:text-red-300 transition-colors"
+                            className="p-1 rounded hover:bg-red-600/20 text-log-combat hover:text-red-300 transition-colors"
                             title="Удалить"
                           >
                             <Trash2 size={16} />
@@ -563,14 +563,14 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
 
               <button
                 onClick={handleAddBinding}
-                className="mt-3 flex items-center gap-2 px-3 py-2 bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 rounded transition-colors text-sm"
+                className="mt-3 flex items-center gap-2 px-3 py-2 bg-ui-input-bg hover:bg-dock-item-hover border border-ui-input-border rounded transition-colors text-sm"
               >
                 <Plus size={16} />
                 Добавить привязку
               </button>
             </div>
 
-            <div className="mt-6 p-3 bg-neutral-800/50 border border-neutral-700 rounded text-xs text-gray-400">
+            <div className="mt-6 p-3 bg-ui-input-bg/50 border border-window-border rounded text-xs text-dock-text-dim">
               <p className="font-semibold mb-1">Примечание:</p>
               <p>• Нажмите на поле клавиши, затем нажмите нужную клавишу</p>
               <p>• Выберите команду из выпадающего списка</p>
@@ -605,11 +605,11 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
             <h2 className="text-lg font-bold mb-4">Система окон</h2>
 
             {resetWindowLayout && (
-              <div className="p-4 bg-neutral-800/50 border border-neutral-700 rounded mb-4">
+              <div className="p-4 bg-ui-input-bg/50 border border-window-border rounded mb-4">
                 <h3 className="text-md font-semibold mb-2">
                   Расположение окон
                 </h3>
-                <p className="text-sm text-gray-400 mb-3">
+                <p className="text-sm text-dock-text-dim mb-3">
                   Сбросить расположение всех окон к значениям по умолчанию
                 </p>
                 <button
@@ -630,9 +630,9 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
             )}
 
             {onOpenCasino && (
-              <div className="p-4 bg-neutral-800/50 border border-neutral-700 rounded">
+              <div className="p-4 bg-ui-input-bg/50 border border-window-border rounded">
                 <h3 className="text-md font-semibold mb-2">Gacha</h3>
-                <p className="text-sm text-gray-400 mb-3">
+                <p className="text-sm text-dock-text-dim mb-3">
                   Покрути баннер чтобы выбить новую собачку!
                 </p>
                 <button
@@ -650,12 +650,12 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
           <>
             <h2 className="text-lg font-bold mb-4">Настройки интерфейса</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-neutral-800 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-ui-input-bg rounded-lg">
                 <div>
-                  <h3 className="font-medium text-white mb-1">
+                  <h3 className="font-medium text-window-text mb-1">
                     Всплывающие уведомления
                   </h3>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-dock-text-dim">
                     Показывать текстовые уведомления в центре экрана (например,
                     &quot;Ваш ход&quot;)
                   </p>
@@ -675,15 +675,15 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
             </div>
 
             {/* Информация о билде */}
-            <div className="mt-auto pt-6 border-t border-neutral-700">
-              <div className="text-xs text-gray-500 space-y-1">
+            <div className="mt-auto pt-6 border-t border-window-border">
+              <div className="text-xs text-dock-text-dim space-y-1">
                 <p>
-                  <span className="text-gray-400">Коммит:</span>{" "}
+                  <span className="text-window-icon-color">Коммит:</span>{" "}
                   <span className="font-mono">{__GIT_COMMIT__}</span>
-                  <span className="text-gray-600"> ({__GIT_BRANCH__})</span>
+                  <span className="text-dock-text-dim"> ({__GIT_BRANCH__})</span>
                 </p>
                 <p>
-                  <span className="text-gray-400">Сборка:</span>{" "}
+                  <span className="text-window-icon-color">Сборка:</span>{" "}
                   {new Date(__BUILD_TIME__).toLocaleString("ru-RU")}
                 </p>
               </div>

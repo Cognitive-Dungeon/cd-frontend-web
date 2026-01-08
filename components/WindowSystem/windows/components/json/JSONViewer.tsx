@@ -36,15 +36,15 @@ const JSONNode: FC<JSONNodeProps> = ({ data, keyName, level, isLast }) => {
   const renderValue = () => {
     switch (dataType) {
       case "string":
-        return <span className="text-green-400">&quot;{data}&quot;</span>;
+        return <span className="text-log-success">&quot;{data}&quot;</span>;
       case "number":
-        return <span className="text-cyan-400">{data}</span>;
+        return <span className="text-log-command">{data}</span>;
       case "boolean":
-        return <span className="text-purple-400">{String(data)}</span>;
+        return <span className="text-log-narrative">{String(data)}</span>;
       case "null":
-        return <span className="text-gray-500">null</span>;
+        return <span className="text-log-info">null</span>;
       case "undefined":
-        return <span className="text-gray-500">undefined</span>;
+        return <span className="text-log-info">undefined</span>;
       default:
         return null;
     }
@@ -70,11 +70,11 @@ const JSONNode: FC<JSONNodeProps> = ({ data, keyName, level, isLast }) => {
         {keyName && (
           <>
             <span className="text-blue-300">{keyName}</span>
-            <span className="text-gray-500 mx-1">:</span>
+            <span className="text-log-info mx-1">:</span>
           </>
         )}
         {renderValue()}
-        {!isLast && <span className="text-gray-500">,</span>}
+        {!isLast && <span className="text-log-info">,</span>}
       </div>
     );
   }
@@ -82,11 +82,11 @@ const JSONNode: FC<JSONNodeProps> = ({ data, keyName, level, isLast }) => {
   return (
     <div className="font-mono text-sm">
       <div
-        className="flex items-center py-0.5 hover:bg-neutral-800 cursor-pointer"
+        className="flex items-center py-0.5 hover:bg-ui-tab-hover-bg cursor-pointer"
         style={{ paddingLeft: `${indent}px` }}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <button className="p-0 mr-1 text-gray-400 hover:text-gray-200">
+        <button className="p-0 mr-1 text-window-icon-color hover:text-window-text">
           {isExpanded ? (
             <ChevronDown className="w-3 h-3" />
           ) : (
@@ -96,7 +96,7 @@ const JSONNode: FC<JSONNodeProps> = ({ data, keyName, level, isLast }) => {
         {keyName && (
           <>
             <span className="text-blue-300">{keyName}</span>
-            <span className="text-gray-500 mx-1">:</span>
+            <span className="text-log-info mx-1">:</span>
           </>
         )}
         <span className="text-gray-400">{getObjectPreview()}</span>

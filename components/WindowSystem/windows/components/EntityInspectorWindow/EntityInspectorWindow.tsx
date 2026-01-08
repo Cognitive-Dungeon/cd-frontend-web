@@ -18,21 +18,21 @@ export const EntityInspectorWindow: FC<EntityInspectorWindowProps> = ({
 
   if (!entity) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-neutral-950 text-gray-400 font-mono">
+      <div className="flex flex-col items-center justify-center h-full bg-window-content text-dock-text-dim font-mono">
         <p className="text-sm">Entity not found: {entityId}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-neutral-950 text-gray-300 font-mono">
+    <div className="flex flex-col h-full bg-window-content text-window-text font-mono">
       {/* Header */}
-      <div className="p-4 border-b border-neutral-700">
+      <div className="p-4 border-b border-window-border">
         <div className="flex items-center gap-3">
           <span className={`text-3xl ${entity.color}`}>{entity.symbol}</span>
           <div>
-            <h3 className="text-lg font-bold text-white">{entity.name}</h3>
-            <p className="text-xs text-gray-500">
+            <h3 className="text-lg font-bold text-window-text">{entity.name}</h3>
+            <p className="text-xs text-dock-text-dim">
               ID: {entity.id} | Type: {entity.type}
             </p>
           </div>

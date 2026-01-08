@@ -31,17 +31,11 @@ export const LoginWindow: FC<LoginWindowProps> = ({
   };
 
   return (
-    <div style={{ padding: "30px" }}>
-      <div style={{ marginBottom: "30px" }}>
+    <div className="p-8">
+      <div className="mb-8">
         <label
           htmlFor="entity-id-input"
-          style={{
-            display: "block",
-            marginBottom: "12px",
-            fontWeight: "600",
-            color: "#e0e0e0",
-            fontSize: "16px",
-          }}
+          className="block mb-3 font-semibold text-window-text text-base"
         >
           Entity ID:
         </label>
@@ -55,17 +49,7 @@ export const LoginWindow: FC<LoginWindowProps> = ({
           placeholder={
             wsConnected ? "Enter your entity ID" : "Waiting for connection..."
           }
-          style={{
-            width: "100%",
-            padding: "12px 16px",
-            fontSize: "16px",
-            border: "1px solid #444",
-            borderRadius: "6px",
-            backgroundColor: "#2a2a2a",
-            color: "#e0e0e0",
-            outline: "none",
-            boxSizing: "border-box",
-          }}
+          className="w-full p-4 text-base border border-ui-input-border rounded-md bg-ui-input-bg text-ui-input-text outline-none box-border placeholder-ui-input-placeholder focus:border-window-border-focus transition-colors"
           autoFocus={wsConnected}
         />
       </div>
@@ -73,36 +57,11 @@ export const LoginWindow: FC<LoginWindowProps> = ({
       <button
         onClick={handleConnect}
         disabled={!entityId.trim() || isConnected || !wsConnected}
-        style={{
-          width: "100%",
-          padding: "14px 20px",
-          fontSize: "16px",
-          fontWeight: "600",
-          color:
-            isConnected || !wsConnected || !entityId.trim() ? "#888" : "#fff",
-          backgroundColor:
-            isConnected || !wsConnected || !entityId.trim()
-              ? "#333"
-              : "#4a9eff",
-          border: "none",
-          borderRadius: "6px",
-          cursor:
+        className={`w-full p-4 text-base font-semibold rounded-md transition-all duration-200 ${
             !entityId.trim() || isConnected || !wsConnected
-              ? "not-allowed"
-              : "pointer",
-          opacity: !entityId.trim() || isConnected || !wsConnected ? 0.6 : 1,
-          transition: "background-color 0.2s",
-        }}
-        onMouseEnter={(e) => {
-          if (entityId.trim() && !isConnected && wsConnected) {
-            e.currentTarget.style.backgroundColor = "#3a8eef";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!isConnected && wsConnected) {
-            e.currentTarget.style.backgroundColor = "#4a9eff";
-          }
-        }}
+            ? "bg-ui-button-disabled-bg text-ui-button-disabled-text cursor-not-allowed opacity-60"
+            : "bg-ui-button-primary-bg text-ui-button-primary-text hover:bg-ui-button-primary-hover cursor-pointer opacity-100"
+        }`}
       >
         {isConnected
           ? "Authenticated"
@@ -112,35 +71,13 @@ export const LoginWindow: FC<LoginWindowProps> = ({
       </button>
 
       {isConnected && (
-        <div
-          style={{
-            marginTop: "24px",
-            padding: "12px 16px",
-            backgroundColor: "#1a4d2e",
-            border: "1px solid #2d7a4a",
-            borderRadius: "6px",
-            color: "#4ade80",
-            fontSize: "15px",
-            fontWeight: "500",
-          }}
-        >
+        <div className="mt-6 p-4 bg-green-900/40 border border-green-700/50 rounded-md text-green-400 text-sm font-medium">
           ✓ Authenticated as {entityId}
         </div>
       )}
 
       {loginError && !isConnected && (
-        <div
-          style={{
-            marginTop: "24px",
-            padding: "12px 16px",
-            backgroundColor: "#4d1a1a",
-            border: "1px solid #7a2d2d",
-            borderRadius: "6px",
-            color: "#f87171",
-            fontSize: "15px",
-            fontWeight: "500",
-          }}
-        >
+        <div className="mt-6 p-4 bg-red-900/40 border border-red-700/50 rounded-md text-red-400 text-sm font-medium">
           ✗ {loginError}
         </div>
       )}

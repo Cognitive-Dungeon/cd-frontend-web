@@ -125,7 +125,7 @@ export const TurnOrderBar: React.FC<TurnOrderBarProps> = ({
   };
 
   return (
-    <div className="p-2 bg-neutral-900 rounded-lg border border-neutral-700 shadow-lg">
+    <div className="p-2 bg-window-base rounded-lg border border-window-border shadow-lg">
       <div ref={containerRef} className="turn-order-scroll-container-compact">
         <div
           className="turn-order-cards-compact"

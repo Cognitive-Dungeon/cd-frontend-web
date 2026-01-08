@@ -48,7 +48,7 @@ const Dock: FC = () => {
       {window.badge !== undefined &&
         window.badge !== null &&
         window.badge !== "" && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-dock-badge text-dock-badge-text text-[10px] font-bold rounded-full border border-neutral-900 shadow-sm">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-dock-badge text-dock-badge-text text-[10px] font-bold rounded-full border border-dock-base shadow-sm">
             {window.badge}
           </span>
         )}

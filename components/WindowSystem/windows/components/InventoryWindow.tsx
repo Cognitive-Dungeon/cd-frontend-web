@@ -123,13 +123,13 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
 
   return (
     <div
-      className="flex flex-col h-full bg-neutral-950 text-gray-300 font-mono relative"
+      className="flex flex-col h-full bg-window-content text-window-text font-mono relative"
       onDragOver={handleDragOver}
     >
       {/* Grid Container */}
       <div className="flex-1 overflow-y-auto p-4">
         {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-600">
+          <div className="flex flex-col items-center justify-center h-full text-dock-text-dim">
             <Package size={48} className="mb-3 opacity-50" />
             <p className="text-sm">Your inventory is empty</p>
             <p className="text-xs mt-1">Pick up items to see them here</p>
@@ -154,8 +154,8 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
       </div>
 
       {/* Inventory Stats Footer */}
-      <div className="border-t border-neutral-700 px-4 py-2 bg-neutral-900">
-        <div className="flex items-center justify-between text-xs text-gray-400">
+      <div className="border-t border-window-border px-4 py-2 bg-window-content">
+        <div className="flex items-center justify-between text-xs text-dock-text-dim">
           <div className="flex items-center gap-4">
             <span>
               Items: {items.length}
@@ -171,7 +171,7 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
           {inventoryData?.maxWeight !== undefined &&
             inventoryData?.currentWeight !== undefined && (
               <div className="flex items-center gap-2">
-                <div className="w-24 h-2 bg-neutral-700 rounded-full overflow-hidden">
+                <div className="w-24 h-2 bg-ui-input-bg rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-green-500 to-yellow-500 transition-all"
                     style={{

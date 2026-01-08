@@ -18,13 +18,13 @@ const ProgressBar: FC<{
   const percentage = Math.max(0, Math.min(100, (value / max) * 100));
   return (
     <div className="mb-2">
-      <div className="flex justify-between text-xs uppercase text-gray-400 mb-1">
+      <div className="flex justify-between text-xs uppercase text-dock-text-dim mb-1">
         <span>{label}</span>
         <span>
           {Math.floor(value)} / {max}
         </span>
       </div>
-      <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+      <div className="h-2 w-full bg-window-content rounded-full overflow-hidden">
         <div
           className={`h-full ${color} transition-all duration-300 ease-out`}
           style={{ width: `${percentage}%` }}
@@ -52,13 +52,13 @@ const StatusPanel: FC<StatusPanelProps> = ({
   globalTick = 0,
 }) => {
   return (
-    <div className="bg-neutral-900 border-b border-neutral-700 p-4 flex justify-between items-center h-24">
+    <div className="bg-window-base border-b border-window-border p-4 flex justify-between items-center h-24">
       {/* Player Stats */}
       <div className="w-1/3">
-        <h2 className="text-cyan-400 font-bold text-sm mb-2 flex items-center gap-2">
+        <h2 className="text-log-info font-bold text-sm mb-2 flex items-center gap-2">
           <span>{player.symbol}</span> {player.name}
         </h2>
-        <div className="flex gap-4 mb-2 text-xs text-yellow-400 font-bold">
+        <div className="flex gap-4 mb-2 text-xs text-log-warning font-bold">
           <span>Золото: {player.stats.gold}g</span>
         </div>
         <div className="flex gap-2 w-full">
@@ -66,7 +66,7 @@ const StatusPanel: FC<StatusPanelProps> = ({
             <ProgressBar
               value={player.stats.hp}
               max={player.stats.maxHp}
-              color="bg-red-500"
+              color="bg-log-combat"
               label="HP"
             />
           </div>
@@ -74,7 +74,7 @@ const StatusPanel: FC<StatusPanelProps> = ({
             <ProgressBar
               value={player.stats.stamina}
               max={player.stats.maxStamina}
-              color="bg-yellow-500"
+              color="bg-log-warning"
               label="STM"
             />
           </div>
@@ -84,11 +84,11 @@ const StatusPanel: FC<StatusPanelProps> = ({
       {/* Game State Indicator */}
       <div className="flex flex-col items-center">
         <div
-          className={`px-4 py-1 rounded border ${gameState === GameState.COMBAT ? "border-red-500 text-red-500 animate-pulse" : "border-green-500 text-green-500"}`}
+          className={`px-4 py-1 rounded border ${gameState === GameState.COMBAT ? "border-log-combat text-log-combat animate-pulse" : "border-log-success text-log-success"}`}
         >
           {gameState === GameState.COMBAT ? "⚠ БОЙ" : "ИССЛЕДОВАНИЕ"}
         </div>
-        <div className="text-xs text-gray-500 mt-2 font-mono">
+        <div className="text-xs text-dock-text-dim mt-2 font-mono">
           {formatTime(globalTick)}
         </div>
       </div>
@@ -103,12 +103,12 @@ const StatusPanel: FC<StatusPanelProps> = ({
             <ProgressBar
               value={target.stats.hp}
               max={target.stats.maxHp}
-              color="bg-purple-600"
+              color="bg-log-narrative"
               label="Здоровье Врага"
             />
           </div>
         ) : (
-          <div className="text-gray-700 text-sm italic">Нет активной цели</div>
+          <div className="text-ui-tab-inactive-text text-sm italic">Нет активной цели</div>
         )}
       </div>
     </div>
