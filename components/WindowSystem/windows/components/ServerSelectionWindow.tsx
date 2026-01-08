@@ -170,35 +170,20 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
   }, [selectedServerId, servers, onConnect]);
 
   return (
-    <div className="flex flex-col h-full bg-neutral-900 text-gray-300">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-neutral-700">
-        <div className="flex items-center gap-2">
-          <Server size={20} className="text-blue-400" />
-          <h2 className="text-lg font-semibold">Server Selection</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={checkAllServers}
-            disabled={isCheckingAll}
-            className="flex items-center gap-1 px-3 py-1 text-sm bg-neutral-800 hover:bg-neutral-700 rounded transition-colors disabled:opacity-50"
-            title="Refresh all servers"
-          >
-            <RefreshCw
-              size={14}
-              className={isCheckingAll ? "animate-spin" : ""}
-            />
-            Refresh
-          </button>
-          <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 rounded transition-colors"
-          >
-            <Plus size={14} />
-            Add Server
-          </button>
-        </div>
-      </div>
+    <div 
+      className="relative flex flex-col h-full bg-neutral-900 text-gray-300"
+      style={{
+        backgroundImage: "url('/assets/images/server_selection_background.png')",
+        backgroundPosition: "center",
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat"
+      }}
+    >
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/70 pointer-events-none" />
+      
+      {/* Content wrapper with relative positioning */}
+      <div className="relative flex flex-col h-full">
 
       {/* Add Server Form */}
       {showAddForm && (
@@ -243,14 +228,36 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-neutral-700">
+      <div className="p-4 border-t border-neutral-700 flex flex-row justify-between gap-2">
+        <div className="flex items-center gap-2">
+            <button
+              onClick={checkAllServers}
+              disabled={isCheckingAll}
+              className="flex items-center gap-1 px-3 py-1 text-sm bg-neutral-800 hover:bg-neutral-700 rounded transition-colors disabled:opacity-50"
+              title="Refresh all servers"
+            >
+              <RefreshCw
+                size={14}
+                className={isCheckingAll ? "animate-spin" : ""}
+              />
+              Refresh
+            </button>
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+            >
+              <Plus size={14} />
+              Add Server
+            </button>
+        </div>
         <button
           onClick={handleConnect}
           disabled={!selectedServerId}
-          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 rounded transition-colors"
         >
           Connect to Server
         </button>
+      </div>
       </div>
     </div>
   );
