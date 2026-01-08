@@ -27,10 +27,10 @@ const Dock: FC = () => {
       onClick={() => handleWindowClick(window.id, window.isMinimized)}
       className={`relative flex items-center justify-center p-2 rounded transition-colors shrink-0 ${
         window.isFocused && !window.isMinimized
-          ? "bg-gray-600 text-white"
+          ? "bg-dock-item-active text-dock-text-active"
           : window.isMinimized
-            ? "bg-neutral-800 text-gray-500 opacity-60"
-            : "bg-neutral-800 text-gray-300 hover:bg-neutral-700"
+            ? "bg-dock-item text-dock-text-dim opacity-60"
+            : "bg-dock-item text-dock-text hover:bg-dock-item-hover"
       }`}
       title={
         window.isMinimized
@@ -42,13 +42,13 @@ const Dock: FC = () => {
       {window.isMinimized && (
         <Minimize2
           size={10}
-          className="absolute -bottom-0.5 -right-0.5 text-gray-400"
+          className="absolute -bottom-0.5 -right-0.5 text-dock-icon-dim"
         />
       )}
       {window.badge !== undefined &&
         window.badge !== null &&
         window.badge !== "" && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-600 text-white text-[10px] font-bold rounded-full border border-neutral-900 shadow-sm">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-dock-badge text-dock-badge-text text-[10px] font-bold rounded-full border border-neutral-900 shadow-sm">
             {window.badge}
           </span>
         )}
@@ -56,15 +56,15 @@ const Dock: FC = () => {
   );
 
   return (
-    <div className="p-2 text-gray-300 bg-neutral-900 rounded-lg border border-neutral-700 shadow-lg">
+    <div className="p-2 text-dock-text bg-dock-base rounded-lg border border-dock-border shadow-lg">
       <div className="flex items-center gap-2 overflow-x-auto">
         {dockWindows.length === 0 ? (
-          <div className="text-gray-600 text-xs italic px-2">No windows</div>
+          <div className="text-dock-empty-text text-xs italic px-2">No windows</div>
         ) : (
           <>
             {pinnedWindows.map(renderWindow)}
             {pinnedWindows.length > 0 && regularWindows.length > 0 && (
-              <div className="w-px h-6 bg-neutral-600 mx-1 shrink-0" />
+              <div className="w-px h-6 bg-dock-separator mx-1 shrink-0" />
             )}
             {regularWindows.map(renderWindow)}
           </>

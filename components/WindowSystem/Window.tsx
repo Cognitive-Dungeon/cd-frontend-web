@@ -458,10 +458,10 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
           windowState.isMinimized && windowState.minimizeBehavior === "collapse"
             ? "bg-black/40 rounded-lg backdrop-blur-sm border border-neutral-700/50"
             : windowState.decorated
-              ? `bg-neutral-900 border rounded-lg ${
+              ? `bg-window-base border rounded-lg ${
                   windowState.isFocused
-                    ? "border-gray-500"
-                    : "border-neutral-700"
+                    ? "border-window-border-focus"
+                    : "border-window-border"
                 }`
               : "bg-transparent"
         }`}
@@ -514,13 +514,13 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
               data-window-header
               className={`flex items-center justify-between px-3 py-2 border-b select-none ${
                 windowState.isFocused
-                  ? "bg-neutral-800 border-neutral-700"
-                  : "bg-neutral-850 border-neutral-750"
+                  ? "bg-window-header-focus border-window-header-border-focus"
+                  : "bg-window-header border-window-header-border"
               }`}
               onMouseDown={handleMouseDown}
               style={{ cursor: isDragging ? "grabbing" : "grab" }}
             >
-              <span className="text-sm font-medium text-gray-300">
+              <span className="text-sm font-medium text-window-text">
                 {windowState.title}
               </span>
               <div className="flex items-center gap-1">
@@ -528,11 +528,11 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
                 {windowState.minimizable && (
                   <button
                     onClick={() => minimizeWindow(windowState.id)}
-                    className="w-6 h-6 flex items-center justify-center rounded hover:bg-neutral-700 transition-colors"
+                    className="w-6 h-6 flex items-center justify-center rounded hover:bg-window-button-hover transition-colors"
                     title="Minimize"
                   >
                     <svg
-                      className="w-3 h-3 text-gray-400"
+                      className="w-3 h-3 text-window-icon-color"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -550,11 +550,11 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
                 {windowState.closeable && (
                   <button
                     onClick={() => closeWindow(windowState.id)}
-                    className="w-6 h-6 flex items-center justify-center rounded hover:bg-red-600 transition-colors"
+                    className="w-6 h-6 flex items-center justify-center rounded hover:bg-window-button-close-hover transition-colors"
                     title="Close"
                   >
                     <svg
-                      className="w-3 h-3 text-gray-400"
+                      className="w-3 h-3 text-window-icon-color"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -579,7 +579,7 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
             windowState.minimizeBehavior === "collapse"
               ? "h-auto bg-transparent"
               : windowState.decorated
-                ? "h-[calc(100%-40px)] bg-neutral-900"
+                ? "h-[calc(100%-40px)] bg-window-content"
                 : "h-full"
           }`}
         >
@@ -603,8 +603,8 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
               style={{ zIndex: 10 }}
               title="Изменить размер"
             >
-              <div className="absolute bottom-1 right-1 w-4 h-4 border-r-2 border-b-2 border-gray-500 group-hover:border-gray-300 transition-colors opacity-60 group-hover:opacity-100" />
-              <div className="absolute bottom-2 right-2 w-2 h-2 border-r-2 border-b-2 border-gray-500 group-hover:border-gray-300 transition-colors opacity-40 group-hover:opacity-80" />
+              <div className="absolute bottom-1 right-1 w-4 h-4 border-r-2 border-b-2 border-window-resize-handle group-hover:border-window-resize-handle-hover transition-colors opacity-60 group-hover:opacity-100" />
+              <div className="absolute bottom-2 right-2 w-2 h-2 border-r-2 border-b-2 border-window-resize-handle group-hover:border-window-resize-handle-hover transition-colors opacity-40 group-hover:opacity-80" />
             </div>
           )}
       </div>
