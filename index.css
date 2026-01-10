@@ -1,30 +1,82 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
 
-@layer base {
-  body {
-    font-family: 'Fira Code', monospace;
-    background-color: #0f0f10;
-    color: #e0e0e0;
-  }
+@theme {
+  --color-window-base: #171717;
+  --color-window-border: #404040;
+  --color-window-border-focus: #6b7280;
+  --color-window-header: #1f1f1f;
+  --color-window-header-focus: #262626;
+  --color-window-header-border: #333333;
+  --color-window-header-border-focus: #404040;
+  --color-window-content: #171717;
+  --color-window-text: #d1d5db;
+  --color-window-icon-color: #9ca3af;
+  --color-window-button-hover: #404040;
+  --color-window-button-close-hover: #dc2626;
+  --color-window-resize-handle: #6b7280;
+  --color-window-resize-handle-hover: #d1d5db;
 
-  /* Custom Scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #1a1a1a;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #4a4a4a;
-    border-radius: 4px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #6a6a6a;
-  }
+  --color-dock-base: #171717;
+  --color-dock-border: #404040;
+  --color-dock-item: #262626;
+  --color-dock-item-hover: #404040;
+  --color-dock-item-active: #4b5563;
+  --color-dock-text: #d1d5db;
+  --color-dock-text-active: #ffffff;
+  --color-dock-text-dim: #6b7280;
+  --color-dock-icon-dim: #9ca3af;
+  --color-dock-badge: #dc2626;
+  --color-dock-badge-text: #ffffff;
+  --color-dock-separator: #525252;
+  --color-dock-empty-text: #525252;
+
+  --color-ui-input-bg: #262626;
+  --color-ui-input-border: #525252;
+  --color-ui-input-text: #e5e7eb;
+  --color-ui-input-placeholder: #6b7280;
+  --color-ui-button-primary-bg: #2563eb;
+  --color-ui-button-primary-hover: #3b82f6;
+  --color-ui-button-primary-text: #ffffff;
+  --color-ui-button-disabled-bg: #262626;
+  --color-ui-button-disabled-text: #737373;
+  --color-ui-tab-active-border: #06b6d4;
+  --color-ui-tab-active-bg: #262626;
+  --color-ui-tab-active-text: #ffffff;
+  --color-ui-tab-inactive-text: #6b7280;
+  --color-ui-tab-hover-bg: #262626;
+  --color-ui-sidebar: #171717;
+
+  --color-log-combat: #f87171;
+  --color-log-narrative: #c084fc;
+  --color-log-speech: #fde047;
+  --color-log-error: #dc2626;
+  --color-log-command: #0891b2;
+  --color-log-success: #4ade80;
+  --color-log-info: #9ca3af;
+  --color-log-warning: #fbbf24;
+  --color-log-timestamp: #ffffff4d;
+}
+
+body {
+  font-family: 'Fira Code', monospace;
+  background-color: #0f0f10;
+  color: #e0e0e0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #4a4a4a;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6a6a6a;
 }
 
 /* Turn Order Bar Styles - Compact Version */
