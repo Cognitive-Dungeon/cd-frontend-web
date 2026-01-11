@@ -8,6 +8,7 @@ import {
   SplashNotification,
   useSplashNotifications,
 } from "./components/SplashNotification";
+import { SplashScreen } from "./components/SplashScreen";
 import {
   WindowManagerProvider,
   useWindowManager,
@@ -54,6 +55,7 @@ const App: React.FC = () => {
   // UI State
   const [contextMenu, setContextMenu] = useState<ContextMenuData | null>(null);
   const [radialMenuOpen, setRadialMenuOpen] = useState(false);
+  const [showSplashScreen, setShowSplashScreen] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const prevActiveEntityIdRef = useRef<string | null>(null);
   const [inspectEntityHandler, setInspectEntityHandler] = useState<
@@ -403,6 +405,11 @@ const App: React.FC = () => {
           onComplete={removeSplashNotification}
         />
       ))}
+
+      {/* App Splash Screen */}
+      {showSplashScreen && (
+        <SplashScreen onComplete={() => setShowSplashScreen(false)} />
+      )}
     </div>
   );
 };

@@ -14,3 +14,4 @@ export {
   useSplashNotifications,
 } from "./SplashNotification";
 export { WindowManagerProvider, WindowSystem } from "./WindowSystem";
+export { SplashScreen } from "./SplashScreen";
