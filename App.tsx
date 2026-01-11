@@ -76,6 +76,12 @@ const App: React.FC = () => {
       return value;
     },
   );
+  
+  const [autoSkipEnabled, setAutoSkipEnabled] = useState(false);
+  
+  const handleToggleAutoSkip = useCallback(() => {
+      setAutoSkipEnabled(prev => !prev);
+  }, []);
 
   // Splash Notifications
   const {
@@ -174,6 +180,21 @@ const App: React.FC = () => {
       addLog,
       sendCommand,
     });
+
+  // Auto-skip turn logic
+  useEffect(() => {
+    if (
+      autoSkipEnabled &&
+      activeEntityId &&
+      player &&
+      activeEntityId === player.id
+    ) {
+      const timer = setTimeout(() => {
+        sendCommand("WAIT");
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [autoSkipEnabled, activeEntityId, player, sendCommand]);
 
   // Input handling hook
   const {
@@ -368,6 +389,8 @@ const App: React.FC = () => {
             onRadialMenuChange={setRadialMenuOpen}
             onCloseContextMenu={() => setContextMenu(null)}
             onInspectEntity={(entity) => inspectEntityHandler?.(entity)}
+            autoSkipEnabled={autoSkipEnabled}
+            onToggleAutoSkip={handleToggleAutoSkip}
           />
         </div>
       </div>

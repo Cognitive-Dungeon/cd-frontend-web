@@ -36,6 +36,8 @@ interface GameViewProps {
   onRadialMenuChange: (open: boolean) => void;
   onCloseContextMenu: () => void;
   onInspectEntity?: (entity: Entity) => void;
+  autoSkipEnabled: boolean;
+  onToggleAutoSkip: () => void;
 }
 
 export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
@@ -59,11 +61,14 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
       entityRegistry,
       onWheel,
       onResetZoom,
+      onToggleAutoSkip,
+      autoSkipEnabled,
       onToggleFollow,
       onMovePlayer,
       onSelectEntity,
       onSelectPosition,
       onFollowEntity,
+
       onSendCommand,
       onGoToPathfinding,
       onContextMenu,
@@ -96,13 +101,13 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
 
           {/* Индикатор зума и переключатель следования */}
           {world && player && (
-            <div className="absolute top-2 right-2 flex flex-col gap-2 z-50">
+            <div className="absolute top-2 right-2 flex flex-col gap-2 z-50 items-end">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onResetZoom();
                 }}
-                className="bg-black/80 text-white px-3 py-1 rounded text-xs font-mono border border-neutral-600 hover:border-cyan-400 hover:text-cyan-200 transition-colors"
+                className="bg-black/80 text-white px-3 py-1 rounded text-xs font-mono border border-neutral-600 hover:border-cyan-400 hover:text-cyan-200 transition-colors w-full"
               >
                 Zoom: {(zoom * 100).toFixed(0)}%
               </button>
@@ -112,7 +117,7 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
                   onToggleFollow();
                 }}
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`px-3 py-1 rounded text-xs font-mono border transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1 rounded text-xs font-mono border transition-colors flex items-center justify-center gap-1.5 w-full ${
                   followedEntityId
                     ? "bg-cyan-600/80 text-white border-cyan-500"
                     : "bg-black/80 text-gray-400 border-neutral-600"
@@ -128,9 +133,7 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
                     <>
                       <Focus className="w-3 h-3" />
                       <span>
-                        Следую за{" "}
-                        {entityRegistry.get(followedEntityId)?.name ||
-                          "сущностью"}
+                        Слежение
                       </span>
                     </>
                   )
@@ -141,6 +144,16 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
                   </>
                 )}
               </button>
+
+              <label className="flex items-center gap-2 bg-black/80 text-gray-400 px-3 py-1 rounded border border-neutral-600 text-xs font-mono cursor-pointer hover:text-cyan-200 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={autoSkipEnabled}
+                  onChange={onToggleAutoSkip}
+                  className="accent-cyan-500"
+                />
+                <span>Авто-скип</span>
+              </label>
             </div>
           )}
 

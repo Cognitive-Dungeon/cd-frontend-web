@@ -23,6 +23,7 @@ import {
     ClientToServerEntityTargetPayload,
     ClientToServerItemPayload,
     ClientToServerMovePayload,
+    ClientToServerTextPayload,
     Entity,
     Item,
     LogType,
@@ -107,6 +108,21 @@ export const useCommandSystem = ({
       CUSTOM: (p: ClientToServerCustomPayload): ClientToServerCommand => ({
         action: "CUSTOM",
         payload: p,
+      }),
+
+      SAY: (p: ClientToServerTextPayload): ClientToServerCommand => ({
+        action: "SAY",
+        payload: { text: p.text },
+      }),
+
+      WHISPER: (p: ClientToServerTextPayload): ClientToServerCommand => ({
+        action: "WHISPER",
+        payload: { text: p.text },
+      }),
+
+      YELL: (p: ClientToServerTextPayload): ClientToServerCommand => ({
+        action: "YELL",
+        payload: { text: p.text },
       }),
     }),
     [],

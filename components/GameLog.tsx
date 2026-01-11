@@ -104,9 +104,6 @@ const GameLog: React.FC<GameLogProps> = ({
                 {log.type === LogType.COMMAND && (
                   <span className="mr-2 text-gray-600">{">"}</span>
                 )}
-                {log.type === LogType.SPEECH && (
-                  <span className="mr-2">💬</span>
-                )}
                 <span dangerouslySetInnerHTML={{ __html: log.text }} />
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
