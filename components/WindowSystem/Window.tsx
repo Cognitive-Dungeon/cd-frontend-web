@@ -48,6 +48,8 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
   const windowRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
+  const [hasMovedThreshold, setHasMovedThreshold] = useState(false);
   const [dragPosition, setDragPosition] = useState<{
     x: number;
     y: number;
@@ -67,6 +69,7 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
 
   const SNAP_THRESHOLD = 20;
   const MAGNETIC_THRESHOLD = 30; // Threshold for 9-point snap system
+  const DRAG_START_THRESHOLD = 5; // Minimum pixels to move before showing snap visualization
 
   // Get current pixel position - use drag position during drag for immediate feedback
   const basePixelPosition = getWindowPixelPosition(windowState);
@@ -100,6 +103,8 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
     }
 
     setIsDragging(true);
+    setDragStartPos({ x: e.clientX, y: e.clientY });
+    setHasMovedThreshold(false);
     setDragOffset({
       x: e.clientX - pixelPosition.x,
       y: e.clientY - pixelPosition.y,
@@ -191,6 +196,17 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
     }
 
     const handleMouseMove = (e: MouseEvent) => {
+      // Check if we've moved beyond the threshold
+      if (!hasMovedThreshold) {
+        const distanceX = Math.abs(e.clientX - dragStartPos.x);
+        const distanceY = Math.abs(e.clientY - dragStartPos.y);
+        const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        
+        if (distance >= DRAG_START_THRESHOLD) {
+          setHasMovedThreshold(true);
+        }
+      }
+
       const newX = e.clientX - dragOffset.x;
       const newY = e.clientY - dragOffset.y;
 
@@ -204,6 +220,7 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
 
     const handleMouseUp = (e: MouseEvent) => {
       setIsDragging(false);
+      setHasMovedThreshold(false);
       setDragPosition(null);
       setActiveSnap(null);
 
@@ -225,6 +242,8 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
   }, [
     isDragging,
     dragOffset,
+    dragStartPos,
+    hasMovedThreshold,
     windowState.id,
     windowState.dockable,
     updateWindowPositionPx,
@@ -352,7 +371,7 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
       )}
 
       {/* 9-point snap visualization */}
-      {isDragging && (
+      {isDragging && hasMovedThreshold && (
         <div className="fixed inset-0 pointer-events-none z-[9997]">
           {/* Viewport snap points */}
           {SNAP_POINTS.map((point, index) => {
