@@ -55,7 +55,10 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
     y: number;
   } | null>(null);
   const [isResizing, setIsResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState<string>("");
   const [resizeStart, setResizeStart] = useState({
+    x: 0,
+    y: 0,
     width: 0,
     height: 0,
     mouseX: 0,
@@ -252,25 +255,44 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
     detectSnapZone,
   ]);
 
-  const handleResizeMouseDown = (e: React.MouseEvent) => {
-    if (
-      !windowState.resizable &&
-      !windowState.resizableX &&
-      !windowState.resizableY
-    ) {
-      return;
-    }
+  const handleResizeStart =
+    (direction: string) => (e: React.MouseEvent) => {
+      if (
+        !windowState.resizable &&
+        !windowState.resizableX &&
+        !windowState.resizableY
+      ) {
+        return;
+      }
 
-    e.preventDefault();
-    e.stopPropagation();
-    setIsResizing(true);
-    setResizeStart({
-      width: windowState.size.width,
-      height: windowState.size.height,
-      mouseX: e.clientX,
-      mouseY: e.clientY,
-    });
-  };
+      // Check specific axis constraints
+      if (
+        (direction.includes("e") || direction.includes("w")) &&
+        windowState.resizableX === false
+      ) {
+        return;
+      }
+      if (
+        (direction.includes("n") || direction.includes("s")) &&
+        windowState.resizableY === false
+      ) {
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+      setIsResizing(true);
+      setResizeDirection(direction);
+      const pos = getWindowPixelPosition(windowState);
+      setResizeStart({
+        x: pos.x,
+        y: pos.y,
+        width: windowState.size.width,
+        height: windowState.size.height,
+        mouseX: e.clientX,
+        mouseY: e.clientY,
+      });
+    };
 
   useEffect(() => {
     if (!isResizing) {
@@ -281,36 +303,73 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
       const deltaX = e.clientX - resizeStart.mouseX;
       const deltaY = e.clientY - resizeStart.mouseY;
 
-      const newWidth =
-        windowState.resizableX !== false
-          ? Math.max(200, resizeStart.width + deltaX)
-          : resizeStart.width;
-      const newHeight =
-        windowState.resizableY !== false
-          ? Math.max(150, resizeStart.height + deltaY)
-          : resizeStart.height;
+      let newWidth = resizeStart.width;
+      let newHeight = resizeStart.height;
+      let newX = resizeStart.x;
+      let newY = resizeStart.y;
 
-      updateWindowSize(windowState.id, { width: newWidth, height: newHeight });
+      // Handle Width (East/West)
+      if (resizeDirection.includes("e")) {
+         newWidth = Math.max(200, resizeStart.width + deltaX);
+      } else if (resizeDirection.includes("w")) {
+         const proposedWidth = resizeStart.width - deltaX;
+         newWidth = Math.max(200, proposedWidth);
+         // Shift X only by the amount width actually changed
+         newX = resizeStart.x + (resizeStart.width - newWidth);
+      }
+
+      // Handle Height (South/North)
+      if (resizeDirection.includes("s")) {
+         newHeight = Math.max(150, resizeStart.height + deltaY);
+      } else if (resizeDirection.includes("n")) {
+         const proposedHeight = resizeStart.height - deltaY;
+         newHeight = Math.max(150, proposedHeight);
+         // Shift Y only by the amount height actually changed
+         newY = resizeStart.y + (resizeStart.height - newHeight);
+      }
+
+      // Apply constraints if needed (though checks in handleResizeStart mostly cover start)
+      // Double check constraints if specific axes are disabled but passed through generic
+      if (windowState.resizableX === false) {
+         newWidth = resizeStart.width;
+         newX = resizeStart.x;
+      }
+      if (windowState.resizableY === false) {
+         newHeight = resizeStart.height;
+         newY = resizeStart.y;
+      }
+
+      if (newWidth !== windowState.size.width || newHeight !== windowState.size.height) {
+        updateWindowSize(windowState.id, { width: newWidth, height: newHeight });
+      }
+      
+      if (newX !== resizeStart.x || newY !== resizeStart.y) {
+         updateWindowPositionPx(windowState.id, { x: newX, y: newY });
+      }
     };
 
     const handleMouseUp = () => {
       setIsResizing(false);
+      setResizeDirection("");
     };
 
     document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mouseup", handleMouseUp); // Add mouseup to document to catch release outside window
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [
     isResizing,
     resizeStart,
+    resizeDirection,
     windowState.id,
-    updateWindowSize,
+    windowState.size,
     windowState.resizableX,
     windowState.resizableY,
+    updateWindowSize,
+    updateWindowPositionPx,
   ]);
 
   if (windowState.isMinimized && windowState.minimizeBehavior !== "collapse") {
@@ -605,26 +664,55 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
           {windowState.content}
         </div>
 
-        {/* Resize handle (только если resizable или resizableX/resizableY === true) */}
+        {/* Resize handles */}
         {!windowState.isMinimized &&
           (windowState.resizable ||
             windowState.resizableX ||
             windowState.resizableY) && (
-            <div
-              onMouseDown={handleResizeMouseDown}
-              className={`absolute bottom-0 right-0 w-5 h-5 group ${
-                windowState.resizableX && windowState.resizableY
-                  ? "cursor-nwse-resize"
-                  : windowState.resizableX
-                    ? "cursor-ew-resize"
-                    : "cursor-ns-resize"
-              }`}
-              style={{ zIndex: 10 }}
-              title="Изменить размер"
-            >
-              <div className="absolute bottom-1 right-1 w-4 h-4 border-r-2 border-b-2 border-window-resize-handle group-hover:border-window-resize-handle-hover transition-colors opacity-60 group-hover:opacity-100" />
-              <div className="absolute bottom-2 right-2 w-2 h-2 border-r-2 border-b-2 border-window-resize-handle group-hover:border-window-resize-handle-hover transition-colors opacity-40 group-hover:opacity-80" />
-            </div>
+            <>
+              {/* Sides */}
+              <div
+                 onMouseDown={handleResizeStart("e")}
+                 className="absolute top-0 right-0 w-1 h-full cursor-ew-resize hover:bg-cyan-500/50 z-10"
+              />
+              <div
+                 onMouseDown={handleResizeStart("s")}
+                 className="absolute bottom-0 left-0 w-full h-1 cursor-ns-resize hover:bg-cyan-500/50 z-10"
+              />
+              <div
+                 onMouseDown={handleResizeStart("w")}
+                 className="absolute top-0 left-0 w-1 h-full cursor-ew-resize hover:bg-cyan-500/50 z-10"
+              />
+              <div
+                 onMouseDown={handleResizeStart("n")}
+                 className="absolute top-0 left-0 w-full h-1 cursor-ns-resize hover:bg-cyan-500/50 z-10"
+              />
+
+              {/* Corners */}
+              <div
+                 onMouseDown={handleResizeStart("se")}
+                 className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-20"
+              />
+              <div
+                 onMouseDown={handleResizeStart("sw")}
+                 className="absolute bottom-0 left-0 w-4 h-4 cursor-nesw-resize z-20"
+              />
+              <div
+                 onMouseDown={handleResizeStart("nw")}
+                 className="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize z-20"
+              />
+              <div
+                 onMouseDown={handleResizeStart("ne")}
+                 className="absolute top-0 right-0 w-4 h-4 cursor-nesw-resize z-20"
+              />
+
+              {/* Visual grip for SE corner (traditional look) */}
+              <div className="absolute bottom-1 right-1 w-3 h-3 pointer-events-none z-10">
+                 <div className="absolute bottom-0 right-0 w-full h-[2px] bg-window-resize-handle/50" />
+                 <div className="absolute bottom-0 right-0 w-[2px] h-full bg-window-resize-handle/50" />
+                 <div className="absolute bottom-1 right-1 w-1.5 h-1.5 bg-window-resize-handle/30" />
+              </div>
+            </>
           )}
       </div>
     </WindowContext.Provider>
