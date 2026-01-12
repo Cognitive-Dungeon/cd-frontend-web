@@ -30,7 +30,11 @@ export const SplashScreen: FC<SplashScreenProps> = ({ onComplete }) => {
 
   return (
     <div
-      className={`fixed inset-0 bg-black z-[99999] flex items-center justify-center transition-opacity duration-400 ease-in-out ${
+      onClick={() => {
+        setIsHidden(true);
+        onComplete?.();
+      }}
+      className={`fixed inset-0 bg-black z-[99999] flex items-center justify-center transition-opacity duration-400 ease-in-out cursor-pointer ${
         isFading ? "opacity-0" : "opacity-100"
       }`}
     >
