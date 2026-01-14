@@ -45,6 +45,7 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
   const [newServerName, setNewServerName] = useState("");
   const [newServerHost, setNewServerHost] = useState("");
   const [newServerPort, setNewServerPort] = useState("8080");
+  const [isDndGirlVisible, setIsDndGirlVisible] = useState(true);
 
   // --- LOGIC ---
 
@@ -180,10 +181,50 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
       }}
     >
         {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/70 pointer-events-none" />
+        <div className="absolute inset-0 bg-black/70 pointer-events-none z-0" />
+
+        {/* Decorative image (outside the window corner) + trails */}
+        {isDndGirlVisible && (
+          <button
+            type="button"
+            className="cd-dndgirl-falling-wrap cd-dndgirl-falling-button"
+            aria-label="Hide decorative image"
+            onClick={() => setIsDndGirlVisible(false)}
+            style={{
+              position: "absolute",
+              bottom: 0,
+              right: -140,
+            }}
+          >
+            <div className="cd-dndgirl-trails" aria-hidden="true">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <span
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={i}
+                  className="cd-dndgirl-trail"
+                  style={{
+                    left: `${8 + i * 9}%`,
+                    animationDelay: `${i * 0.18}s`,
+                    animationDuration: `${2.2 + (i % 3) * 0.45}s`,
+                    ["--trail-x" as never]: `${(i % 2 === 0 ? 1 : -1) * (1 + (i % 3))}px`,
+                    ["--trail-rot" as never]: `${(i % 2 === 0 ? 1 : -1) * (4 + (i % 4))}deg`,
+                    ["--trail-w" as never]: `${2 + (i % 2)}px`,
+                    ["--trail-h" as never]: `${18 + (i % 4) * 6}px`,
+                  }}
+                />
+              ))}
+            </div>
+            <img
+              src="/assets/images/dndgirl-falling.png"
+              alt=""
+              draggable={false}
+              className="cd-dndgirl-falling pointer-events-none select-none"
+            />
+          </button>
+        )}
       
       {/* Content wrapper with relative positioning */}
-      <div className="relative flex flex-col h-full">
+      <div className="relative z-10 flex flex-col h-full">
 
       {/* Add Server Form */}
       {showAddForm && (

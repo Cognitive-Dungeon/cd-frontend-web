@@ -46,6 +46,7 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
   } = useWindowManager();
 
   const windowRef = useRef<HTMLDivElement>(null);
+  const allowOverflowOutsideWindow = windowState.id === "server-selection";
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
@@ -530,7 +531,9 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
       <div
         ref={windowRef}
         data-window
-        className={`absolute overflow-hidden transition-all ${
+        className={`absolute transition-all ${
+          allowOverflowOutsideWindow ? "overflow-visible" : "overflow-hidden"
+        } ${
           windowState.docked !== "none" ? "duration-300" : "duration-0"
         } ${
           windowState.isMinimized && windowState.minimizeBehavior === "collapse"
@@ -652,7 +655,9 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
 
         {/* Содержимое окна */}
         <div
-          className={`w-full overflow-auto ${
+          className={`w-full ${
+            allowOverflowOutsideWindow ? "overflow-visible" : "overflow-auto"
+          } ${
             windowState.isMinimized &&
             windowState.minimizeBehavior === "collapse"
               ? "h-auto bg-transparent"
