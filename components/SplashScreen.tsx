@@ -26,7 +26,9 @@ export const SplashScreen: FC<SplashScreenProps> = ({ onComplete }) => {
     };
   }, [onComplete]);
 
-  if (isHidden) return null;
+  if (isHidden) {
+    return null;
+  }
 
   return (
     <div

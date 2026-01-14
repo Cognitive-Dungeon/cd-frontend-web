@@ -35,18 +35,18 @@ const JSONNode: FC<JSONNodeProps> = ({ data, keyName, level, isLast }) => {
 
   const renderValue = () => {
     switch (dataType) {
-      case "string":
-        return <span className="text-log-success">&quot;{data}&quot;</span>;
-      case "number":
-        return <span className="text-log-command">{data}</span>;
-      case "boolean":
-        return <span className="text-log-narrative">{String(data)}</span>;
-      case "null":
-        return <span className="text-log-info">null</span>;
-      case "undefined":
-        return <span className="text-log-info">undefined</span>;
-      default:
-        return null;
+    case "string":
+      return <span className="text-log-success">&quot;{data}&quot;</span>;
+    case "number":
+      return <span className="text-log-command">{data}</span>;
+    case "boolean":
+      return <span className="text-log-narrative">{String(data)}</span>;
+    case "null":
+      return <span className="text-log-info">null</span>;
+    case "undefined":
+      return <span className="text-log-info">undefined</span>;
+    default:
+      return null;
     }
   };
 
@@ -106,23 +106,23 @@ const JSONNode: FC<JSONNodeProps> = ({ data, keyName, level, isLast }) => {
         <div>
           {dataType === "array"
             ? data.map((item: any, index: number) => (
-                <JSONNode
-                  key={index}
-                  data={item}
-                  keyName={String(index)}
-                  level={level + 1}
-                  isLast={index === data.length - 1}
-                />
-              ))
+              <JSONNode
+                key={index}
+                data={item}
+                keyName={String(index)}
+                level={level + 1}
+                isLast={index === data.length - 1}
+              />
+            ))
             : Object.entries(data).map(([key, value], index, arr) => (
-                <JSONNode
-                  key={key}
-                  data={value}
-                  keyName={key}
-                  level={level + 1}
-                  isLast={index === arr.length - 1}
-                />
-              ))}
+              <JSONNode
+                key={key}
+                data={value}
+                keyName={key}
+                level={level + 1}
+                isLast={index === arr.length - 1}
+              />
+            ))}
         </div>
       )}
     </div>

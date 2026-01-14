@@ -95,21 +95,21 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
 
   const getLogColor = (type: LogType) => {
     switch (type) {
-      case LogType.COMBAT:
-        return "text-log-combat";
-      case LogType.NARRATIVE:
-        return "text-log-narrative italic";
-      case LogType.SPEECH:
-        return "text-log-speech";
-      case LogType.ERROR:
-        return "text-log-error font-bold";
-      case LogType.COMMAND:
-        return "text-log-command font-bold";
-      case LogType.SUCCESS:
-        return "text-log-success";
-      case LogType.INFO:
-      default:
-        return "text-log-info";
+    case LogType.COMBAT:
+      return "text-log-combat";
+    case LogType.NARRATIVE:
+      return "text-log-narrative italic";
+    case LogType.SPEECH:
+      return "text-log-speech";
+    case LogType.ERROR:
+      return "text-log-error font-bold";
+    case LogType.COMMAND:
+      return "text-log-command font-bold";
+    case LogType.SUCCESS:
+      return "text-log-success";
+    case LogType.INFO:
+    default:
+      return "text-log-info";
     }
   };
 
@@ -119,21 +119,21 @@ export const GameLogWindow: React.FC<GameLogWindowProps> = ({
     }
     return logs.filter((log) => {
       switch (activeFilter) {
-        case "COMBAT":
-          return log.type === LogType.COMBAT;
-        case "NARRATIVE":
-          return log.type === LogType.NARRATIVE;
-        case "CHAT":
-          return log.type === LogType.SPEECH;
-        case "SYSTEM":
-          return (
-            log.type === LogType.INFO ||
+      case "COMBAT":
+        return log.type === LogType.COMBAT;
+      case "NARRATIVE":
+        return log.type === LogType.NARRATIVE;
+      case "CHAT":
+        return log.type === LogType.SPEECH;
+      case "SYSTEM":
+        return (
+          log.type === LogType.INFO ||
             log.type === LogType.ERROR ||
             log.type === LogType.COMMAND ||
             log.type === LogType.SUCCESS
-          );
-        default:
-          return true;
+        );
+      default:
+        return true;
       }
     });
   }, [logs, activeFilter]);

@@ -56,19 +56,19 @@ const GameLog: React.FC<GameLogProps> = ({
 
   const getLogColor = (type: LogType) => {
     switch (type) {
-      case LogType.COMBAT:
-        return "text-red-400";
-      case LogType.NARRATIVE:
-        return "text-purple-400 italic";
-      case LogType.SPEECH:
-        return "text-yellow-300";
-      case LogType.ERROR:
-        return "text-red-600 font-bold";
-      case LogType.COMMAND:
-        return "text-cyan-600 font-bold";
-      case LogType.INFO:
-      default:
-        return "text-gray-400";
+    case LogType.COMBAT:
+      return "text-red-400";
+    case LogType.NARRATIVE:
+      return "text-purple-400 italic";
+    case LogType.SPEECH:
+      return "text-yellow-300";
+    case LogType.ERROR:
+      return "text-red-600 font-bold";
+    case LogType.COMMAND:
+      return "text-cyan-600 font-bold";
+    case LogType.INFO:
+    default:
+      return "text-gray-400";
     }
   };
 

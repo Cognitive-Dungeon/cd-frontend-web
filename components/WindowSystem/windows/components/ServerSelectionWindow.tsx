@@ -171,7 +171,7 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
   }, [selectedServerId, servers, onConnect]);
 
   return (
-    <div 
+    <div
       className="relative flex flex-col h-full bg-window-base text-window-text"
       style={{
         backgroundImage: "url('/assets/images/server_selection_background.png')",
@@ -180,97 +180,97 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
         backgroundRepeat: "no-repeat"
       }}
     >
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/70 pointer-events-none z-0" />
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/70 pointer-events-none z-0" />
 
-        {/* Decorative image (outside the window corner) + trails */}
-        {isDndGirlVisible && (
-          <button
-            type="button"
-            className="cd-dndgirl-falling-wrap cd-dndgirl-falling-button"
-            aria-label="Hide decorative image"
-            onClick={() => setIsDndGirlVisible(false)}
-            style={{
-              position: "absolute",
-              bottom: 0,
-              right: -140,
-            }}
-          >
-            <div className="cd-dndgirl-trails" aria-hidden="true">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <span
-                  // eslint-disable-next-line react/no-array-index-key
-                  key={i}
-                  className="cd-dndgirl-trail"
-                  style={{
-                    left: `${8 + i * 9}%`,
-                    animationDelay: `${i * 0.18}s`,
-                    animationDuration: `${2.2 + (i % 3) * 0.45}s`,
-                    ["--trail-x" as never]: `${(i % 2 === 0 ? 1 : -1) * (1 + (i % 3))}px`,
-                    ["--trail-rot" as never]: `${(i % 2 === 0 ? 1 : -1) * (4 + (i % 4))}deg`,
-                    ["--trail-w" as never]: `${2 + (i % 2)}px`,
-                    ["--trail-h" as never]: `${18 + (i % 4) * 6}px`,
-                  }}
-                />
-              ))}
-            </div>
-            <img
-              src="/assets/images/dndgirl-falling.png"
-              alt=""
-              draggable={false}
-              className="cd-dndgirl-falling pointer-events-none select-none"
-            />
-          </button>
-        )}
-      
-      {/* Content wrapper with relative positioning */}
-      <div className="relative z-10 flex flex-col h-full">
-
-      {/* Add Server Form */}
-      {showAddForm && (
-        <AddServerForm
-          newServerName={newServerName}
-          newServerHost={newServerHost}
-          newServerPort={newServerPort}
-          onNameChange={setNewServerName}
-          onHostChange={setNewServerHost}
-          onPortChange={setNewServerPort}
-          onCancel={() => setShowAddForm(false)}
-          onSubmit={handleAddServer}
-        />
-      )}
-
-      {/* Server List */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {servers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-dock-text-dim">
-            <Server size={48} className="mb-2 opacity-50" />
-            <p>No servers configured</p>
-            <p className="text-sm">
-              Click &quot;Add Server&quot; to get started
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {servers.map((server) => (
-              <ServerListItem
-                key={server.id}
-                server={server}
-                status={statuses.get(server.id)}
-                version={versions.get(server.id)}
-                isSelected={selectedServerId === server.id}
-                onSelect={setSelectedServerId}
-                onCheck={checkServer}
-                onRemove={handleRemoveServer}
+      {/* Decorative image (outside the window corner) + trails */}
+      {isDndGirlVisible && (
+        <button
+          type="button"
+          className="cd-dndgirl-falling-wrap cd-dndgirl-falling-button"
+          aria-label="Hide decorative image"
+          onClick={() => setIsDndGirlVisible(false)}
+          style={{
+            position: "absolute",
+            bottom: 0,
+            right: -140,
+          }}
+        >
+          <div className="cd-dndgirl-trails" aria-hidden="true">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <span
+                // eslint-disable-next-line react/no-array-index-key
+                key={i}
+                className="cd-dndgirl-trail"
+                style={{
+                  left: `${8 + i * 9}%`,
+                  animationDelay: `${i * 0.18}s`,
+                  animationDuration: `${2.2 + (i % 3) * 0.45}s`,
+                  ["--trail-x" as never]: `${(i % 2 === 0 ? 1 : -1) * (1 + (i % 3))}px`,
+                  ["--trail-rot" as never]: `${(i % 2 === 0 ? 1 : -1) * (4 + (i % 4))}deg`,
+                  ["--trail-w" as never]: `${2 + (i % 2)}px`,
+                  ["--trail-h" as never]: `${18 + (i % 4) * 6}px`,
+                }}
               />
             ))}
           </div>
-        )}
-      </div>
+          <img
+            src="/assets/images/dndgirl-falling.png"
+            alt=""
+            draggable={false}
+            className="cd-dndgirl-falling pointer-events-none select-none"
+          />
+        </button>
+      )}
 
-      {/* Footer */}
-      <div className="p-4 border-t border-window-border flex flex-row justify-between gap-2">
-        <div className="flex items-center gap-2">
+      {/* Content wrapper with relative positioning */}
+      <div className="relative z-10 flex flex-col h-full">
+
+        {/* Add Server Form */}
+        {showAddForm && (
+          <AddServerForm
+            newServerName={newServerName}
+            newServerHost={newServerHost}
+            newServerPort={newServerPort}
+            onNameChange={setNewServerName}
+            onHostChange={setNewServerHost}
+            onPortChange={setNewServerPort}
+            onCancel={() => setShowAddForm(false)}
+            onSubmit={handleAddServer}
+          />
+        )}
+
+        {/* Server List */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {servers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-dock-text-dim">
+              <Server size={48} className="mb-2 opacity-50" />
+              <p>No servers configured</p>
+              <p className="text-sm">
+              Click &quot;Add Server&quot; to get started
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {servers.map((server) => (
+                <ServerListItem
+                  key={server.id}
+                  server={server}
+                  status={statuses.get(server.id)}
+                  version={versions.get(server.id)}
+                  isSelected={selectedServerId === server.id}
+                  onSelect={setSelectedServerId}
+                  onCheck={checkServer}
+                  onRemove={handleRemoveServer}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-window-border flex flex-row justify-between gap-2">
+          <div className="flex items-center gap-2">
             <button
               onClick={checkAllServers}
               disabled={isCheckingAll}
@@ -290,15 +290,15 @@ export const ServerSelectionWindow: React.FC<ServerSelectionWindowProps> = ({
               <Plus size={14} />
               Add Server
             </button>
-        </div>
-        <button
-          onClick={handleConnect}
-          disabled={!selectedServerId}
-          className="flex items-center gap-1 px-3 py-1 text-sm bg-ui-button-primary-bg text-ui-button-primary-text hover:bg-ui-button-primary-hover rounded transition-colors"
-        >
+          </div>
+          <button
+            onClick={handleConnect}
+            disabled={!selectedServerId}
+            className="flex items-center gap-1 px-3 py-1 text-sm bg-ui-button-primary-bg text-ui-button-primary-text hover:bg-ui-button-primary-hover rounded transition-colors"
+          >
           Connect to Server
-        </button>
-      </div>
+          </button>
+        </div>
       </div>
     </div>
   );

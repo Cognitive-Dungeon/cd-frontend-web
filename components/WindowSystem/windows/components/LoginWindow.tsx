@@ -58,7 +58,7 @@ export const LoginWindow: FC<LoginWindowProps> = ({
         onClick={handleConnect}
         disabled={!entityId.trim() || isConnected || !wsConnected}
         className={`w-full p-4 text-base font-semibold rounded-md transition-all duration-200 ${
-            !entityId.trim() || isConnected || !wsConnected
+          !entityId.trim() || isConnected || !wsConnected
             ? "bg-ui-button-disabled-bg text-ui-button-disabled-text cursor-not-allowed opacity-60"
             : "bg-ui-button-primary-bg text-ui-button-primary-text hover:bg-ui-button-primary-hover cursor-pointer opacity-100"
         }`}

@@ -339,24 +339,24 @@ const GameGrid: FC<GameGridProps> = ({
       }
 
       switch (actionId) {
-        case "attack":
-          onSendCommand("ATTACK", { targetId: entity.id });
-          break;
-        case "talk":
-          onSendCommand("TALK", { targetId: entity.id });
-          break;
-        case "pickup":
-          onSendCommand("PICKUP", { itemId: entity.id });
-          break;
-        case "interact":
-          onSendCommand("INTERACT", { targetId: entity.id });
-          break;
-        case "inspect":
-          // For inspection, we can select the entity
-          if (onSelectEntity) {
-            onSelectEntity(entity.id);
-          }
-          break;
+      case "attack":
+        onSendCommand("ATTACK", { targetId: entity.id });
+        break;
+      case "talk":
+        onSendCommand("TALK", { targetId: entity.id });
+        break;
+      case "pickup":
+        onSendCommand("PICKUP", { itemId: entity.id });
+        break;
+      case "interact":
+        onSendCommand("INTERACT", { targetId: entity.id });
+        break;
+      case "inspect":
+        // For inspection, we can select the entity
+        if (onSelectEntity) {
+          onSelectEntity(entity.id);
+        }
+        break;
       }
 
       // Close radial menu after action

@@ -44,7 +44,7 @@ export const ServerListItem: FC<ServerListItemProps> = ({
       <div className="flex items-start justify-between">
         <div className="flex-1 overflow-hidden"> {/* overflow-hidden для truncate */}
           <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-window-text truncate">{server.name}</h3>
+            <h3 className="font-semibold text-window-text truncate">{server.name}</h3>
             {/* {server.isDefault && (
               <span className="px-1.5 py-0.5 text-[10px] bg-ui-button-primary-bg text-ui-button-primary-text rounded shrink-0">
                 DEFAULT
@@ -76,21 +76,21 @@ export const ServerListItem: FC<ServerListItemProps> = ({
           <ServerStatusBadge status={status} />
           <div className="flex items-end justify-between">
 
-              <div className="flex items-center gap-2">
-                {!server.isDefault && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRemove(server.id);
-                    }}
-                    className="p-1 text-window-icon-color hover:text-red-400 rounded transition-colors"
-                    title="Remove server"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
-                
-              </div>
+            <div className="flex items-center gap-2">
+              {!server.isDefault && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(server.id);
+                  }}
+                  className="p-1 text-window-icon-color hover:text-red-400 rounded transition-colors"
+                  title="Remove server"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+
+            </div>
           </div>
         </div>
       </div>

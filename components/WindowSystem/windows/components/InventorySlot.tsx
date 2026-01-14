@@ -318,23 +318,23 @@ export const InventorySlot: FC<InventorySlotProps> = ({
               )}
               {isEquipped
                 ? onUnequip && (
-                    <button
-                      onClick={handleUnequip}
-                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-dock-item-hover text-log-speech flex items-center gap-1.5"
-                    >
-                      <ShieldOff className="w-3 h-3" />
-                      <span>Unequip</span>
-                    </button>
-                  )
+                  <button
+                    onClick={handleUnequip}
+                    className="w-full px-2 py-1.5 text-left text-xs hover:bg-dock-item-hover text-log-speech flex items-center gap-1.5"
+                  >
+                    <ShieldOff className="w-3 h-3" />
+                    <span>Unequip</span>
+                  </button>
+                )
                 : onEquip && (
-                    <button
-                      onClick={handleEquip}
-                      className="w-full px-2 py-1.5 text-left text-xs hover:bg-dock-item-hover text-log-command flex items-center gap-1.5"
-                    >
-                      <Shield className="w-3 h-3" />
-                      <span>Equip</span>
-                    </button>
-                  )}
+                  <button
+                    onClick={handleEquip}
+                    className="w-full px-2 py-1.5 text-left text-xs hover:bg-dock-item-hover text-log-command flex items-center gap-1.5"
+                  >
+                    <Shield className="w-3 h-3" />
+                    <span>Equip</span>
+                  </button>
+                )}
               {onDrop && (
                 <button
                   onClick={handleDropItem}

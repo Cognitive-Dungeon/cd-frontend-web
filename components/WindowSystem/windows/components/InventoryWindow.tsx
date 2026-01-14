@@ -170,17 +170,17 @@ export const InventoryWindow: FC<InventoryWindowProps> = ({
           </div>
           {inventoryData?.maxWeight !== undefined &&
             inventoryData?.currentWeight !== undefined && (
-              <div className="flex items-center gap-2">
-                <div className="w-24 h-2 bg-ui-input-bg rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-green-500 to-yellow-500 transition-all"
-                    style={{
-                      width: `${Math.min((inventoryData.currentWeight / inventoryData.maxWeight) * 100, 100)}%`,
-                    }}
-                  />
-                </div>
+            <div className="flex items-center gap-2">
+              <div className="w-24 h-2 bg-ui-input-bg rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-green-500 to-yellow-500 transition-all"
+                  style={{
+                    width: `${Math.min((inventoryData.currentWeight / inventoryData.maxWeight) * 100, 100)}%`,
+                  }}
+                />
               </div>
-            )}
+            </div>
+          )}
         </div>
       </div>
     </div>

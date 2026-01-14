@@ -163,35 +163,35 @@ export function validateCommandPayload(
   const p = payload as Record<string, unknown>;
 
   switch (action) {
-    case "LOGIN":
-      return typeof p.token === "string" && p.token.length > 0;
+  case "LOGIN":
+    return typeof p.token === "string" && p.token.length > 0;
 
-    case "MOVE":
-      return (
-        (typeof p.dx === "number" && typeof p.dy === "number") ||
+  case "MOVE":
+    return (
+      (typeof p.dx === "number" && typeof p.dy === "number") ||
         (typeof p.x === "number" && typeof p.y === "number")
-      );
+    );
 
-    case "ATTACK":
-    case "TALK":
-    case "INTERACT":
-      return typeof p.targetId === "string" && p.targetId.length > 0;
+  case "ATTACK":
+  case "TALK":
+  case "INTERACT":
+    return typeof p.targetId === "string" && p.targetId.length > 0;
 
-    case "WAIT":
-      return Object.keys(p).length === 0;
+  case "WAIT":
+    return Object.keys(p).length === 0;
 
-    case "PICKUP":
-    case "DROP":
-    case "USE":
-    case "EQUIP":
-    case "UNEQUIP":
-      return typeof p.itemId === "string" && p.itemId.length > 0;
+  case "PICKUP":
+  case "DROP":
+  case "USE":
+  case "EQUIP":
+  case "UNEQUIP":
+    return typeof p.itemId === "string" && p.itemId.length > 0;
 
-    case "CUSTOM":
-      return true;
+  case "CUSTOM":
+    return true;
 
-    default:
-      return false;
+  default:
+    return false;
   }
 }
 
@@ -215,43 +215,43 @@ export function validateCommandPayload(
  */
 export function validateCommand(command: ClientToServerCommand): boolean {
   switch (command.action) {
-    case "LOGIN":
-      return typeof command.token === "string" && command.token.length > 0;
+  case "LOGIN":
+    return typeof command.token === "string" && command.token.length > 0;
 
-    case "MOVE":
-      return (
-        (typeof command.payload.dx === "number" &&
+  case "MOVE":
+    return (
+      (typeof command.payload.dx === "number" &&
           typeof command.payload.dy === "number") ||
         (typeof command.payload.x === "number" &&
           typeof command.payload.y === "number")
-      );
+    );
 
-    case "ATTACK":
-    case "TALK":
-    case "INTERACT":
-      return (
-        typeof command.payload.targetId === "string" &&
+  case "ATTACK":
+  case "TALK":
+  case "INTERACT":
+    return (
+      typeof command.payload.targetId === "string" &&
         command.payload.targetId.length > 0
-      );
+    );
 
-    case "WAIT":
-      return true;
+  case "WAIT":
+    return true;
 
-    case "PICKUP":
-    case "DROP":
-    case "USE":
-    case "EQUIP":
-    case "UNEQUIP":
-      return (
-        typeof command.payload.itemId === "string" &&
+  case "PICKUP":
+  case "DROP":
+  case "USE":
+  case "EQUIP":
+  case "UNEQUIP":
+    return (
+      typeof command.payload.itemId === "string" &&
         command.payload.itemId.length > 0
-      );
+    );
 
-    case "CUSTOM":
-      return typeof command.payload === "object";
+  case "CUSTOM":
+    return typeof command.payload === "object";
 
-    default:
-      return false;
+  default:
+    return false;
   }
 }
 

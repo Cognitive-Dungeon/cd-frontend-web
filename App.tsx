@@ -60,7 +60,7 @@ const App: React.FC = () => {
   const prevActiveEntityIdRef = useRef<string | null>(null);
   const [inspectEntityHandler, setInspectEntityHandler] = useState<
     ((entity: any) => void) | null
-  >(null);
+      >(null);
 
   // Memoized callback to prevent infinite loop in WindowSystem
   const handleInspectEntityCallback = useCallback(
@@ -78,11 +78,11 @@ const App: React.FC = () => {
       return value;
     },
   );
-  
+
   const [autoSkipEnabled, setAutoSkipEnabled] = useState(false);
-  
+
   const handleToggleAutoSkip = useCallback(() => {
-      setAutoSkipEnabled(prev => !prev);
+    setAutoSkipEnabled(prev => !prev);
   }, []);
 
   // Splash Notifications

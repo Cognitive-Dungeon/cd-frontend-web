@@ -1,24 +1,24 @@
 import {createContext, FC, ReactNode, useCallback, useContext, useEffect, useState,} from "react";
 
 import {
-    calculateNormalizedPosition,
-    calculateWindowTopLeftPx,
-    DockedPosition,
-    getOriginFromMagneticSnap,
-    MagneticSnap,
-    WindowBounds,
-    WindowConfig,
-    WindowOrigin,
-    WindowPosition,
-    WindowSize,
-    WindowState,
+  calculateNormalizedPosition,
+  calculateWindowTopLeftPx,
+  DockedPosition,
+  getOriginFromMagneticSnap,
+  MagneticSnap,
+  WindowBounds,
+  WindowConfig,
+  WindowOrigin,
+  WindowPosition,
+  WindowSize,
+  WindowState,
 } from "./types";
 import {
-    applyDefaultLayout,
-    clampPositionPx,
-    getStoredWindowState,
-    resetToDefaultLayout,
-    saveWindowState,
+  applyDefaultLayout,
+  clampPositionPx,
+  getStoredWindowState,
+  resetToDefaultLayout,
+  saveWindowState,
 } from "./utils";
 
 interface WindowManagerContextType {
@@ -100,23 +100,23 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
       const viewportHeight = window.innerHeight;
 
       switch (position) {
-        case "left":
-          return {
-            x: 0,
-            y: 0,
-            width: viewportWidth / 2,
-            height: viewportHeight,
-          };
-        case "right":
-          return {
-            x: viewportWidth / 2,
-            y: 0,
-            width: viewportWidth / 2,
-            height: viewportHeight,
-          };
-        case "none":
-        default:
-          return { x: 0, y: 0, width: 0, height: 0 };
+      case "left":
+        return {
+          x: 0,
+          y: 0,
+          width: viewportWidth / 2,
+          height: viewportHeight,
+        };
+      case "right":
+        return {
+          x: viewportWidth / 2,
+          y: 0,
+          width: viewportWidth / 2,
+          height: viewportHeight,
+        };
+      case "none":
+      default:
+        return { x: 0, y: 0, width: 0, height: 0 };
       }
     },
     [],
@@ -204,11 +204,11 @@ export const WindowManagerProvider: FC<WindowManagerProviderProps> = ({
           return prev.map((w) =>
             w.id === config.id
               ? {
-                  ...w,
-                  isFocused: true,
-                  isMinimized: false,
-                  zIndex: nextZIndex,
-                }
+                ...w,
+                isFocused: true,
+                isMinimized: false,
+                zIndex: nextZIndex,
+              }
               : { ...w, isFocused: false },
           );
         }

@@ -1,13 +1,13 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 
 import {
-    DisconnectedEventData,
-    ErrorEventData,
-    MessageEventData,
-    ReconnectAttemptEventData,
-    WebSocketConfig,
-    WebSocketEvent,
-    WebSocketService,
+  DisconnectedEventData,
+  ErrorEventData,
+  MessageEventData,
+  ReconnectAttemptEventData,
+  WebSocketConfig,
+  WebSocketEvent,
+  WebSocketService,
 } from "@cognitive-dungeon/agent-sdk";
 
 

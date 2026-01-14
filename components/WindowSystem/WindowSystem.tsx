@@ -7,27 +7,27 @@ import {getStoredWindowState} from "./utils";
 import Window from "./Window";
 import {useWindowManager} from "./WindowManager";
 import {
-    CASINO_WINDOW_ID,
-    createCasinoWindowConfig,
-    createDockWindowConfig,
-    createEntityInspectorWindowConfig,
-    createGameLogWindowConfig,
-    createInventoryWindowConfig,
-    createItemInspectorWindowConfig,
-    createLoginWindowConfig,
-    createQuickAccessWindowConfig,
-    createSettingsWindowConfig,
-    createTurnOrderBarWindowConfig,
-    createTurnOrderWindowConfig,
-    DOCK_WINDOW_ID,
-    ENTITY_INSPECTOR_WINDOW_ID,
-    GAME_LOG_WINDOW_ID,
-    INVENTORY_WINDOW_ID,
-    LOGIN_WINDOW_ID,
-    QUICK_ACCESS_WINDOW_ID,
-    SETTINGS_WINDOW_ID,
-    TURN_ORDER_BAR_WINDOW_ID,
-    TURN_ORDER_WINDOW_ID,
+  CASINO_WINDOW_ID,
+  createCasinoWindowConfig,
+  createDockWindowConfig,
+  createEntityInspectorWindowConfig,
+  createGameLogWindowConfig,
+  createInventoryWindowConfig,
+  createItemInspectorWindowConfig,
+  createLoginWindowConfig,
+  createQuickAccessWindowConfig,
+  createSettingsWindowConfig,
+  createTurnOrderBarWindowConfig,
+  createTurnOrderWindowConfig,
+  DOCK_WINDOW_ID,
+  ENTITY_INSPECTOR_WINDOW_ID,
+  GAME_LOG_WINDOW_ID,
+  INVENTORY_WINDOW_ID,
+  LOGIN_WINDOW_ID,
+  QUICK_ACCESS_WINDOW_ID,
+  SETTINGS_WINDOW_ID,
+  TURN_ORDER_BAR_WINDOW_ID,
+  TURN_ORDER_WINDOW_ID,
 } from "./windows";
 
 interface WindowSystemProps {
@@ -218,8 +218,8 @@ const WindowSystem: FC<WindowSystemProps> = ({
           onInspectItem: (item) => handleInspectItemRef.current?.(item),
           equipment: playerEquipment
             ? ([playerEquipment.weapon, playerEquipment.armor].filter(
-                Boolean,
-              ) as Item[])
+              Boolean,
+            ) as Item[])
             : [],
         }),
       );
@@ -397,8 +397,8 @@ const WindowSystem: FC<WindowSystemProps> = ({
       onInspectItem: (item) => handleInspectItemRef.current?.(item),
       equipment: playerEquipment
         ? ([playerEquipment.weapon, playerEquipment.armor].filter(
-            Boolean,
-          ) as Item[])
+          Boolean,
+        ) as Item[])
         : [],
     });
     updateWindowContent(QUICK_ACCESS_WINDOW_ID, quickAccessConfig.content);

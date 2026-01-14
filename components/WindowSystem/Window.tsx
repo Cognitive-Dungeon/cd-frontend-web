@@ -1,14 +1,14 @@
 import {createContext, FC, useCallback, useContext, useEffect, useRef, useState,} from "react";
 
 import {
-    DockedPosition,
-    findClosestSnap,
-    getViewportSnapPointPx,
-    getWindowSnapPointPx,
-    MinimizeBehavior,
-    SNAP_POINTS,
-    SnapPoint,
-    WindowState,
+  DockedPosition,
+  findClosestSnap,
+  getViewportSnapPointPx,
+  getWindowSnapPointPx,
+  MinimizeBehavior,
+  SNAP_POINTS,
+  SnapPoint,
+  WindowState,
 } from "./types";
 import {useWindowManager} from "./WindowManager";
 
@@ -205,7 +205,7 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
         const distanceX = Math.abs(e.clientX - dragStartPos.x);
         const distanceY = Math.abs(e.clientY - dragStartPos.y);
         const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-        
+
         if (distance >= DRAG_START_THRESHOLD) {
           setHasMovedThreshold(true);
         }
@@ -311,41 +311,41 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
 
       // Handle Width (East/West)
       if (resizeDirection.includes("e")) {
-         newWidth = Math.max(200, resizeStart.width + deltaX);
+        newWidth = Math.max(200, resizeStart.width + deltaX);
       } else if (resizeDirection.includes("w")) {
-         const proposedWidth = resizeStart.width - deltaX;
-         newWidth = Math.max(200, proposedWidth);
-         // Shift X only by the amount width actually changed
-         newX = resizeStart.x + (resizeStart.width - newWidth);
+        const proposedWidth = resizeStart.width - deltaX;
+        newWidth = Math.max(200, proposedWidth);
+        // Shift X only by the amount width actually changed
+        newX = resizeStart.x + (resizeStart.width - newWidth);
       }
 
       // Handle Height (South/North)
       if (resizeDirection.includes("s")) {
-         newHeight = Math.max(150, resizeStart.height + deltaY);
+        newHeight = Math.max(150, resizeStart.height + deltaY);
       } else if (resizeDirection.includes("n")) {
-         const proposedHeight = resizeStart.height - deltaY;
-         newHeight = Math.max(150, proposedHeight);
-         // Shift Y only by the amount height actually changed
-         newY = resizeStart.y + (resizeStart.height - newHeight);
+        const proposedHeight = resizeStart.height - deltaY;
+        newHeight = Math.max(150, proposedHeight);
+        // Shift Y only by the amount height actually changed
+        newY = resizeStart.y + (resizeStart.height - newHeight);
       }
 
       // Apply constraints if needed (though checks in handleResizeStart mostly cover start)
       // Double check constraints if specific axes are disabled but passed through generic
       if (windowState.resizableX === false) {
-         newWidth = resizeStart.width;
-         newX = resizeStart.x;
+        newWidth = resizeStart.width;
+        newX = resizeStart.x;
       }
       if (windowState.resizableY === false) {
-         newHeight = resizeStart.height;
-         newY = resizeStart.y;
+        newHeight = resizeStart.height;
+        newY = resizeStart.y;
       }
 
       if (newWidth !== windowState.size.width || newHeight !== windowState.size.height) {
         updateWindowSize(windowState.id, { width: newWidth, height: newHeight });
       }
-      
+
       if (newX !== resizeStart.x || newY !== resizeStart.y) {
-         updateWindowPositionPx(windowState.id, { x: newX, y: newY });
+        updateWindowPositionPx(windowState.id, { x: newX, y: newY });
       }
     };
 
@@ -358,8 +358,8 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
     document.addEventListener("mouseup", handleMouseUp); // Add mouseup to document to catch release outside window
 
     return () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [
     isResizing,
@@ -540,10 +540,10 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
             ? "bg-black/40 rounded-lg backdrop-blur-sm border border-neutral-700/50"
             : windowState.decorated
               ? `bg-window-base border rounded-lg ${
-                  windowState.isFocused
-                    ? "border-window-border-focus"
-                    : "border-window-border"
-                }`
+                windowState.isFocused
+                  ? "border-window-border-focus"
+                  : "border-window-border"
+              }`
               : "bg-transparent"
         }`}
         style={{
@@ -591,67 +591,67 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
             windowState.isMinimized &&
             windowState.minimizeBehavior === "collapse"
           ) && (
-            <div
-              data-window-header
-              className={`flex items-center justify-between px-3 py-2 border-b select-none ${
-                windowState.isFocused
-                  ? "bg-window-header-focus border-window-header-border-focus"
-                  : "bg-window-header border-window-header-border"
-              }`}
-              onMouseDown={handleMouseDown}
-              style={{ cursor: isDragging ? "grabbing" : "grab" }}
-            >
-              <span className="text-sm font-medium text-window-text">
-                {windowState.title}
-              </span>
-              <div className="flex items-center gap-1">
-                {/* Кнопка свернуть (только если minimizable === true) */}
-                {windowState.minimizable && (
-                  <button
-                    onClick={() => minimizeWindow(windowState.id)}
-                    className="w-6 h-6 flex items-center justify-center rounded hover:bg-window-button-hover transition-colors"
-                    title="Minimize"
+          <div
+            data-window-header
+            className={`flex items-center justify-between px-3 py-2 border-b select-none ${
+              windowState.isFocused
+                ? "bg-window-header-focus border-window-header-border-focus"
+                : "bg-window-header border-window-header-border"
+            }`}
+            onMouseDown={handleMouseDown}
+            style={{ cursor: isDragging ? "grabbing" : "grab" }}
+          >
+            <span className="text-sm font-medium text-window-text">
+              {windowState.title}
+            </span>
+            <div className="flex items-center gap-1">
+              {/* Кнопка свернуть (только если minimizable === true) */}
+              {windowState.minimizable && (
+                <button
+                  onClick={() => minimizeWindow(windowState.id)}
+                  className="w-6 h-6 flex items-center justify-center rounded hover:bg-window-button-hover transition-colors"
+                  title="Minimize"
+                >
+                  <svg
+                    className="w-3 h-3 text-window-icon-color"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      className="w-3 h-3 text-window-icon-color"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20 12H4"
-                      />
-                    </svg>
-                  </button>
-                )}
-                {/* Кнопка закрыть (только если closeable === true) */}
-                {windowState.closeable && (
-                  <button
-                    onClick={() => closeWindow(windowState.id)}
-                    className="w-6 h-6 flex items-center justify-center rounded hover:bg-window-button-close-hover transition-colors"
-                    title="Close"
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20 12H4"
+                    />
+                  </svg>
+                </button>
+              )}
+              {/* Кнопка закрыть (только если closeable === true) */}
+              {windowState.closeable && (
+                <button
+                  onClick={() => closeWindow(windowState.id)}
+                  className="w-6 h-6 flex items-center justify-center rounded hover:bg-window-button-close-hover transition-colors"
+                  title="Close"
+                >
+                  <svg
+                    className="w-3 h-3 text-window-icon-color"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      className="w-3 h-3 text-window-icon-color"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
         {/* Содержимое окна */}
         <div
@@ -674,51 +674,51 @@ const Window: FC<WindowProps> = ({ window: windowState }) => {
           (windowState.resizable ||
             windowState.resizableX ||
             windowState.resizableY) && (
-            <>
-              {/* Sides */}
-              <div
-                 onMouseDown={handleResizeStart("e")}
-                 className="absolute top-0 right-0 w-1 h-full cursor-ew-resize hover:bg-cyan-500/50 z-10"
-              />
-              <div
-                 onMouseDown={handleResizeStart("s")}
-                 className="absolute bottom-0 left-0 w-full h-1 cursor-ns-resize hover:bg-cyan-500/50 z-10"
-              />
-              <div
-                 onMouseDown={handleResizeStart("w")}
-                 className="absolute top-0 left-0 w-1 h-full cursor-ew-resize hover:bg-cyan-500/50 z-10"
-              />
-              <div
-                 onMouseDown={handleResizeStart("n")}
-                 className="absolute top-0 left-0 w-full h-1 cursor-ns-resize hover:bg-cyan-500/50 z-10"
-              />
+          <>
+            {/* Sides */}
+            <div
+              onMouseDown={handleResizeStart("e")}
+              className="absolute top-0 right-0 w-1 h-full cursor-ew-resize hover:bg-cyan-500/50 z-10"
+            />
+            <div
+              onMouseDown={handleResizeStart("s")}
+              className="absolute bottom-0 left-0 w-full h-1 cursor-ns-resize hover:bg-cyan-500/50 z-10"
+            />
+            <div
+              onMouseDown={handleResizeStart("w")}
+              className="absolute top-0 left-0 w-1 h-full cursor-ew-resize hover:bg-cyan-500/50 z-10"
+            />
+            <div
+              onMouseDown={handleResizeStart("n")}
+              className="absolute top-0 left-0 w-full h-1 cursor-ns-resize hover:bg-cyan-500/50 z-10"
+            />
 
-              {/* Corners */}
-              <div
-                 onMouseDown={handleResizeStart("se")}
-                 className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-20"
-              />
-              <div
-                 onMouseDown={handleResizeStart("sw")}
-                 className="absolute bottom-0 left-0 w-4 h-4 cursor-nesw-resize z-20"
-              />
-              <div
-                 onMouseDown={handleResizeStart("nw")}
-                 className="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize z-20"
-              />
-              <div
-                 onMouseDown={handleResizeStart("ne")}
-                 className="absolute top-0 right-0 w-4 h-4 cursor-nesw-resize z-20"
-              />
+            {/* Corners */}
+            <div
+              onMouseDown={handleResizeStart("se")}
+              className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-20"
+            />
+            <div
+              onMouseDown={handleResizeStart("sw")}
+              className="absolute bottom-0 left-0 w-4 h-4 cursor-nesw-resize z-20"
+            />
+            <div
+              onMouseDown={handleResizeStart("nw")}
+              className="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize z-20"
+            />
+            <div
+              onMouseDown={handleResizeStart("ne")}
+              className="absolute top-0 right-0 w-4 h-4 cursor-nesw-resize z-20"
+            />
 
-              {/* Visual grip for SE corner (traditional look) */}
-              <div className="absolute bottom-1 right-1 w-3 h-3 pointer-events-none z-10">
-                 <div className="absolute bottom-0 right-0 w-full h-[2px] bg-window-resize-handle/50" />
-                 <div className="absolute bottom-0 right-0 w-[2px] h-full bg-window-resize-handle/50" />
-                 <div className="absolute bottom-1 right-1 w-1.5 h-1.5 bg-window-resize-handle/30" />
-              </div>
-            </>
-          )}
+            {/* Visual grip for SE corner (traditional look) */}
+            <div className="absolute bottom-1 right-1 w-3 h-3 pointer-events-none z-10">
+              <div className="absolute bottom-0 right-0 w-full h-[2px] bg-window-resize-handle/50" />
+              <div className="absolute bottom-0 right-0 w-[2px] h-full bg-window-resize-handle/50" />
+              <div className="absolute bottom-1 right-1 w-1.5 h-1.5 bg-window-resize-handle/30" />
+            </div>
+          </>
+        )}
       </div>
     </WindowContext.Provider>
   );

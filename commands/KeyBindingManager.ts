@@ -6,17 +6,17 @@
  */
 
 import {
-    CommandAttack,
-    CommandCastArea,
-    CommandDown,
-    CommandInspect,
-    CommandLeft,
-    CommandPickup,
-    CommandRight,
-    CommandTalk,
-    CommandTeleport,
-    CommandTrade,
-    CommandUp,
+  CommandAttack,
+  CommandCastArea,
+  CommandDown,
+  CommandInspect,
+  CommandLeft,
+  CommandPickup,
+  CommandRight,
+  CommandTalk,
+  CommandTeleport,
+  CommandTrade,
+  CommandUp,
 } from "./definitions";
 import {GameCommand, KeyBinding} from "./types";
 

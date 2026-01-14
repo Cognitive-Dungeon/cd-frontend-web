@@ -2,20 +2,20 @@ import {Plus, Trash2} from "lucide-react";
 import {FC, useEffect, useState} from "react";
 
 import {
-    CommandAttack,
-    CommandCastArea,
-    CommandCustom,
-    CommandDown,
-    CommandInspect,
-    CommandLeft,
-    CommandPickup,
-    CommandRight,
-    CommandTalk,
-    CommandTeleport,
-    CommandTrade,
-    CommandUp,
-    GameCommand,
-    KeyBindingManager,
+  CommandAttack,
+  CommandCastArea,
+  CommandCustom,
+  CommandDown,
+  CommandInspect,
+  CommandLeft,
+  CommandPickup,
+  CommandRight,
+  CommandTalk,
+  CommandTeleport,
+  CommandTrade,
+  CommandUp,
+  GameCommand,
+  KeyBindingManager,
 } from "../../../../commands";
 
 interface KeybindingsSettingsProps {
@@ -470,79 +470,79 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                             !AVAILABLE_COMMANDS.some((c) =>
                               commandsEqual(binding.command, c),
                             ) ? (
-                            <div className="text-sm">
-                              <div className="font-semibold text-log-narrative">
+                              <div className="text-sm">
+                                <div className="font-semibold text-log-narrative">
                                 Custom: {binding.command.action}
-                              </div>
-                              <div className="text-xs text-dock-text-dim mt-1 font-mono">
-                                {JSON.stringify(binding.command.payload)}
-                              </div>
-                              {(binding.command.requiresEntityTarget ||
+                                </div>
+                                <div className="text-xs text-dock-text-dim mt-1 font-mono">
+                                  {JSON.stringify(binding.command.payload)}
+                                </div>
+                                {(binding.command.requiresEntityTarget ||
                                 binding.command.requiresPositionTarget) && (
-                                <div className="text-xs text-log-speech mt-1">
-                                  {binding.command.requiresEntityTarget &&
+                                  <div className="text-xs text-log-speech mt-1">
+                                    {binding.command.requiresEntityTarget &&
                                     "⚠ Требует выбор сущности"}
-                                  {binding.command.requiresEntityTarget &&
+                                    {binding.command.requiresEntityTarget &&
                                     binding.command.requiresPositionTarget &&
                                     " • "}
-                                  {binding.command.requiresPositionTarget &&
+                                    {binding.command.requiresPositionTarget &&
                                     "⚠ Требует выбор позиции"}
-                                </div>
-                              )}
-                              <button
-                                onClick={() => {
-                                  setEditingCustomCommand(binding.id);
-                                  setCustomAction(
-                                    binding.command?.action || "",
-                                  );
-                                  setRequiresEntityTarget(
-                                    binding.command?.requiresEntityTarget ||
+                                  </div>
+                                )}
+                                <button
+                                  onClick={() => {
+                                    setEditingCustomCommand(binding.id);
+                                    setCustomAction(
+                                      binding.command?.action || "",
+                                    );
+                                    setRequiresEntityTarget(
+                                      binding.command?.requiresEntityTarget ||
                                       false,
-                                  );
-                                  setRequiresPositionTarget(
-                                    binding.command?.requiresPositionTarget ||
+                                    );
+                                    setRequiresPositionTarget(
+                                      binding.command?.requiresPositionTarget ||
                                       false,
-                                  );
-                                  setCustomPayload(
-                                    JSON.stringify(
-                                      binding.command?.payload || {},
-                                      null,
-                                      2,
-                                    ),
-                                  );
-                                }}
-                                className="mt-1 text-xs text-blue-400 hover:text-blue-300 underline"
-                              >
+                                    );
+                                    setCustomPayload(
+                                      JSON.stringify(
+                                        binding.command?.payload || {},
+                                        null,
+                                        2,
+                                      ),
+                                    );
+                                  }}
+                                  className="mt-1 text-xs text-blue-400 hover:text-blue-300 underline"
+                                >
                                 Редактировать
-                              </button>
-                            </div>
-                          ) : (
-                            <select
-                              value={
-                                binding.command
-                                  ? AVAILABLE_COMMANDS.findIndex((c) =>
+                                </button>
+                              </div>
+                            ) : (
+                              <select
+                                value={
+                                  binding.command
+                                    ? AVAILABLE_COMMANDS.findIndex((c) =>
                                       commandsEqual(binding.command, c),
                                     )
-                                  : -1
-                              }
-                              onChange={(e) =>
-                                handleCommandChange(
-                                  binding.id,
-                                  parseInt(e.target.value),
-                                )
-                              }
-                              className="w-full bg-ui-input-bg border border-ui-input-border rounded px-2 py-1 text-window-text hover:bg-dock-item-hover focus:outline-none focus:border-window-border-focus"
-                            >
-                              <option value={-1} disabled>
+                                    : -1
+                                }
+                                onChange={(e) =>
+                                  handleCommandChange(
+                                    binding.id,
+                                    parseInt(e.target.value),
+                                  )
+                                }
+                                className="w-full bg-ui-input-bg border border-ui-input-border rounded px-2 py-1 text-window-text hover:bg-dock-item-hover focus:outline-none focus:border-window-border-focus"
+                              >
+                                <option value={-1} disabled>
                                 Выберите команду...
-                              </option>
-                              {AVAILABLE_COMMANDS.map((cmd, idx) => (
-                                <option key={idx} value={idx}>
-                                  {cmd.label || cmd.action}
                                 </option>
-                              ))}
-                            </select>
-                          )}
+                                {AVAILABLE_COMMANDS.map((cmd, idx) => (
+                                  <option key={idx} value={idx}>
+                                    {cmd.label || cmd.action}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
                         </td>
                         <td className="py-2 px-2">
                           <button
