@@ -18,7 +18,8 @@
     "lucide-react": "^0.555.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "three": "^0.182.0"
+    "three": "^0.182.0",
+    "troika-three-text": "^0.52.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",

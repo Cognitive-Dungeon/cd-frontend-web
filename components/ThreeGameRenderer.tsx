@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import * as THREE from "three";
+import { Text } from "troika-three-text";
 
 import { EntityType } from "../types";
 import type {
@@ -50,6 +51,7 @@ const ENTITY_COLOR: Record<EntityType, number> = {
 const FLOOR_HEIGHT = 1;
 const WALL_HEIGHT = 1;
 const ENTITY_Y_OFFSET = 1.5;
+const ENTITY_LABEL_Y_OFFSET = 0.75;
 const SELECTION_Y_OFFSET = 0;
 
 // Fog-of-war overlay tuning
@@ -271,6 +273,7 @@ export function ThreeGameRenderer({
   const entitiesGroupRef = useRef<THREE.Group | null>(null);
 
   const entityMeshesRef = useRef<Map<string, THREE.Mesh>>(new Map());
+  const entityNameTextRef = useRef<Map<string, Text>>(new Map());
   const entityRenderPosRef = useRef<Map<string, { x: number; y: number }>>(
     new Map(),
   );
@@ -409,6 +412,7 @@ export function ThreeGameRenderer({
 
     // Scene-owned caches should not survive a renderer/scene reset (HMR can preserve refs).
     entityMeshesRef.current.clear();
+    entityNameTextRef.current.clear();
     entityRenderPosRef.current.clear();
     previousTilePosRef.current.clear();
     lastFrameTimeRef.current = null;
@@ -576,6 +580,7 @@ export function ThreeGameRenderer({
 
       // Clear scene-owned caches (important for HMR preserving refs)
       entityMeshesRef.current.clear();
+      entityNameTextRef.current.clear();
       entityRenderPosRef.current.clear();
       previousTilePosRef.current.clear();
       lastFrameTimeRef.current = null;
@@ -955,6 +960,7 @@ export function ThreeGameRenderer({
     }
 
     const meshes = entityMeshesRef.current;
+    const nameText = entityNameTextRef.current;
     const renderPos = entityRenderPosRef.current;
     const prevTilePos = previousTilePosRef.current;
 
@@ -1008,10 +1014,67 @@ export function ThreeGameRenderer({
         }
       }
 
+      const trimmedName = typeof entity.name === "string" ? entity.name.trim() : "";
+      const shouldShowName = trimmedName.length > 0;
+
+      if (shouldShowName) {
+        let text = nameText.get(entity.id);
+        const existingName = (text?.userData as any)?.labelName as string | undefined;
+
+        if (!text || existingName !== trimmedName) {
+          if (text) {
+            entitiesGroup.remove(text);
+            text.dispose();
+            nameText.delete(entity.id);
+          }
+
+          text = new Text();
+          text.text = trimmedName;
+          text.fontSize = 0.28;
+          text.color = 0xffffff;
+          (text as any).outlineWidth = 0.08;
+          (text as any).outlineColor = 0x000000;
+          (text as any).outlineOpacity = 0.9;
+          (text as any).strokeWidth = 0.0;
+          (text as any).strokeColor = 0x000000;
+          (text as any).strokeOpacity = 0;
+          (text as any).anchorX = "center";
+          (text as any).anchorY = "bottom";
+          text.renderOrder = 1002;
+          text.frustumCulled = false;
+
+          // Ensure it draws on top like UI.
+          const mat = text.material as THREE.Material | undefined;
+          if (mat) {
+            (mat as any).transparent = true;
+            (mat as any).depthTest = false;
+            (mat as any).depthWrite = false;
+          }
+
+          text.userData = { ...(text.userData as any), entityId: entity.id, labelName: trimmedName };
+          entitiesGroup.add(text);
+          nameText.set(entity.id, text);
+          text.sync();
+        }
+      } else {
+        const text = nameText.get(entity.id);
+        if (text) {
+          entitiesGroup.remove(text);
+          text.dispose();
+          nameText.delete(entity.id);
+        }
+      }
+
       const rp = renderPos.get(entity.id);
       if (!rp || shouldSnap) {
         renderPos.set(entity.id, { x: targetX, y: targetZ });
         mesh.position.set(targetX, entityY, targetZ);
+
+        const text = nameText.get(entity.id);
+        if (text) {
+          text.position.set(targetX, entityY + ENTITY_LABEL_Y_OFFSET, targetZ);
+          text.visible = tileAt?.isVisible === true;
+        }
       }
 
       prevTilePos.set(entity.id, { x: entity.pos.x, y: entity.pos.y });
@@ -1032,6 +1095,16 @@ export function ThreeGameRenderer({
       meshes.delete(id);
       renderPos.delete(id);
       prevTilePos.delete(id);
+    }
+
+    // Remove labels for entities that no longer exist / died
+    for (const [id, text] of nameText.entries()) {
+      if (aliveIds.has(id)) {
+        continue;
+      }
+      entitiesGroup.remove(text);
+      text.dispose();
+      nameText.delete(id);
     }
   }, [entities, world, teleportSnapDistance, resolveColor, sceneEpoch]);
 
@@ -1127,6 +1200,7 @@ export function ThreeGameRenderer({
 
         const meshes = entityMeshesRef.current;
         const renderPos = entityRenderPosRef.current;
+        const nameText = entityNameTextRef.current;
 
         for (const entity of ents) {
           if (entity.isDead) {
@@ -1154,6 +1228,12 @@ export function ThreeGameRenderer({
           rp.x += (targetX - rp.x) * alpha;
           rp.y += (targetZ - rp.y) * alpha;
           mesh.position.set(rp.x, entityY, rp.y);
+
+          const text = nameText.get(entity.id);
+          if (text) {
+            text.position.set(rp.x, entityY + ENTITY_LABEL_Y_OFFSET, rp.y);
+            text.visible = tileAtEntity?.isVisible === true;
+          }
         }
 
         const cellSizePx = getCellSize(z);
@@ -1167,6 +1247,11 @@ export function ThreeGameRenderer({
           const entityMeshes = entityMeshesRef.current;
           for (const mesh of entityMeshes.values()) {
             mesh.quaternion.copy(cam.quaternion);
+          }
+
+          const nameText = entityNameTextRef.current;
+          for (const t of nameText.values()) {
+            t.quaternion.copy(cam.quaternion);
           }
         };
 
