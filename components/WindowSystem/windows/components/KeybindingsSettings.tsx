@@ -18,12 +18,19 @@ import {
   KeyBindingManager,
 } from "../../../../commands";
 
+import type {GameRendererType, ThreeRenderMode} from "../../../../types";
+
 interface KeybindingsSettingsProps {
   keyBindingManager: KeyBindingManager;
   resetWindowLayout: () => Promise<void>;
   onOpenCasino: () => void;
   splashNotificationsEnabled: boolean;
   onToggleSplashNotifications: (enabled: boolean) => void;
+
+  graphicsRenderer: GameRendererType;
+  onGraphicsRendererChange: (renderer: GameRendererType) => void;
+  threeRenderMode: ThreeRenderMode;
+  onThreeRenderModeChange: (mode: ThreeRenderMode) => void;
 }
 
 interface KeyBindingRow {
@@ -75,8 +82,14 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
   onOpenCasino,
   splashNotificationsEnabled,
   onToggleSplashNotifications,
+  graphicsRenderer,
+  onGraphicsRendererChange,
+  threeRenderMode,
+  onThreeRenderModeChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<"keybindings" | "windows" | "ui">(
+  const [activeTab, setActiveTab] = useState<
+    "keybindings" | "windows" | "ui" | "graphics"
+  >(
     "keybindings",
   );
   const [bindings, setBindings] = useState<KeyBindingRow[]>(() => {
@@ -328,6 +341,17 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
           }`}
         >
           UI
+        </button>
+
+        <button
+          onClick={() => setActiveTab("graphics")}
+          className={`px-4 py-2 rounded text-left transition-colors ${
+            activeTab === "graphics"
+              ? "bg-ui-tab-active-bg text-ui-tab-active-text"
+              : "text-ui-tab-inactive-text hover:bg-ui-tab-hover-bg hover:text-window-text"
+          }`}
+        >
+          Графика
         </button>
       </div>
 
@@ -669,7 +693,7 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                     }
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-cyan-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-cyan-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
                 </label>
               </div>
             </div>
@@ -686,6 +710,64 @@ const KeybindingsSettings: FC<KeybindingsSettingsProps> = ({
                   <span className="text-window-icon-color">Сборка:</span>{" "}
                   {new Date(__BUILD_TIME__).toLocaleString("ru-RU")}
                 </p>
+              </div>
+            </div>
+          </>
+        )}
+
+        {activeTab === "graphics" && (
+          <>
+            <h2 className="text-lg font-bold mb-4">Графика</h2>
+
+            <div className="space-y-4">
+              <div className="p-4 bg-ui-input-bg/50 border border-window-border rounded">
+                <h3 className="text-md font-semibold mb-2">Рендерер карты</h3>
+                <p className="text-sm text-dock-text-dim mb-3">
+                  Выберите, какой компонент отвечает за отрисовку карты.
+                </p>
+
+                <div className="flex items-center gap-3">
+                  <select
+                    value={graphicsRenderer}
+                    onChange={(e) =>
+                      onGraphicsRendererChange(e.target.value as GameRendererType)
+                    }
+                    className="w-full bg-ui-input-bg border border-ui-input-border rounded px-2 py-1 text-window-text hover:bg-dock-item-hover focus:outline-none focus:border-window-border-focus"
+                  >
+                    <option value="grid">Сетка (DOM)</option>
+                    <option value="three">Three.js (WebGL)</option>
+                  </select>
+                </div>
+
+                {graphicsRenderer === "three" && (
+                  <div className="mt-4 pt-4 border-t border-window-border">
+                    <h4 className="font-medium text-window-text mb-1">
+                      Режим камеры
+                    </h4>
+                    <p className="text-sm text-dock-text-dim mb-3">
+                      Ortho2D имитирует текущую 2D-камеру. Iso3D включает
+                      перспективную камеру с изометрическим углом.
+                    </p>
+
+                    <select
+                      value={threeRenderMode}
+                      onChange={(e) =>
+                        onThreeRenderModeChange(
+                          e.target.value as ThreeRenderMode,
+                        )
+                      }
+                      className="w-full bg-ui-input-bg border border-ui-input-border rounded px-2 py-1 text-window-text hover:bg-dock-item-hover focus:outline-none focus:border-window-border-focus"
+                    >
+                      <option value="ortho2d">Ortho2D (ортографическая)</option>
+                      <option value="iso3d">Iso3D (изометрия)</option>
+                    </select>
+
+                    <p className="mt-3 text-xs text-yellow-500">
+                      Three.js рендерер сейчас экспериментальный: клики/интеракции
+                      с клетками ещё не перенесены.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </>

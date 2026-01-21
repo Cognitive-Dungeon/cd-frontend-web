@@ -1,7 +1,7 @@
 import type {FC} from "react";
 
 import {KeyBindingManager} from "../commands";
-import type {Entity, GameState, Item, LogMessage, ServerToClientEquipmentView,} from "../types";
+import type {Entity, GameRendererType, GameState, Item, LogMessage, ServerToClientEquipmentView, ThreeRenderMode, Tile,} from "../types";
 
 import StatusPanel from "./StatusPanel";
 import {WindowSystem} from "./WindowSystem";
@@ -21,8 +21,14 @@ interface HUDProps {
   onSendCommand: (text: string, type: "SAY" | "WHISPER" | "YELL") => void;
   onContextMenu: (data: any) => void;
   onInspectEntity?: (handler: (entity: Entity) => void) => void;
+  onInspectTile?: (handler: (tile: Tile, position: { x: number; y: number }) => void) => void;
   splashNotificationsEnabled: boolean;
   onToggleSplashNotifications: (enabled: boolean) => void;
+
+  graphicsRenderer: GameRendererType;
+  onGraphicsRendererChange: (renderer: GameRendererType) => void;
+  threeRenderMode: ThreeRenderMode;
+  onThreeRenderModeChange: (mode: ThreeRenderMode) => void;
   playerInventory: Item[];
   playerInventoryData?: {
     maxSlots?: number;
@@ -57,8 +63,13 @@ export const HUD: FC<HUDProps> = ({
   onSendCommand,
   onContextMenu,
   onInspectEntity,
+  onInspectTile,
   splashNotificationsEnabled,
   onToggleSplashNotifications,
+  graphicsRenderer,
+  onGraphicsRendererChange,
+  threeRenderMode,
+  onThreeRenderModeChange,
   playerInventory,
   playerInventoryData,
   playerEquipment,
@@ -98,8 +109,13 @@ export const HUD: FC<HUDProps> = ({
         onSendCommand={onSendCommand}
         onContextMenu={onContextMenu}
         onInspectEntity={onInspectEntity}
+        onInspectTile={onInspectTile}
         splashNotificationsEnabled={splashNotificationsEnabled}
         onToggleSplashNotifications={onToggleSplashNotifications}
+        graphicsRenderer={graphicsRenderer}
+        onGraphicsRendererChange={onGraphicsRendererChange}
+        threeRenderMode={threeRenderMode}
+        onThreeRenderModeChange={onThreeRenderModeChange}
         playerInventory={playerInventory}
         playerInventoryData={playerInventoryData}
         playerEquipment={playerEquipment}

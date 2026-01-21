@@ -16,6 +16,8 @@ interface GameGridProps {
   zoom: number;
   disableAnimations?: boolean;
   followedEntityId?: string | null;
+  movementSmoothing?: number;
+  teleportSnapDistance?: number;
   speechBubbles?: SpeechBubble[];
   radialMenuOpen?: boolean;
   onMovePlayer?: (x: number, y: number) => void;
@@ -39,6 +41,8 @@ const GameGrid: FC<GameGridProps> = ({
   zoom,
   disableAnimations = false,
   followedEntityId = null,
+  movementSmoothing = 14,
+  teleportSnapDistance,
   speechBubbles = [],
   radialMenuOpen = false,
   onMovePlayer,
@@ -80,9 +84,22 @@ const GameGrid: FC<GameGridProps> = ({
   const previousHpRef = useRef<Map<string, number>>(new Map());
   const damageTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
+  const previousEntityPosRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+
   const gridRef = useRef<HTMLDivElement>(null);
 
   const CELL_SIZE = getCellSize(zoom);
+
+  useEffect(() => {
+    const next = new Map<string, { x: number; y: number }>();
+    for (const entity of entities) {
+      if (entity.isDead) {
+        continue;
+      }
+      next.set(entity.id, { x: entity.pos.x, y: entity.pos.y });
+    }
+    previousEntityPosRef.current = next;
+  }, [entities]);
 
   // Track HP changes and trigger damage animations
   useEffect(() => {
@@ -738,8 +755,26 @@ const GameGrid: FC<GameGridProps> = ({
 
             // Отключаем анимацию для отслеживаемой сущности
             const isFollowedEntity = entity.id === followedEntityId;
+
+            const prevPos = previousEntityPosRef.current.get(entity.id);
+            const distanceMoved = prevPos
+              ? Math.hypot(entity.pos.x - prevPos.x, entity.pos.y - prevPos.y)
+              : 0;
+            const shouldSnapTeleport =
+              typeof teleportSnapDistance === "number" &&
+              teleportSnapDistance > 0 &&
+              prevPos !== undefined &&
+              distanceMoved >= teleportSnapDistance;
+
+            const transitionSeconds = Math.min(
+              1,
+              Math.max(0.05, 4.2 / Math.max(1, movementSmoothing)),
+            );
+
             const shouldAnimate =
-              !disableAnimations && (!isFollowedEntity || !followedEntityId);
+              !disableAnimations &&
+              !shouldSnapTeleport &&
+              (!isFollowedEntity || !followedEntityId);
 
             // Find speech bubble for this entity
             const bubble = speechBubbles.find((b) => b.entityId === entity.id);
@@ -758,7 +793,7 @@ const GameGrid: FC<GameGridProps> = ({
                   width: CELL_SIZE,
                   height: CELL_SIZE,
                   transition: shouldAnimate
-                    ? "left 0.3s ease-out, top 0.3s ease-out"
+                    ? `left ${transitionSeconds}s ease-out, top ${transitionSeconds}s ease-out`
                     : "none",
                 }}
               >

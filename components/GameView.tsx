@@ -1,10 +1,11 @@
 import {Focus, Navigation} from "lucide-react";
 import {forwardRef} from "react";
 
-import type {ContextMenuData, Entity, GameWorld, Position, SpeechBubble,} from "../types";
+import type {ContextMenuData, Entity, GameRendererType, GameWorld, Position, SpeechBubble, ThreeRenderMode, Tile,} from "../types";
 
 import {ContextMenu} from "./ContextMenu";
 import GameGrid from "./GameGrid";
+import { ThreeGameRenderer } from "./ThreeGameRenderer";
 
 interface GameViewProps {
   world: GameWorld | null;
@@ -15,6 +16,8 @@ interface GameViewProps {
   isPanning: boolean;
   followedEntityId: string | null;
   cameraOffset: { x: number; y: number };
+  movementSmoothing: number;
+  teleportSnapDistance: number;
   speechBubbles: SpeechBubble[];
   radialMenuOpen: boolean;
   selectedTargetEntityId: string | null;
@@ -27,7 +30,7 @@ interface GameViewProps {
   onResetZoom: () => void;
   onToggleFollow: () => void;
   onMovePlayer: (dx: number, dy: number) => void;
-  onSelectEntity: (entityId: string) => void;
+  onSelectEntity: (entityId: string | null) => void;
   onSelectPosition: (x: number, y: number) => void;
   onFollowEntity: (entityId: string) => void;
   onSendCommand: (action: string, payload?: unknown) => void;
@@ -36,8 +39,12 @@ interface GameViewProps {
   onRadialMenuChange: (open: boolean) => void;
   onCloseContextMenu: () => void;
   onInspectEntity?: (entity: Entity) => void;
+  onInspectTile?: (tile: Tile, position: { x: number; y: number }) => void;
   autoSkipEnabled: boolean;
   onToggleAutoSkip: () => void;
+
+  graphicsRenderer: GameRendererType;
+  threeRenderMode: ThreeRenderMode;
 }
 
 export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
@@ -51,6 +58,8 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
       isPanning,
       followedEntityId,
       cameraOffset,
+      movementSmoothing,
+      teleportSnapDistance,
       speechBubbles,
       radialMenuOpen,
       selectedTargetEntityId,
@@ -75,6 +84,9 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
       onRadialMenuChange,
       onCloseContextMenu,
       onInspectEntity,
+      onInspectTile,
+      graphicsRenderer,
+      threeRenderMode,
     },
     containerRef,
   ) => {
@@ -158,40 +170,64 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
           )}
 
           {world && player && (
-            <div
-              className="absolute top-0 left-0"
-              style={{
-                transform: `translate(${cameraOffset.x}px, ${cameraOffset.y}px)`,
-                transition: followedEntityId
-                  ? "transform 0.3s ease-out"
-                  : "none",
-              }}
-            >
-              <GameGrid
-                world={world}
-                entities={[player, ...entities]}
-                playerPos={player.pos}
-                fovRadius={8}
-                zoom={zoom}
-                disableAnimations={isZooming}
-                followedEntityId={followedEntityId}
-                speechBubbles={speechBubbles}
-                radialMenuOpen={radialMenuOpen}
-                onMovePlayer={onMovePlayer}
-                onSelectEntity={onSelectEntity}
-                onSelectPosition={onSelectPosition}
-                onFollowEntity={onFollowEntity}
-                onSendCommand={onSendCommand}
-                onGoToPathfinding={onGoToPathfinding}
-                onContextMenu={onContextMenu}
-                onRadialMenuChange={onRadialMenuChange}
-                onInspectEntity={onInspectEntity}
-                selectedTargetEntityId={selectedTargetEntityId}
-                selectedTargetPosition={selectedTargetPosition}
-                pathfindingTarget={pathfindingTarget}
-                currentPath={currentPath}
-              />
-            </div>
+            <>
+              {graphicsRenderer === "three" ? (
+                <div className="absolute inset-0">
+                  <ThreeGameRenderer
+                    world={world}
+                    entities={[player, ...entities]}
+                    zoom={zoom}
+                    cameraOffset={cameraOffset}
+                    mode={threeRenderMode}
+                    movementSmoothing={movementSmoothing}
+                    teleportSnapDistance={teleportSnapDistance}
+                    selectedTargetEntityId={selectedTargetEntityId}
+                    selectedTargetPosition={selectedTargetPosition}
+                    className="w-full h-full"
+                    onSelectPosition={onSelectPosition}
+                    onSelectEntity={onSelectEntity}
+                    onContextMenu={onContextMenu}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="absolute top-0 left-0"
+                  style={{
+                    transform: `translate(${cameraOffset.x}px, ${cameraOffset.y}px)`,
+                    transition: followedEntityId
+                      ? "transform 0.3s ease-out"
+                      : "none",
+                  }}
+                >
+                  <GameGrid
+                    world={world}
+                    entities={[player, ...entities]}
+                    playerPos={player.pos}
+                    fovRadius={8}
+                    zoom={zoom}
+                    disableAnimations={isZooming}
+                    followedEntityId={followedEntityId}
+                    movementSmoothing={movementSmoothing}
+                    teleportSnapDistance={teleportSnapDistance}
+                    speechBubbles={speechBubbles}
+                    radialMenuOpen={radialMenuOpen}
+                    onMovePlayer={onMovePlayer}
+                    onSelectEntity={onSelectEntity}
+                    onSelectPosition={onSelectPosition}
+                    onFollowEntity={onFollowEntity}
+                    onSendCommand={onSendCommand}
+                    onGoToPathfinding={onGoToPathfinding}
+                    onContextMenu={onContextMenu}
+                    onRadialMenuChange={onRadialMenuChange}
+                    onInspectEntity={onInspectEntity}
+                    selectedTargetEntityId={selectedTargetEntityId}
+                    selectedTargetPosition={selectedTargetPosition}
+                    pathfindingTarget={pathfindingTarget}
+                    currentPath={currentPath}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -206,6 +242,7 @@ export const GameView = forwardRef<HTMLDivElement, GameViewProps>(
             onSelectPosition={onSelectPosition}
             onGoToPathfinding={onGoToPathfinding}
             onInspectEntity={onInspectEntity}
+            onInspectTile={onInspectTile}
           />
         )}
       </>

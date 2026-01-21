@@ -22,7 +22,15 @@ import {
   useCommandSystem,
   useInputHandling,
 } from "./hooks";
-import { ContextMenuData, ServerInfo, ServerManager, LogType } from "./types";
+import {
+  ContextMenuData,
+  Tile,
+  GameRendererType,
+  ServerInfo,
+  ServerManager,
+  LogType,
+  ThreeRenderMode,
+} from "./types";
 
 const App: React.FC = () => {
   const keyBindingManager = useMemo(() => {
@@ -62,10 +70,21 @@ const App: React.FC = () => {
     ((entity: any) => void) | null
       >(null);
 
+  const [inspectTileHandler, setInspectTileHandler] = useState<
+    ((tile: Tile, position: { x: number; y: number }) => void) | null
+  >(null);
+
   // Memoized callback to prevent infinite loop in WindowSystem
   const handleInspectEntityCallback = useCallback(
     (handler: (entity: any) => void) => {
       setInspectEntityHandler(() => handler);
+    },
+    [],
+  );
+
+  const handleInspectTileCallback = useCallback(
+    (handler: (tile: Tile, position: { x: number; y: number }) => void) => {
+      setInspectTileHandler(() => handler);
     },
     [],
   );
@@ -80,6 +99,52 @@ const App: React.FC = () => {
   );
 
   const [autoSkipEnabled, setAutoSkipEnabled] = useState(false);
+
+  const movementSmoothing = 14;
+  const teleportSnapDistance = 4;
+
+  // Graphics settings
+  const [graphicsRenderer, setGraphicsRenderer] = useState<GameRendererType>(
+    () => {
+      try {
+        const v = localStorage.getItem("graphics.renderer");
+        if (v === "grid" || v === "three") {
+          return v;
+        }
+      } catch {
+        // ignore
+      }
+      return "grid";
+    },
+  );
+
+  const [threeRenderMode, setThreeRenderMode] = useState<ThreeRenderMode>(() => {
+    try {
+      const v = localStorage.getItem("graphics.three.mode");
+      if (v === "ortho2d" || v === "iso3d") {
+        return v;
+      }
+    } catch {
+      // ignore
+    }
+    return "ortho2d";
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("graphics.renderer", graphicsRenderer);
+    } catch {
+      // ignore
+    }
+  }, [graphicsRenderer]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("graphics.three.mode", threeRenderMode);
+    } catch {
+      // ignore
+    }
+  }, [threeRenderMode]);
 
   const handleToggleAutoSkip = useCallback(() => {
     setAutoSkipEnabled(prev => !prev);
@@ -204,7 +269,7 @@ const App: React.FC = () => {
     selectedTargetPosition,
     handleSelectEntity,
     handleSelectPosition,
-    handleContextMenu,
+    handleContextMenu: handleContextMenuBase,
   } = useInputHandling({
     keyBindingManager,
     selectedTargetEntityId: null,
@@ -215,6 +280,17 @@ const App: React.FC = () => {
     setRadialMenuOpen,
     setContextMenu,
   });
+
+  const handleContextMenu = useCallback(
+    (data: ContextMenuData) => {
+      const tile = world?.map?.[data.cellY]?.[data.cellX] ?? null;
+      handleContextMenuBase({
+        ...data,
+        tile,
+      });
+    },
+    [handleContextMenuBase, world],
+  );
 
   // Handle login with authentication state update
   const handleLogin = useCallback(
@@ -339,8 +415,13 @@ const App: React.FC = () => {
           onSendCommand={sendTextCommand}
           onContextMenu={handleContextMenu}
           onInspectEntity={handleInspectEntityCallback}
+          onInspectTile={handleInspectTileCallback}
           splashNotificationsEnabled={splashNotificationsEnabled}
           onToggleSplashNotifications={handleToggleSplashNotifications}
+          graphicsRenderer={graphicsRenderer}
+          onGraphicsRendererChange={setGraphicsRenderer}
+          threeRenderMode={threeRenderMode}
+          onThreeRenderModeChange={setThreeRenderMode}
           playerInventory={player?.inventory ?? []}
           playerInventoryData={player?.inventoryData}
           playerEquipment={player?.equipment}
@@ -370,6 +451,8 @@ const App: React.FC = () => {
             isPanning={isPanning}
             followedEntityId={followedEntityId}
             cameraOffset={cameraOffset}
+            movementSmoothing={movementSmoothing}
+            teleportSnapDistance={teleportSnapDistance}
             speechBubbles={speechBubbles}
             radialMenuOpen={radialMenuOpen}
             selectedTargetEntityId={selectedTargetEntityId}
@@ -391,8 +474,13 @@ const App: React.FC = () => {
             onRadialMenuChange={setRadialMenuOpen}
             onCloseContextMenu={() => setContextMenu(null)}
             onInspectEntity={(entity) => inspectEntityHandler?.(entity)}
+            onInspectTile={(tile, position) =>
+              inspectTileHandler?.(tile, position)
+            }
             autoSkipEnabled={autoSkipEnabled}
             onToggleAutoSkip={handleToggleAutoSkip}
+            graphicsRenderer={graphicsRenderer}
+            threeRenderMode={threeRenderMode}
           />
         </div>
       </div>

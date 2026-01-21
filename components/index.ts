@@ -8,6 +8,7 @@ export { ContextMenu } from "./ContextMenu";
 export { default as GameGrid } from "./GameGrid";
 export { default as GameLog } from "./GameLog";
 export { RadialMenu } from "./RadialMenu";
+export { ThreeGameRenderer } from "./ThreeGameRenderer";
 export { default as StatusPanel } from "./StatusPanel";
 export {
   SplashNotification,

@@ -1,6 +1,7 @@
 import {Settings} from "lucide-react";
 
 import {KeyBindingManager} from "../../../commands";
+import type {GameRendererType, ThreeRenderMode} from "../../../types";
 import {WindowConfig} from "../types";
 
 import KeybindingsSettings from "./components/KeybindingsSettings";
@@ -13,6 +14,11 @@ interface SettingsWindowOptions {
   onOpenCasino: () => void;
   splashNotificationsEnabled: boolean;
   onToggleSplashNotifications: (enabled: boolean) => void;
+
+  graphicsRenderer: GameRendererType;
+  onGraphicsRendererChange: (renderer: GameRendererType) => void;
+  threeRenderMode: ThreeRenderMode;
+  onThreeRenderModeChange: (mode: ThreeRenderMode) => void;
 }
 
 export const createSettingsWindowConfig = ({
@@ -21,6 +27,10 @@ export const createSettingsWindowConfig = ({
   onOpenCasino,
   splashNotificationsEnabled,
   onToggleSplashNotifications,
+  graphicsRenderer,
+  onGraphicsRendererChange,
+  threeRenderMode,
+  onThreeRenderModeChange,
 }: SettingsWindowOptions): WindowConfig => ({
   id: SETTINGS_WINDOW_ID,
   title: "Settings",
@@ -39,6 +49,10 @@ export const createSettingsWindowConfig = ({
       onOpenCasino={onOpenCasino}
       splashNotificationsEnabled={splashNotificationsEnabled}
       onToggleSplashNotifications={onToggleSplashNotifications}
+      graphicsRenderer={graphicsRenderer}
+      onGraphicsRendererChange={onGraphicsRendererChange}
+      threeRenderMode={threeRenderMode}
+      onThreeRenderModeChange={onThreeRenderModeChange}
     />
   ),
 });

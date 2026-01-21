@@ -11,7 +11,7 @@
 /**
  * Тип окружения тайла
  */
-export type TileEnv = "stone" | "grass" | "water" | "tree" | "floor";
+export type TileEnv = "stone" | "grass" | "water" | "tree" | "floor" | "wall";
 
 /**
  * Тайл карты (клиентская модель)
@@ -21,6 +21,12 @@ export interface Tile {
   x: number;
   /** Координата Y */
   y: number;
+  /** Символ (из протокола, опционально) */
+  symbol?: string;
+  /** Цвет (из протокола, опционально; формат зависит от сервера) */
+  color?: string;
+  /** Вертикальный уровень/смещение тайла (база по Y в 3D), опционально */
+  elevation?: number;
   /** Является ли тайл стеной */
   isWall: boolean;
   /** Тип окружения */

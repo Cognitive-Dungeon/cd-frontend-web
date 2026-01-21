@@ -136,6 +136,9 @@ export const useGameState = () => {
               newWorld.map[y][x] = {
                 x,
                 y,
+                symbol: " ",
+                color: "#000000",
+                elevation: 0,
                 isWall: true,
                 env: "stone",
                 isVisible: false,
@@ -155,6 +158,18 @@ export const useGameState = () => {
               newWorld.map[tileView.y][tileView.x] = {
                 x: tileView.x,
                 y: tileView.y,
+                symbol: tileView.symbol ?? " ",
+                color: tileView.color ?? "#000000",
+                elevation:
+                  typeof tileView.elevation === "number"
+                    ? tileView.elevation
+                    : typeof tileView.height === "number"
+                      ? tileView.height
+                      : typeof tileView.level === "number"
+                        ? tileView.level
+                        : typeof tileView.h === "number"
+                          ? tileView.h
+                          : 0,
                 isWall: tileView.isWall ?? false,
                 env: tileView.isWall ? "stone" : "floor",
                 isVisible: tileView.isVisible ?? false,

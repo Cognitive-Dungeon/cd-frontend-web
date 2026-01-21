@@ -90,6 +90,8 @@ export type { ContextMenuData } from "./types/ui";
 
 export type { SpeechBubble } from "./types/ui";
 
+export type { GameRendererType, ThreeRenderMode } from "./types/ui";
+
 // ============================================================================
 // Server Manager (deprecated location - use services/ServerManager)
 // ============================================================================

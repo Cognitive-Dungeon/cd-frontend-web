@@ -5,6 +5,7 @@
  */
 
 import type {Entity} from "../game/entity";
+import type {Tile} from "../game/world";
 
 /**
  * Данные контекстного меню
@@ -20,4 +21,7 @@ export interface ContextMenuData {
   cellY: number;
   /** Сущности в данной клетке */
   entities: Entity[];
+
+  /** Тайл в данной клетке (если доступен) */
+  tile?: Tile | null;
 }

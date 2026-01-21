@@ -38,6 +38,11 @@ export {
 } from "./JSONViewerWindowConfig";
 
 export {
+  INSPECTOR_WINDOW_ID,
+  createInspectorWindowConfig,
+} from "./InspectorWindowConfig";
+
+export {
   ENTITY_INSPECTOR_WINDOW_ID,
   createEntityInspectorWindowConfig,
 } from "./EntityInspectorWindowConfig";

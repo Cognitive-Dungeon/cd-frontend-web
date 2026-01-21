@@ -3,7 +3,7 @@ import {FC, useEffect, useRef} from "react";
 import {createPortal} from "react-dom";
 
 import {useContextMenuPosition} from "../hooks";
-import {ContextMenuData, Entity, Position} from "../types";
+import {ContextMenuData, Entity, Position, Tile} from "../types";
 
 interface ContextMenuProps {
   data: ContextMenuData;
@@ -14,6 +14,7 @@ interface ContextMenuProps {
   onSelectPosition?: (x: number, y: number) => void;
   onGoToPathfinding?: (position: Position) => void;
   onInspectEntity?: (entity: Entity) => void;
+  onInspectTile?: (tile: Tile, position: { x: number; y: number }) => void;
 }
 
 export const ContextMenu: FC<ContextMenuProps> = ({
@@ -25,8 +26,12 @@ export const ContextMenu: FC<ContextMenuProps> = ({
   onSelectPosition,
   onGoToPathfinding,
   onInspectEntity,
+  onInspectTile,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const tile = data.tile ?? null;
+  const tilePosition = { x: data.cellX, y: data.cellY };
 
   const position = useContextMenuPosition({
     initialPosition: { x: data.x, y: data.y },
@@ -51,7 +56,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({
     <div
       ref={menuRef}
       data-context-menu
-      className="fixed bg-window-base border border-window-border rounded shadow-xl z-[9999] min-w-48 text-window-text"
+      className="fixed bg-window-base border border-window-border rounded shadow-xl z-9999 min-w-48 text-window-text"
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
     >
       <div className="p-2 border-b border-window-border text-xs text-dock-text-dim">
@@ -273,6 +278,20 @@ export const ContextMenu: FC<ContextMenuProps> = ({
           <Sparkles className="w-3 h-3" />
           <span>Заклинание на область</span>
         </button>
+
+        {tile && (
+          <button
+            type="button"
+            className="w-full px-3 py-1 text-left text-xs hover:bg-dock-item-hover text-ui-tab-active-text flex items-center gap-1.5"
+            onMouseDown={() => {
+              onInspectTile?.(tile, tilePosition);
+              onClose();
+            }}
+          >
+            <FileJson className="w-3 h-3" />
+            <span>Открыть тайл в JSON</span>
+          </button>
+        )}
       </div>
     </div>,
     document.body,

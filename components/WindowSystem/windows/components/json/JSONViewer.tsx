@@ -4,6 +4,7 @@ import {FC, useMemo, useState} from "react";
 interface JSONViewerProps {
   data: any;
   title?: string;
+  showHeader?: boolean;
 }
 
 interface JSONNodeProps {
@@ -129,7 +130,11 @@ const JSONNode: FC<JSONNodeProps> = ({ data, keyName, level, isLast }) => {
   );
 };
 
-export const JSONViewer: FC<JSONViewerProps> = ({ data, title }) => {
+export const JSONViewer: FC<JSONViewerProps> = ({
+  data,
+  title,
+  showHeader = true,
+}) => {
   const [copied, setCopied] = useState(false);
 
   const jsonString = useMemo(() => {
@@ -153,30 +158,32 @@ export const JSONViewer: FC<JSONViewerProps> = ({ data, title }) => {
   return (
     <div className="flex flex-col h-full bg-neutral-950 text-gray-300">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-neutral-800">
-        <div className="flex items-center gap-2">
-          <Braces className="w-4 h-4 text-cyan-400" />
-          <span className="text-sm font-semibold">
-            {title || "JSON Viewer"}
-          </span>
+      {showHeader && (
+        <div className="flex items-center justify-between p-3 border-b border-neutral-800">
+          <div className="flex items-center gap-2">
+            <Braces className="w-4 h-4 text-cyan-400" />
+            <span className="text-sm font-semibold">
+              {title || "JSON Viewer"}
+            </span>
+          </div>
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 px-2 py-1 text-xs bg-neutral-800 hover:bg-neutral-700 rounded transition-colors"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3 h-3" />
+                <span>Copied</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3 h-3" />
+                <span>Copy</span>
+              </>
+            )}
+          </button>
         </div>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2 py-1 text-xs bg-neutral-800 hover:bg-neutral-700 rounded transition-colors"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3 h-3" />
-              <span>Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3 h-3" />
-              <span>Copy JSON</span>
-            </>
-          )}
-        </button>
-      </div>
+      )}
 
       {/* JSON Tree */}
       <div className="flex-1 overflow-auto p-3">

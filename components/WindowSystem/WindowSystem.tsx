@@ -1,7 +1,7 @@
 import {FC, useCallback, useEffect, useRef} from "react";
 
 import {KeyBindingManager} from "../../commands";
-import {ContextMenuData, Entity, Item, LogMessage, Position, ServerToClientEquipmentView,} from "../../types";
+import {ContextMenuData, Entity, GameRendererType, Item, LogMessage, Position, ServerToClientEquipmentView, ThreeRenderMode, Tile,} from "../../types";
 
 import {getStoredWindowState} from "./utils";
 import Window from "./Window";
@@ -10,19 +10,18 @@ import {
   CASINO_WINDOW_ID,
   createCasinoWindowConfig,
   createDockWindowConfig,
-  createEntityInspectorWindowConfig,
   createGameLogWindowConfig,
   createInventoryWindowConfig,
-  createItemInspectorWindowConfig,
   createLoginWindowConfig,
   createQuickAccessWindowConfig,
+  createInspectorWindowConfig,
   createSettingsWindowConfig,
   createTurnOrderBarWindowConfig,
   createTurnOrderWindowConfig,
   DOCK_WINDOW_ID,
-  ENTITY_INSPECTOR_WINDOW_ID,
   GAME_LOG_WINDOW_ID,
   INVENTORY_WINDOW_ID,
+  INSPECTOR_WINDOW_ID,
   LOGIN_WINDOW_ID,
   QUICK_ACCESS_WINDOW_ID,
   SETTINGS_WINDOW_ID,
@@ -42,8 +41,14 @@ interface WindowSystemProps {
   onSendCommand?: (text: string, type: "SAY" | "WHISPER" | "YELL") => void;
   onContextMenu?: (data: ContextMenuData) => void;
   onInspectEntity?: (handler: (entity: Entity) => void) => void;
+  onInspectTile?: (handler: (tile: Tile, position: { x: number; y: number }) => void) => void;
   splashNotificationsEnabled: boolean;
   onToggleSplashNotifications: (enabled: boolean) => void;
+
+  graphicsRenderer: GameRendererType;
+  onGraphicsRendererChange: (renderer: GameRendererType) => void;
+  threeRenderMode: ThreeRenderMode;
+  onThreeRenderModeChange: (mode: ThreeRenderMode) => void;
   playerInventory?: Item[];
   playerInventoryData?: {
     maxSlots?: number;
@@ -75,8 +80,13 @@ const WindowSystem: FC<WindowSystemProps> = ({
   onSendCommand,
   onContextMenu,
   onInspectEntity,
+  onInspectTile,
   splashNotificationsEnabled,
   onToggleSplashNotifications,
+  graphicsRenderer,
+  onGraphicsRendererChange,
+  threeRenderMode,
+  onThreeRenderModeChange,
   playerInventory = [],
   playerInventoryData,
   playerEquipment,
@@ -107,17 +117,52 @@ const WindowSystem: FC<WindowSystemProps> = ({
   const prevEntitiesRef = useRef<Entity[]>([]);
   const handleInspectEntityRef = useRef<(entity: Entity) => void>(() => {});
   const handleInspectItemRef = useRef<(item: Item) => void>(() => {});
+  const handleInspectTileRef = useRef<
+    (tile: Tile, position: { x: number; y: number }) => void
+  >(() => {});
 
   // Handle opening entity inspector - update ref on every render
   handleInspectEntityRef.current = (entity: Entity) => {
     openWindow(
-      createEntityInspectorWindowConfig({ entity, entities: entities || [] }),
+      createInspectorWindowConfig({
+        kind: "entity",
+        title: `Inspector: ${entity.name}`,
+        entityType: entity.type,
+        data: entity,
+        stableId: entity.id,
+      }),
     );
   };
 
   // Handle opening item inspector - update ref on every render
   handleInspectItemRef.current = (item: Item) => {
-    openWindow(createItemInspectorWindowConfig({ item }));
+    openWindow(
+      createInspectorWindowConfig({
+        kind: "entity",
+        title: `Inspector: ${item.name}`,
+        entityType: item.type,
+        data: item,
+        stableId: item.id,
+      }),
+    );
+  };
+
+  // Handle opening tile JSON viewer - update ref on every render
+  handleInspectTileRef.current = (
+    tile: Tile,
+    position: { x: number; y: number },
+  ) => {
+    openWindow(
+      createInspectorWindowConfig({
+        kind: "tile",
+        title: `Tile (${position.x}, ${position.y})`,
+        data: {
+          position,
+          tile,
+        },
+        stableId: `${position.x}-${position.y}`,
+      }),
+    );
   };
 
   // Expose stable wrapper through onInspectEntity prop (only once on mount)
@@ -125,6 +170,15 @@ const WindowSystem: FC<WindowSystemProps> = ({
     if (onInspectEntity) {
       onInspectEntity((entity: Entity) => {
         handleInspectEntityRef.current?.(entity);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (onInspectTile) {
+      onInspectTile((tile: Tile, position: { x: number; y: number }) => {
+        handleInspectTileRef.current?.(tile, position);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,6 +213,10 @@ const WindowSystem: FC<WindowSystemProps> = ({
           onOpenCasino: handleOpenCasino,
           splashNotificationsEnabled,
           onToggleSplashNotifications,
+          graphicsRenderer,
+          onGraphicsRendererChange,
+          threeRenderMode,
+          onThreeRenderModeChange,
         }),
       );
 
@@ -286,6 +344,10 @@ const WindowSystem: FC<WindowSystemProps> = ({
     onDropItem,
     splashNotificationsEnabled,
     onToggleSplashNotifications,
+    graphicsRenderer,
+    onGraphicsRendererChange,
+    threeRenderMode,
+    onThreeRenderModeChange,
     onLogin,
     isAuthenticated,
     wsConnected,
@@ -322,11 +384,19 @@ const WindowSystem: FC<WindowSystemProps> = ({
       onOpenCasino: handleOpenCasino,
       splashNotificationsEnabled,
       onToggleSplashNotifications,
+      graphicsRenderer,
+      onGraphicsRendererChange,
+      threeRenderMode,
+      onThreeRenderModeChange,
     });
     updateWindowContent(SETTINGS_WINDOW_ID, settingsConfig.content);
   }, [
     splashNotificationsEnabled,
     onToggleSplashNotifications,
+    graphicsRenderer,
+    onGraphicsRendererChange,
+    threeRenderMode,
+    onThreeRenderModeChange,
     keyBindingManager,
     resetWindowLayout,
     handleOpenCasino,
@@ -412,11 +482,13 @@ const WindowSystem: FC<WindowSystemProps> = ({
     updateWindowContent,
   ]);
 
-  // Update EntityInspectorWindow content when entities change
+  // Update InspectorWindow content when entities change
   useEffect(() => {
+    const entityInspectorPrefix = `${INSPECTOR_WINDOW_ID}-entity-`;
+
     // Find all open entity inspector windows
     const inspectorWindows = windowsRef.current.filter((window) =>
-      window.id.startsWith(ENTITY_INSPECTOR_WINDOW_ID),
+      window.id.startsWith(entityInspectorPrefix),
     );
 
     if (inspectorWindows.length === 0) {
@@ -428,7 +500,7 @@ const WindowSystem: FC<WindowSystemProps> = ({
     const prevEntities = prevEntitiesRef.current;
 
     inspectorWindows.forEach((window) => {
-      const entityId = window.id.replace(`${ENTITY_INSPECTOR_WINDOW_ID}-`, "");
+      const entityId = window.id.replace(entityInspectorPrefix, "");
       const currentEntity = entities.find((e) => e.id === entityId);
       const prevEntity = prevEntities.find((e) => e.id === entityId);
 
@@ -445,12 +517,15 @@ const WindowSystem: FC<WindowSystemProps> = ({
 
     // Update content for each inspector window
     inspectorWindows.forEach((window) => {
-      const entityId = window.id.replace(`${ENTITY_INSPECTOR_WINDOW_ID}-`, "");
+      const entityId = window.id.replace(entityInspectorPrefix, "");
       const entity = entities.find((e) => e.id === entityId);
       if (entity) {
-        const inspectorConfig = createEntityInspectorWindowConfig({
-          entity,
-          entities,
+        const inspectorConfig = createInspectorWindowConfig({
+          kind: "entity",
+          title: `Inspector: ${entity.name}`,
+          entityType: entity.type,
+          data: entity,
+          stableId: entity.id,
         });
         updateWindowContent(window.id, inspectorConfig.content);
       }
