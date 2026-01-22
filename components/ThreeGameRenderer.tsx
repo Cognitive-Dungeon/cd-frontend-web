@@ -485,7 +485,7 @@ export function ThreeGameRenderer({
     const ring = new THREE.Mesh(ringGeom, ringMat);
     ring.visible = false;
     ring.rotation.x = -Math.PI / 2;
-    ring.position.set(0, ENTITY_Y_OFFSET, 0);
+    ring.position.set(0, ENTITY_Y_OFFSET-1, 0);
     ring.renderOrder = 1001;
     ring.frustumCulled = false;
     scene.add(ring);
@@ -1028,15 +1028,21 @@ export function ThreeGameRenderer({
             nameText.delete(entity.id);
           }
 
+
+          const desired =
+            resolveColor(entity.color) ??
+            ENTITY_COLOR[entity.type] ??
+            0xffffff;
+
           text = new Text();
           text.text = trimmedName;
           text.fontSize = 0.28;
           text.color = 0xffffff;
-          (text as any).outlineWidth = 0.08;
+          (text as any).outlineWidth = 0.02;
           (text as any).outlineColor = 0x000000;
           (text as any).outlineOpacity = 0.9;
-          (text as any).strokeWidth = 0.0;
-          (text as any).strokeColor = 0x000000;
+          (text as any).strokeWidth = 0;
+          (text as any).strokeColor = desired;
           (text as any).strokeOpacity = 0;
           (text as any).anchorX = "center";
           (text as any).anchorY = "bottom";
@@ -1203,9 +1209,9 @@ export function ThreeGameRenderer({
         const nameText = entityNameTextRef.current;
 
         for (const entity of ents) {
-          if (entity.isDead) {
-            continue;
-          }
+          // if (entity.isDead) {
+          //   continue;
+          // }
 
           const mesh = meshes.get(entity.id);
           if (!mesh) {
